@@ -1,0 +1,27 @@
+{
+  "statistics": {
+    "total_rules": 2,
+    "clearance_rules": 1,
+    "width_rules": 1,
+    "via_rules": 0
+  },
+  "clearance_rules": [
+    {
+      "id": "rule-clearance",
+      "enabled": true,
+      "priority": 0,
+      "minimum_mm": 0.2
+    }
+  ],
+  "width_rules": [
+    {
+      "id": "rule-width",
+      "enabled": true,
+      "priority": 0,
+      "min_width_mm": 0.15,
+      "preferred_width_mm": 0.3
+    }
+  ],
+  "via_rules": [],
+  "netclasses": []
+}

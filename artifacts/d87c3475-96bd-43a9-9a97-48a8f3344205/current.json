@@ -1,0 +1,76 @@
+{
+  "id": "d87c3475-96bd-43a9-9a97-48a8f3344205",
+  "type": "constraint.ruleSet",
+  "version": 1,
+  "relations": [],
+  "data": {
+    "rules": [
+      {
+        "id": "rule-clearance",
+        "type": "clearance",
+        "scope": {
+          "nets": null,
+          "netclass": null,
+          "components": null,
+          "layers": null
+        },
+        "params": {
+          "min_clearance_mm": 0.2,
+          "min_width_mm": null,
+          "preferred_width_mm": null,
+          "max_width_mm": null,
+          "min_drill_mm": null,
+          "max_drill_mm": null,
+          "pair_gap_mm": null,
+          "max_skew_ps": null,
+          "target_length_mm": null,
+          "max_delta_mm": null,
+          "forbid_split_plane_crossing": null,
+          "min_plane_continuity_mm": null,
+          "min_spacing_mm": null,
+          "max_coupling_coeff": null,
+          "extensions": {}
+        },
+        "enabled": true,
+        "priority": 0
+      },
+      {
+        "id": "rule-width",
+        "type": "traceWidth",
+        "scope": {
+          "nets": null,
+          "netclass": null,
+          "components": null,
+          "layers": null
+        },
+        "params": {
+          "min_clearance_mm": null,
+          "min_width_mm": 0.15,
+          "preferred_width_mm": null,
+          "max_width_mm": null,
+          "min_drill_mm": null,
+          "max_drill_mm": null,
+          "pair_gap_mm": null,
+          "max_skew_ps": null,
+          "target_length_mm": null,
+          "max_delta_mm": null,
+          "forbid_split_plane_crossing": null,
+          "min_plane_continuity_mm": null,
+          "min_spacing_mm": null,
+          "max_coupling_coeff": null,
+          "extensions": {}
+        },
+        "enabled": true,
+        "priority": 0
+      }
+    ],
+    "netclasses": []
+  },
+  "meta": {
+    "source_engine": "altium",
+    "created_at": "2026-01-27T02:44:15.645945",
+    "updated_at": "2026-01-27T02:44:15.645952",
+    "created_by": "engine",
+    "tags": []
+  }
+}

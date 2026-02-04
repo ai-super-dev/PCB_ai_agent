@@ -1,0 +1,470 @@
+{
+  "id": "f1c8a9ba-4b69-4598-a407-ff4c6c5966be",
+  "type": "constraint.violations",
+  "version": 1,
+  "relations": [
+    {
+      "role": "checks",
+      "target_id": "e2b3d49e-1ce8-4b49-b7bd-ad153ea48c4a"
+    },
+    {
+      "role": "uses",
+      "target_id": "0010336a-9f14-4ecb-beb4-89ec3bbc072d"
+    }
+  ],
+  "data": {
+    "violations": [
+      {
+        "id": "violation-1",
+        "type": "unrouted_net",
+        "severity": "warning",
+        "message": "Net '194out' has no routed tracks",
+        "net_name": "194out",
+        "rule_id": "connectivity"
+      },
+      {
+        "id": "violation-2",
+        "type": "unrouted_net",
+        "severity": "warning",
+        "message": "Net 'NetR222_1' has no routed tracks",
+        "net_name": "NetR222_1",
+        "rule_id": "connectivity"
+      },
+      {
+        "id": "violation-3",
+        "type": "unrouted_net",
+        "severity": "warning",
+        "message": "Net '+21V' has no routed tracks",
+        "net_name": "+21V",
+        "rule_id": "connectivity"
+      },
+      {
+        "id": "violation-4",
+        "type": "unrouted_net",
+        "severity": "warning",
+        "message": "Net '+30VIN' has no routed tracks",
+        "net_name": "+30VIN",
+        "rule_id": "connectivity"
+      },
+      {
+        "id": "violation-5",
+        "type": "unrouted_net",
+        "severity": "warning",
+        "message": "Net 'NetC170_1' has no routed tracks",
+        "net_name": "NetC170_1",
+        "rule_id": "connectivity"
+      },
+      {
+        "id": "violation-6",
+        "type": "unrouted_net",
+        "severity": "warning",
+        "message": "Net 'NetC166_2' has no routed tracks",
+        "net_name": "NetC166_2",
+        "rule_id": "connectivity"
+      },
+      {
+        "id": "violation-7",
+        "type": "unrouted_net",
+        "severity": "warning",
+        "message": "Net 'NetC147_1' has no routed tracks",
+        "net_name": "NetC147_1",
+        "rule_id": "connectivity"
+      },
+      {
+        "id": "violation-8",
+        "type": "unrouted_net",
+        "severity": "warning",
+        "message": "Net 'NetR101_1' has no routed tracks",
+        "net_name": "NetR101_1",
+        "rule_id": "connectivity"
+      },
+      {
+        "id": "violation-9",
+        "type": "unrouted_net",
+        "severity": "warning",
+        "message": "Net 'NetC149_2' has no routed tracks",
+        "net_name": "NetC149_2",
+        "rule_id": "connectivity"
+      },
+      {
+        "id": "violation-10",
+        "type": "unrouted_net",
+        "severity": "warning",
+        "message": "Net 'NetC148_2' has no routed tracks",
+        "net_name": "NetC148_2",
+        "rule_id": "connectivity"
+      },
+      {
+        "id": "violation-11",
+        "type": "unrouted_net",
+        "severity": "warning",
+        "message": "Net 'NetD9_2' has no routed tracks",
+        "net_name": "NetD9_2",
+        "rule_id": "connectivity"
+      },
+      {
+        "id": "violation-12",
+        "type": "unrouted_net",
+        "severity": "warning",
+        "message": "Net 'NetR98_1' has no routed tracks",
+        "net_name": "NetR98_1",
+        "rule_id": "connectivity"
+      },
+      {
+        "id": "violation-13",
+        "type": "unrouted_net",
+        "severity": "warning",
+        "message": "Net '+5VIN' has no routed tracks",
+        "net_name": "+5VIN",
+        "rule_id": "connectivity"
+      },
+      {
+        "id": "violation-14",
+        "type": "unrouted_net",
+        "severity": "warning",
+        "message": "Net '3.3VFSALC' has no routed tracks",
+        "net_name": "3.3VFSALC",
+        "rule_id": "connectivity"
+      },
+      {
+        "id": "violation-15",
+        "type": "unrouted_net",
+        "severity": "warning",
+        "message": "Net '+30V' has no routed tracks",
+        "net_name": "+30V",
+        "rule_id": "connectivity"
+      },
+      {
+        "id": "violation-16",
+        "type": "unrouted_net",
+        "severity": "warning",
+        "message": "Net 'FLJC' has no routed tracks",
+        "net_name": "FLJC",
+        "rule_id": "connectivity"
+      },
+      {
+        "id": "violation-17",
+        "type": "unrouted_net",
+        "severity": "error",
+        "message": "Net 'GND' has no routed tracks",
+        "net_name": "GND",
+        "rule_id": "connectivity"
+      },
+      {
+        "id": "violation-18",
+        "type": "unrouted_net",
+        "severity": "warning",
+        "message": "Net 'FS' has no routed tracks",
+        "net_name": "FS",
+        "rule_id": "connectivity"
+      },
+      {
+        "id": "violation-19",
+        "type": "unrouted_net",
+        "severity": "warning",
+        "message": "Net 'NetR102_1' has no routed tracks",
+        "net_name": "NetR102_1",
+        "rule_id": "connectivity"
+      },
+      {
+        "id": "violation-20",
+        "type": "unrouted_net",
+        "severity": "warning",
+        "message": "Net 'NetR106_2' has no routed tracks",
+        "net_name": "NetR106_2",
+        "rule_id": "connectivity"
+      },
+      {
+        "id": "violation-21",
+        "type": "unrouted_net",
+        "severity": "warning",
+        "message": "Net 'NetC135_2' has no routed tracks",
+        "net_name": "NetC135_2",
+        "rule_id": "connectivity"
+      },
+      {
+        "id": "violation-22",
+        "type": "unrouted_net",
+        "severity": "warning",
+        "message": "Net 'NetC136_2' has no routed tracks",
+        "net_name": "NetC136_2",
+        "rule_id": "connectivity"
+      },
+      {
+        "id": "violation-23",
+        "type": "unrouted_net",
+        "severity": "warning",
+        "message": "Net 'NetC155_2' has no routed tracks",
+        "net_name": "NetC155_2",
+        "rule_id": "connectivity"
+      },
+      {
+        "id": "violation-24",
+        "type": "unrouted_net",
+        "severity": "warning",
+        "message": "Net 'NetC156_2' has no routed tracks",
+        "net_name": "NetC156_2",
+        "rule_id": "connectivity"
+      },
+      {
+        "id": "violation-25",
+        "type": "unrouted_net",
+        "severity": "warning",
+        "message": "Net 'NetC178_1' has no routed tracks",
+        "net_name": "NetC178_1",
+        "rule_id": "connectivity"
+      },
+      {
+        "id": "violation-26",
+        "type": "unrouted_net",
+        "severity": "warning",
+        "message": "Net 'NetC172_2' has no routed tracks",
+        "net_name": "NetC172_2",
+        "rule_id": "connectivity"
+      },
+      {
+        "id": "violation-27",
+        "type": "unrouted_net",
+        "severity": "warning",
+        "message": "Net 'NetR113_2' has no routed tracks",
+        "net_name": "NetR113_2",
+        "rule_id": "connectivity"
+      },
+      {
+        "id": "violation-28",
+        "type": "unrouted_net",
+        "severity": "warning",
+        "message": "Net 'NetR111_2' has no routed tracks",
+        "net_name": "NetR111_2",
+        "rule_id": "connectivity"
+      },
+      {
+        "id": "violation-29",
+        "type": "unrouted_net",
+        "severity": "warning",
+        "message": "Net 'NetR110_2' has no routed tracks",
+        "net_name": "NetR110_2",
+        "rule_id": "connectivity"
+      },
+      {
+        "id": "violation-30",
+        "type": "unrouted_net",
+        "severity": "warning",
+        "message": "Net '+5V' has no routed tracks",
+        "net_name": "+5V",
+        "rule_id": "connectivity"
+      },
+      {
+        "id": "violation-31",
+        "type": "unrouted_net",
+        "severity": "warning",
+        "message": "Net 'NetR110_1' has no routed tracks",
+        "net_name": "NetR110_1",
+        "rule_id": "connectivity"
+      },
+      {
+        "id": "violation-32",
+        "type": "unrouted_net",
+        "severity": "warning",
+        "message": "Net 'NetR115_2' has no routed tracks",
+        "net_name": "NetR115_2",
+        "rule_id": "connectivity"
+      },
+      {
+        "id": "violation-33",
+        "type": "unrouted_net",
+        "severity": "warning",
+        "message": "Net 'NetR108_1' has no routed tracks",
+        "net_name": "NetR108_1",
+        "rule_id": "connectivity"
+      },
+      {
+        "id": "violation-34",
+        "type": "unrouted_net",
+        "severity": "warning",
+        "message": "Net 'NetC138_2' has no routed tracks",
+        "net_name": "NetC138_2",
+        "rule_id": "connectivity"
+      },
+      {
+        "id": "violation-35",
+        "type": "unrouted_net",
+        "severity": "warning",
+        "message": "Net 'NetC139_2' has no routed tracks",
+        "net_name": "NetC139_2",
+        "rule_id": "connectivity"
+      },
+      {
+        "id": "violation-36",
+        "type": "unrouted_net",
+        "severity": "warning",
+        "message": "Net 'NetD13_2' has no routed tracks",
+        "net_name": "NetD13_2",
+        "rule_id": "connectivity"
+      },
+      {
+        "id": "violation-37",
+        "type": "unrouted_net",
+        "severity": "warning",
+        "message": "Net 'NetD8_2' has no routed tracks",
+        "net_name": "NetD8_2",
+        "rule_id": "connectivity"
+      },
+      {
+        "id": "violation-38",
+        "type": "unrouted_net",
+        "severity": "warning",
+        "message": "Net 'NetD8_1' has no routed tracks",
+        "net_name": "NetD8_1",
+        "rule_id": "connectivity"
+      },
+      {
+        "id": "violation-39",
+        "type": "unrouted_net",
+        "severity": "warning",
+        "message": "Net '+200V' has no routed tracks",
+        "net_name": "+200V",
+        "rule_id": "connectivity"
+      },
+      {
+        "id": "violation-40",
+        "type": "unrouted_net",
+        "severity": "warning",
+        "message": "Net 'NetC158_2' has no routed tracks",
+        "net_name": "NetC158_2",
+        "rule_id": "connectivity"
+      },
+      {
+        "id": "violation-41",
+        "type": "unrouted_net",
+        "severity": "warning",
+        "message": "Net 'NetC173_1' has no routed tracks",
+        "net_name": "NetC173_1",
+        "rule_id": "connectivity"
+      },
+      {
+        "id": "violation-42",
+        "type": "unrouted_net",
+        "severity": "warning",
+        "message": "Net '-5V' has no routed tracks",
+        "net_name": "-5V",
+        "rule_id": "connectivity"
+      },
+      {
+        "id": "violation-43",
+        "type": "unrouted_net",
+        "severity": "warning",
+        "message": "Net 'NetC165_2' has no routed tracks",
+        "net_name": "NetC165_2",
+        "rule_id": "connectivity"
+      },
+      {
+        "id": "violation-44",
+        "type": "unrouted_net",
+        "severity": "warning",
+        "message": "Net 'NetC163_1' has no routed tracks",
+        "net_name": "NetC163_1",
+        "rule_id": "connectivity"
+      },
+      {
+        "id": "violation-45",
+        "type": "unrouted_net",
+        "severity": "warning",
+        "message": "Net 'NetC161_2' has no routed tracks",
+        "net_name": "NetC161_2",
+        "rule_id": "connectivity"
+      },
+      {
+        "id": "violation-46",
+        "type": "unrouted_net",
+        "severity": "warning",
+        "message": "Net 'NetD14_1' has no routed tracks",
+        "net_name": "NetD14_1",
+        "rule_id": "connectivity"
+      },
+      {
+        "id": "violation-47",
+        "type": "unrouted_net",
+        "severity": "warning",
+        "message": "Net 'NetC169_1' has no routed tracks",
+        "net_name": "NetC169_1",
+        "rule_id": "connectivity"
+      },
+      {
+        "id": "violation-48",
+        "type": "unrouted_net",
+        "severity": "warning",
+        "message": "Net '12V' has no routed tracks",
+        "net_name": "12V",
+        "rule_id": "connectivity"
+      },
+      {
+        "id": "violation-49",
+        "type": "unrouted_net",
+        "severity": "warning",
+        "message": "Net 'NetD13_1' has no routed tracks",
+        "net_name": "NetD13_1",
+        "rule_id": "connectivity"
+      },
+      {
+        "id": "violation-50",
+        "type": "unrouted_net",
+        "severity": "warning",
+        "message": "Net 'NetR124_2' has no routed tracks",
+        "net_name": "NetR124_2",
+        "rule_id": "connectivity"
+      },
+      {
+        "id": "violation-51",
+        "type": "unrouted_net",
+        "severity": "warning",
+        "message": "Net 'NetR127_1' has no routed tracks",
+        "net_name": "NetR127_1",
+        "rule_id": "connectivity"
+      },
+      {
+        "id": "violation-52",
+        "type": "unrouted_net",
+        "severity": "warning",
+        "message": "Net 'NetR126_2' has no routed tracks",
+        "net_name": "NetR126_2",
+        "rule_id": "connectivity"
+      },
+      {
+        "id": "violation-53",
+        "type": "unrouted_net",
+        "severity": "warning",
+        "message": "Net 'NetR127_2' has no routed tracks",
+        "net_name": "NetR127_2",
+        "rule_id": "connectivity"
+      },
+      {
+        "id": "violation-54",
+        "type": "unrouted_net",
+        "severity": "warning",
+        "message": "Net 'NetR124_1' has no routed tracks",
+        "net_name": "NetR124_1",
+        "rule_id": "connectivity"
+      },
+      {
+        "id": "violation-55",
+        "type": "unrouted_net",
+        "severity": "warning",
+        "message": "Net 'NetC147_2' has no routed tracks",
+        "net_name": "NetC147_2",
+        "rule_id": "connectivity"
+      }
+    ],
+    "board_artifact_id": "e2b3d49e-1ce8-4b49-b7bd-ad153ea48c4a",
+    "constraint_artifact_id": "0010336a-9f14-4ecb-beb4-89ec3bbc072d",
+    "drc_run_timestamp": "2026-01-27T02:44:54.165921",
+    "violation_count": 55
+  },
+  "meta": {
+    "source_engine": "altium",
+    "created_at": "2026-01-27T02:44:54.165942",
+    "updated_at": "2026-01-27T02:44:54.165946",
+    "created_by": "engine",
+    "tags": []
+  }
+}

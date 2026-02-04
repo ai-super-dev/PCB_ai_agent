@@ -1,0 +1,1691 @@
+{
+  "id": "8f076a2b-4aba-4126-b9d3-756739d6dd70",
+  "type": "pcb.board",
+  "version": 1,
+  "relations": [],
+  "data": {
+    "board": {
+      "outline": {
+        "polygon": [
+          [
+            0.0,
+            0.0
+          ],
+          [
+            100.0,
+            0.0
+          ],
+          [
+            100.0,
+            80.0
+          ],
+          [
+            0.0,
+            80.0
+          ]
+        ]
+      },
+      "layers": [
+        {
+          "id": "L1",
+          "name": "Top",
+          "kind": "signal",
+          "index": 1
+        },
+        {
+          "id": "L2",
+          "name": "GND",
+          "kind": "ground",
+          "index": 2
+        },
+        {
+          "id": "L3",
+          "name": "VCC",
+          "kind": "power",
+          "index": 3
+        },
+        {
+          "id": "L4",
+          "name": "Bottom",
+          "kind": "signal",
+          "index": 4
+        }
+      ],
+      "stackup": {
+        "layers": [
+          "L1",
+          "L2",
+          "L3",
+          "L4"
+        ],
+        "thickness_mm": 1.6,
+        "dielectrics": []
+      }
+    },
+    "nets": [
+      {
+        "id": "net-194out",
+        "name": "194out"
+      },
+      {
+        "id": "net-netr222_1",
+        "name": "NetR222_1"
+      },
+      {
+        "id": "net-+21v",
+        "name": "+21V"
+      },
+      {
+        "id": "net-+30vin",
+        "name": "+30VIN"
+      },
+      {
+        "id": "net-netc170_1",
+        "name": "NetC170_1"
+      },
+      {
+        "id": "net-netc166_2",
+        "name": "NetC166_2"
+      },
+      {
+        "id": "net-netc147_1",
+        "name": "NetC147_1"
+      },
+      {
+        "id": "net-netr101_1",
+        "name": "NetR101_1"
+      },
+      {
+        "id": "net-netc149_2",
+        "name": "NetC149_2"
+      },
+      {
+        "id": "net-netc148_2",
+        "name": "NetC148_2"
+      },
+      {
+        "id": "net-netd9_2",
+        "name": "NetD9_2"
+      },
+      {
+        "id": "net-netr98_1",
+        "name": "NetR98_1"
+      },
+      {
+        "id": "net-+5vin",
+        "name": "+5VIN"
+      },
+      {
+        "id": "net-3.3vfsalc",
+        "name": "3.3VFSALC"
+      },
+      {
+        "id": "net-+30v",
+        "name": "+30V"
+      },
+      {
+        "id": "net-fljc",
+        "name": "FLJC"
+      },
+      {
+        "id": "net-gnd",
+        "name": "GND"
+      },
+      {
+        "id": "net-fs",
+        "name": "FS"
+      },
+      {
+        "id": "net-netr102_1",
+        "name": "NetR102_1"
+      },
+      {
+        "id": "net-netr106_2",
+        "name": "NetR106_2"
+      },
+      {
+        "id": "net-netc135_2",
+        "name": "NetC135_2"
+      },
+      {
+        "id": "net-netc136_2",
+        "name": "NetC136_2"
+      },
+      {
+        "id": "net-netc155_2",
+        "name": "NetC155_2"
+      },
+      {
+        "id": "net-netc156_2",
+        "name": "NetC156_2"
+      },
+      {
+        "id": "net-netc178_1",
+        "name": "NetC178_1"
+      },
+      {
+        "id": "net-netc172_2",
+        "name": "NetC172_2"
+      },
+      {
+        "id": "net-netr113_2",
+        "name": "NetR113_2"
+      },
+      {
+        "id": "net-netr111_2",
+        "name": "NetR111_2"
+      },
+      {
+        "id": "net-netr110_2",
+        "name": "NetR110_2"
+      },
+      {
+        "id": "net-+5v",
+        "name": "+5V"
+      },
+      {
+        "id": "net-netr110_1",
+        "name": "NetR110_1"
+      },
+      {
+        "id": "net-netr115_2",
+        "name": "NetR115_2"
+      },
+      {
+        "id": "net-netr108_1",
+        "name": "NetR108_1"
+      },
+      {
+        "id": "net-netc138_2",
+        "name": "NetC138_2"
+      },
+      {
+        "id": "net-netc139_2",
+        "name": "NetC139_2"
+      },
+      {
+        "id": "net-netd13_2",
+        "name": "NetD13_2"
+      },
+      {
+        "id": "net-netd8_2",
+        "name": "NetD8_2"
+      },
+      {
+        "id": "net-netd8_1",
+        "name": "NetD8_1"
+      },
+      {
+        "id": "net-+200v",
+        "name": "+200V"
+      },
+      {
+        "id": "net-netc158_2",
+        "name": "NetC158_2"
+      },
+      {
+        "id": "net-netc173_1",
+        "name": "NetC173_1"
+      },
+      {
+        "id": "net--5v",
+        "name": "-5V"
+      },
+      {
+        "id": "net-netc165_2",
+        "name": "NetC165_2"
+      },
+      {
+        "id": "net-netc163_1",
+        "name": "NetC163_1"
+      },
+      {
+        "id": "net-netc161_2",
+        "name": "NetC161_2"
+      },
+      {
+        "id": "net-netd14_1",
+        "name": "NetD14_1"
+      },
+      {
+        "id": "net-netc169_1",
+        "name": "NetC169_1"
+      },
+      {
+        "id": "net-12v",
+        "name": "12V"
+      },
+      {
+        "id": "net-netd13_1",
+        "name": "NetD13_1"
+      },
+      {
+        "id": "net-netr124_2",
+        "name": "NetR124_2"
+      },
+      {
+        "id": "net-netr127_1",
+        "name": "NetR127_1"
+      },
+      {
+        "id": "net-netr126_2",
+        "name": "NetR126_2"
+      },
+      {
+        "id": "net-netr127_2",
+        "name": "NetR127_2"
+      },
+      {
+        "id": "net-netr124_1",
+        "name": "NetR124_1"
+      },
+      {
+        "id": "net-netc147_2",
+        "name": "NetC147_2"
+      }
+    ],
+    "tracks": [],
+    "vias": [],
+    "footprints": [
+      {
+        "id": "fp-unknown",
+        "ref": "U?",
+        "position": [
+          0.0,
+          0.0
+        ],
+        "rotation_deg": 0.0,
+        "layer": "L1",
+        "pads": [],
+        "footprint_name": ""
+      },
+      {
+        "id": "fp-unknown",
+        "ref": "U?",
+        "position": [
+          0.0,
+          0.0
+        ],
+        "rotation_deg": 0.0,
+        "layer": "L1",
+        "pads": [],
+        "footprint_name": ""
+      },
+      {
+        "id": "fp-unknown",
+        "ref": "U?",
+        "position": [
+          0.0,
+          0.0
+        ],
+        "rotation_deg": 0.0,
+        "layer": "L1",
+        "pads": [],
+        "footprint_name": ""
+      },
+      {
+        "id": "fp-unknown",
+        "ref": "U?",
+        "position": [
+          0.0,
+          0.0
+        ],
+        "rotation_deg": 0.0,
+        "layer": "L1",
+        "pads": [],
+        "footprint_name": ""
+      },
+      {
+        "id": "fp-unknown",
+        "ref": "U?",
+        "position": [
+          0.0,
+          0.0
+        ],
+        "rotation_deg": 0.0,
+        "layer": "L1",
+        "pads": [],
+        "footprint_name": ""
+      },
+      {
+        "id": "fp-unknown",
+        "ref": "U?",
+        "position": [
+          0.0,
+          0.0
+        ],
+        "rotation_deg": 0.0,
+        "layer": "L1",
+        "pads": [],
+        "footprint_name": ""
+      },
+      {
+        "id": "fp-unknown",
+        "ref": "U?",
+        "position": [
+          0.0,
+          0.0
+        ],
+        "rotation_deg": 0.0,
+        "layer": "L1",
+        "pads": [],
+        "footprint_name": ""
+      },
+      {
+        "id": "fp-unknown",
+        "ref": "U?",
+        "position": [
+          0.0,
+          0.0
+        ],
+        "rotation_deg": 0.0,
+        "layer": "L1",
+        "pads": [],
+        "footprint_name": ""
+      },
+      {
+        "id": "fp-unknown",
+        "ref": "U?",
+        "position": [
+          0.0,
+          0.0
+        ],
+        "rotation_deg": 0.0,
+        "layer": "L1",
+        "pads": [],
+        "footprint_name": ""
+      },
+      {
+        "id": "fp-unknown",
+        "ref": "U?",
+        "position": [
+          0.0,
+          0.0
+        ],
+        "rotation_deg": 0.0,
+        "layer": "L1",
+        "pads": [],
+        "footprint_name": ""
+      },
+      {
+        "id": "fp-unknown",
+        "ref": "U?",
+        "position": [
+          0.0,
+          0.0
+        ],
+        "rotation_deg": 0.0,
+        "layer": "L1",
+        "pads": [],
+        "footprint_name": ""
+      },
+      {
+        "id": "fp-unknown",
+        "ref": "U?",
+        "position": [
+          0.0,
+          0.0
+        ],
+        "rotation_deg": 0.0,
+        "layer": "L1",
+        "pads": [],
+        "footprint_name": ""
+      },
+      {
+        "id": "fp-unknown",
+        "ref": "U?",
+        "position": [
+          0.0,
+          0.0
+        ],
+        "rotation_deg": 0.0,
+        "layer": "L1",
+        "pads": [],
+        "footprint_name": ""
+      },
+      {
+        "id": "fp-unknown",
+        "ref": "U?",
+        "position": [
+          0.0,
+          0.0
+        ],
+        "rotation_deg": 0.0,
+        "layer": "L1",
+        "pads": [],
+        "footprint_name": ""
+      },
+      {
+        "id": "fp-unknown",
+        "ref": "U?",
+        "position": [
+          0.0,
+          0.0
+        ],
+        "rotation_deg": 0.0,
+        "layer": "L1",
+        "pads": [],
+        "footprint_name": ""
+      },
+      {
+        "id": "fp-unknown",
+        "ref": "U?",
+        "position": [
+          0.0,
+          0.0
+        ],
+        "rotation_deg": 0.0,
+        "layer": "L1",
+        "pads": [],
+        "footprint_name": ""
+      },
+      {
+        "id": "fp-unknown",
+        "ref": "U?",
+        "position": [
+          0.0,
+          0.0
+        ],
+        "rotation_deg": 0.0,
+        "layer": "L1",
+        "pads": [],
+        "footprint_name": ""
+      },
+      {
+        "id": "fp-unknown",
+        "ref": "U?",
+        "position": [
+          0.0,
+          0.0
+        ],
+        "rotation_deg": 0.0,
+        "layer": "L1",
+        "pads": [],
+        "footprint_name": ""
+      },
+      {
+        "id": "fp-unknown",
+        "ref": "U?",
+        "position": [
+          0.0,
+          0.0
+        ],
+        "rotation_deg": 0.0,
+        "layer": "L1",
+        "pads": [],
+        "footprint_name": ""
+      },
+      {
+        "id": "fp-unknown",
+        "ref": "U?",
+        "position": [
+          0.0,
+          0.0
+        ],
+        "rotation_deg": 0.0,
+        "layer": "L1",
+        "pads": [],
+        "footprint_name": ""
+      },
+      {
+        "id": "fp-unknown",
+        "ref": "U?",
+        "position": [
+          0.0,
+          0.0
+        ],
+        "rotation_deg": 0.0,
+        "layer": "L1",
+        "pads": [],
+        "footprint_name": ""
+      },
+      {
+        "id": "fp-unknown",
+        "ref": "U?",
+        "position": [
+          0.0,
+          0.0
+        ],
+        "rotation_deg": 0.0,
+        "layer": "L1",
+        "pads": [],
+        "footprint_name": ""
+      },
+      {
+        "id": "fp-unknown",
+        "ref": "U?",
+        "position": [
+          0.0,
+          0.0
+        ],
+        "rotation_deg": 0.0,
+        "layer": "L1",
+        "pads": [],
+        "footprint_name": ""
+      },
+      {
+        "id": "fp-unknown",
+        "ref": "U?",
+        "position": [
+          0.0,
+          0.0
+        ],
+        "rotation_deg": 0.0,
+        "layer": "L1",
+        "pads": [],
+        "footprint_name": ""
+      },
+      {
+        "id": "fp-unknown",
+        "ref": "U?",
+        "position": [
+          0.0,
+          0.0
+        ],
+        "rotation_deg": 0.0,
+        "layer": "L1",
+        "pads": [],
+        "footprint_name": ""
+      },
+      {
+        "id": "fp-unknown",
+        "ref": "U?",
+        "position": [
+          0.0,
+          0.0
+        ],
+        "rotation_deg": 0.0,
+        "layer": "L1",
+        "pads": [],
+        "footprint_name": ""
+      },
+      {
+        "id": "fp-unknown",
+        "ref": "U?",
+        "position": [
+          0.0,
+          0.0
+        ],
+        "rotation_deg": 0.0,
+        "layer": "L1",
+        "pads": [],
+        "footprint_name": ""
+      },
+      {
+        "id": "fp-unknown",
+        "ref": "U?",
+        "position": [
+          0.0,
+          0.0
+        ],
+        "rotation_deg": 0.0,
+        "layer": "L1",
+        "pads": [],
+        "footprint_name": ""
+      },
+      {
+        "id": "fp-unknown",
+        "ref": "U?",
+        "position": [
+          0.0,
+          0.0
+        ],
+        "rotation_deg": 0.0,
+        "layer": "L1",
+        "pads": [],
+        "footprint_name": ""
+      },
+      {
+        "id": "fp-unknown",
+        "ref": "U?",
+        "position": [
+          0.0,
+          0.0
+        ],
+        "rotation_deg": 0.0,
+        "layer": "L1",
+        "pads": [],
+        "footprint_name": ""
+      },
+      {
+        "id": "fp-unknown",
+        "ref": "U?",
+        "position": [
+          0.0,
+          0.0
+        ],
+        "rotation_deg": 0.0,
+        "layer": "L1",
+        "pads": [],
+        "footprint_name": ""
+      },
+      {
+        "id": "fp-unknown",
+        "ref": "U?",
+        "position": [
+          0.0,
+          0.0
+        ],
+        "rotation_deg": 0.0,
+        "layer": "L1",
+        "pads": [],
+        "footprint_name": ""
+      },
+      {
+        "id": "fp-unknown",
+        "ref": "U?",
+        "position": [
+          0.0,
+          0.0
+        ],
+        "rotation_deg": 0.0,
+        "layer": "L1",
+        "pads": [],
+        "footprint_name": ""
+      },
+      {
+        "id": "fp-unknown",
+        "ref": "U?",
+        "position": [
+          0.0,
+          0.0
+        ],
+        "rotation_deg": 0.0,
+        "layer": "L1",
+        "pads": [],
+        "footprint_name": ""
+      },
+      {
+        "id": "fp-unknown",
+        "ref": "U?",
+        "position": [
+          0.0,
+          0.0
+        ],
+        "rotation_deg": 0.0,
+        "layer": "L1",
+        "pads": [],
+        "footprint_name": ""
+      },
+      {
+        "id": "fp-unknown",
+        "ref": "U?",
+        "position": [
+          0.0,
+          0.0
+        ],
+        "rotation_deg": 0.0,
+        "layer": "L1",
+        "pads": [],
+        "footprint_name": ""
+      },
+      {
+        "id": "fp-unknown",
+        "ref": "U?",
+        "position": [
+          0.0,
+          0.0
+        ],
+        "rotation_deg": 0.0,
+        "layer": "L1",
+        "pads": [],
+        "footprint_name": ""
+      },
+      {
+        "id": "fp-unknown",
+        "ref": "U?",
+        "position": [
+          0.0,
+          0.0
+        ],
+        "rotation_deg": 0.0,
+        "layer": "L1",
+        "pads": [],
+        "footprint_name": ""
+      },
+      {
+        "id": "fp-unknown",
+        "ref": "U?",
+        "position": [
+          0.0,
+          0.0
+        ],
+        "rotation_deg": 0.0,
+        "layer": "L1",
+        "pads": [],
+        "footprint_name": ""
+      },
+      {
+        "id": "fp-unknown",
+        "ref": "U?",
+        "position": [
+          0.0,
+          0.0
+        ],
+        "rotation_deg": 0.0,
+        "layer": "L1",
+        "pads": [],
+        "footprint_name": ""
+      },
+      {
+        "id": "fp-unknown",
+        "ref": "U?",
+        "position": [
+          0.0,
+          0.0
+        ],
+        "rotation_deg": 0.0,
+        "layer": "L1",
+        "pads": [],
+        "footprint_name": ""
+      },
+      {
+        "id": "fp-unknown",
+        "ref": "U?",
+        "position": [
+          0.0,
+          0.0
+        ],
+        "rotation_deg": 0.0,
+        "layer": "L1",
+        "pads": [],
+        "footprint_name": ""
+      },
+      {
+        "id": "fp-unknown",
+        "ref": "U?",
+        "position": [
+          0.0,
+          0.0
+        ],
+        "rotation_deg": 0.0,
+        "layer": "L1",
+        "pads": [],
+        "footprint_name": ""
+      },
+      {
+        "id": "fp-unknown",
+        "ref": "U?",
+        "position": [
+          0.0,
+          0.0
+        ],
+        "rotation_deg": 0.0,
+        "layer": "L1",
+        "pads": [],
+        "footprint_name": ""
+      },
+      {
+        "id": "fp-unknown",
+        "ref": "U?",
+        "position": [
+          0.0,
+          0.0
+        ],
+        "rotation_deg": 0.0,
+        "layer": "L1",
+        "pads": [],
+        "footprint_name": ""
+      },
+      {
+        "id": "fp-unknown",
+        "ref": "U?",
+        "position": [
+          0.0,
+          0.0
+        ],
+        "rotation_deg": 0.0,
+        "layer": "L1",
+        "pads": [],
+        "footprint_name": ""
+      },
+      {
+        "id": "fp-unknown",
+        "ref": "U?",
+        "position": [
+          0.0,
+          0.0
+        ],
+        "rotation_deg": 0.0,
+        "layer": "L1",
+        "pads": [],
+        "footprint_name": ""
+      },
+      {
+        "id": "fp-unknown",
+        "ref": "U?",
+        "position": [
+          0.0,
+          0.0
+        ],
+        "rotation_deg": 0.0,
+        "layer": "L1",
+        "pads": [],
+        "footprint_name": ""
+      },
+      {
+        "id": "fp-unknown",
+        "ref": "U?",
+        "position": [
+          0.0,
+          0.0
+        ],
+        "rotation_deg": 0.0,
+        "layer": "L1",
+        "pads": [],
+        "footprint_name": ""
+      },
+      {
+        "id": "fp-unknown",
+        "ref": "U?",
+        "position": [
+          0.0,
+          0.0
+        ],
+        "rotation_deg": 0.0,
+        "layer": "L1",
+        "pads": [],
+        "footprint_name": ""
+      },
+      {
+        "id": "fp-unknown",
+        "ref": "U?",
+        "position": [
+          0.0,
+          0.0
+        ],
+        "rotation_deg": 0.0,
+        "layer": "L1",
+        "pads": [],
+        "footprint_name": ""
+      },
+      {
+        "id": "fp-unknown",
+        "ref": "U?",
+        "position": [
+          0.0,
+          0.0
+        ],
+        "rotation_deg": 0.0,
+        "layer": "L1",
+        "pads": [],
+        "footprint_name": ""
+      },
+      {
+        "id": "fp-unknown",
+        "ref": "U?",
+        "position": [
+          0.0,
+          0.0
+        ],
+        "rotation_deg": 0.0,
+        "layer": "L1",
+        "pads": [],
+        "footprint_name": ""
+      },
+      {
+        "id": "fp-unknown",
+        "ref": "U?",
+        "position": [
+          0.0,
+          0.0
+        ],
+        "rotation_deg": 0.0,
+        "layer": "L1",
+        "pads": [],
+        "footprint_name": ""
+      },
+      {
+        "id": "fp-unknown",
+        "ref": "U?",
+        "position": [
+          0.0,
+          0.0
+        ],
+        "rotation_deg": 0.0,
+        "layer": "L1",
+        "pads": [],
+        "footprint_name": ""
+      },
+      {
+        "id": "fp-unknown",
+        "ref": "U?",
+        "position": [
+          0.0,
+          0.0
+        ],
+        "rotation_deg": 0.0,
+        "layer": "L1",
+        "pads": [],
+        "footprint_name": ""
+      },
+      {
+        "id": "fp-unknown",
+        "ref": "U?",
+        "position": [
+          0.0,
+          0.0
+        ],
+        "rotation_deg": 0.0,
+        "layer": "L1",
+        "pads": [],
+        "footprint_name": ""
+      },
+      {
+        "id": "fp-unknown",
+        "ref": "U?",
+        "position": [
+          0.0,
+          0.0
+        ],
+        "rotation_deg": 0.0,
+        "layer": "L1",
+        "pads": [],
+        "footprint_name": ""
+      },
+      {
+        "id": "fp-unknown",
+        "ref": "U?",
+        "position": [
+          0.0,
+          0.0
+        ],
+        "rotation_deg": 0.0,
+        "layer": "L1",
+        "pads": [],
+        "footprint_name": ""
+      },
+      {
+        "id": "fp-unknown",
+        "ref": "U?",
+        "position": [
+          0.0,
+          0.0
+        ],
+        "rotation_deg": 0.0,
+        "layer": "L1",
+        "pads": [],
+        "footprint_name": ""
+      },
+      {
+        "id": "fp-unknown",
+        "ref": "U?",
+        "position": [
+          0.0,
+          0.0
+        ],
+        "rotation_deg": 0.0,
+        "layer": "L1",
+        "pads": [],
+        "footprint_name": ""
+      },
+      {
+        "id": "fp-unknown",
+        "ref": "U?",
+        "position": [
+          0.0,
+          0.0
+        ],
+        "rotation_deg": 0.0,
+        "layer": "L1",
+        "pads": [],
+        "footprint_name": ""
+      },
+      {
+        "id": "fp-unknown",
+        "ref": "U?",
+        "position": [
+          0.0,
+          0.0
+        ],
+        "rotation_deg": 0.0,
+        "layer": "L1",
+        "pads": [],
+        "footprint_name": ""
+      },
+      {
+        "id": "fp-unknown",
+        "ref": "U?",
+        "position": [
+          0.0,
+          0.0
+        ],
+        "rotation_deg": 0.0,
+        "layer": "L1",
+        "pads": [],
+        "footprint_name": ""
+      },
+      {
+        "id": "fp-unknown",
+        "ref": "U?",
+        "position": [
+          0.0,
+          0.0
+        ],
+        "rotation_deg": 0.0,
+        "layer": "L1",
+        "pads": [],
+        "footprint_name": ""
+      },
+      {
+        "id": "fp-unknown",
+        "ref": "U?",
+        "position": [
+          0.0,
+          0.0
+        ],
+        "rotation_deg": 0.0,
+        "layer": "L1",
+        "pads": [],
+        "footprint_name": ""
+      },
+      {
+        "id": "fp-unknown",
+        "ref": "U?",
+        "position": [
+          0.0,
+          0.0
+        ],
+        "rotation_deg": 0.0,
+        "layer": "L1",
+        "pads": [],
+        "footprint_name": ""
+      },
+      {
+        "id": "fp-unknown",
+        "ref": "U?",
+        "position": [
+          0.0,
+          0.0
+        ],
+        "rotation_deg": 0.0,
+        "layer": "L1",
+        "pads": [],
+        "footprint_name": ""
+      },
+      {
+        "id": "fp-unknown",
+        "ref": "U?",
+        "position": [
+          0.0,
+          0.0
+        ],
+        "rotation_deg": 0.0,
+        "layer": "L1",
+        "pads": [],
+        "footprint_name": ""
+      },
+      {
+        "id": "fp-unknown",
+        "ref": "U?",
+        "position": [
+          0.0,
+          0.0
+        ],
+        "rotation_deg": 0.0,
+        "layer": "L1",
+        "pads": [],
+        "footprint_name": ""
+      },
+      {
+        "id": "fp-unknown",
+        "ref": "U?",
+        "position": [
+          0.0,
+          0.0
+        ],
+        "rotation_deg": 0.0,
+        "layer": "L1",
+        "pads": [],
+        "footprint_name": ""
+      },
+      {
+        "id": "fp-unknown",
+        "ref": "U?",
+        "position": [
+          0.0,
+          0.0
+        ],
+        "rotation_deg": 0.0,
+        "layer": "L1",
+        "pads": [],
+        "footprint_name": ""
+      },
+      {
+        "id": "fp-unknown",
+        "ref": "U?",
+        "position": [
+          0.0,
+          0.0
+        ],
+        "rotation_deg": 0.0,
+        "layer": "L1",
+        "pads": [],
+        "footprint_name": ""
+      },
+      {
+        "id": "fp-unknown",
+        "ref": "U?",
+        "position": [
+          0.0,
+          0.0
+        ],
+        "rotation_deg": 0.0,
+        "layer": "L1",
+        "pads": [],
+        "footprint_name": ""
+      },
+      {
+        "id": "fp-unknown",
+        "ref": "U?",
+        "position": [
+          0.0,
+          0.0
+        ],
+        "rotation_deg": 0.0,
+        "layer": "L1",
+        "pads": [],
+        "footprint_name": ""
+      },
+      {
+        "id": "fp-unknown",
+        "ref": "U?",
+        "position": [
+          0.0,
+          0.0
+        ],
+        "rotation_deg": 0.0,
+        "layer": "L1",
+        "pads": [],
+        "footprint_name": ""
+      },
+      {
+        "id": "fp-unknown",
+        "ref": "U?",
+        "position": [
+          0.0,
+          0.0
+        ],
+        "rotation_deg": 0.0,
+        "layer": "L1",
+        "pads": [],
+        "footprint_name": ""
+      },
+      {
+        "id": "fp-unknown",
+        "ref": "U?",
+        "position": [
+          0.0,
+          0.0
+        ],
+        "rotation_deg": 0.0,
+        "layer": "L1",
+        "pads": [],
+        "footprint_name": ""
+      },
+      {
+        "id": "fp-unknown",
+        "ref": "U?",
+        "position": [
+          0.0,
+          0.0
+        ],
+        "rotation_deg": 0.0,
+        "layer": "L1",
+        "pads": [],
+        "footprint_name": ""
+      },
+      {
+        "id": "fp-unknown",
+        "ref": "U?",
+        "position": [
+          0.0,
+          0.0
+        ],
+        "rotation_deg": 0.0,
+        "layer": "L1",
+        "pads": [],
+        "footprint_name": ""
+      },
+      {
+        "id": "fp-unknown",
+        "ref": "U?",
+        "position": [
+          0.0,
+          0.0
+        ],
+        "rotation_deg": 0.0,
+        "layer": "L1",
+        "pads": [],
+        "footprint_name": ""
+      },
+      {
+        "id": "fp-unknown",
+        "ref": "U?",
+        "position": [
+          0.0,
+          0.0
+        ],
+        "rotation_deg": 0.0,
+        "layer": "L1",
+        "pads": [],
+        "footprint_name": ""
+      },
+      {
+        "id": "fp-unknown",
+        "ref": "U?",
+        "position": [
+          0.0,
+          0.0
+        ],
+        "rotation_deg": 0.0,
+        "layer": "L1",
+        "pads": [],
+        "footprint_name": ""
+      },
+      {
+        "id": "fp-unknown",
+        "ref": "U?",
+        "position": [
+          0.0,
+          0.0
+        ],
+        "rotation_deg": 0.0,
+        "layer": "L1",
+        "pads": [],
+        "footprint_name": ""
+      },
+      {
+        "id": "fp-unknown",
+        "ref": "U?",
+        "position": [
+          0.0,
+          0.0
+        ],
+        "rotation_deg": 0.0,
+        "layer": "L1",
+        "pads": [],
+        "footprint_name": ""
+      },
+      {
+        "id": "fp-unknown",
+        "ref": "U?",
+        "position": [
+          0.0,
+          0.0
+        ],
+        "rotation_deg": 0.0,
+        "layer": "L1",
+        "pads": [],
+        "footprint_name": ""
+      },
+      {
+        "id": "fp-unknown",
+        "ref": "U?",
+        "position": [
+          0.0,
+          0.0
+        ],
+        "rotation_deg": 0.0,
+        "layer": "L1",
+        "pads": [],
+        "footprint_name": ""
+      },
+      {
+        "id": "fp-unknown",
+        "ref": "U?",
+        "position": [
+          0.0,
+          0.0
+        ],
+        "rotation_deg": 0.0,
+        "layer": "L1",
+        "pads": [],
+        "footprint_name": ""
+      },
+      {
+        "id": "fp-unknown",
+        "ref": "U?",
+        "position": [
+          0.0,
+          0.0
+        ],
+        "rotation_deg": 0.0,
+        "layer": "L1",
+        "pads": [],
+        "footprint_name": ""
+      },
+      {
+        "id": "fp-unknown",
+        "ref": "U?",
+        "position": [
+          0.0,
+          0.0
+        ],
+        "rotation_deg": 0.0,
+        "layer": "L1",
+        "pads": [],
+        "footprint_name": ""
+      },
+      {
+        "id": "fp-unknown",
+        "ref": "U?",
+        "position": [
+          0.0,
+          0.0
+        ],
+        "rotation_deg": 0.0,
+        "layer": "L1",
+        "pads": [],
+        "footprint_name": ""
+      },
+      {
+        "id": "fp-unknown",
+        "ref": "U?",
+        "position": [
+          0.0,
+          0.0
+        ],
+        "rotation_deg": 0.0,
+        "layer": "L1",
+        "pads": [],
+        "footprint_name": ""
+      },
+      {
+        "id": "fp-unknown",
+        "ref": "U?",
+        "position": [
+          0.0,
+          0.0
+        ],
+        "rotation_deg": 0.0,
+        "layer": "L1",
+        "pads": [],
+        "footprint_name": ""
+      },
+      {
+        "id": "fp-unknown",
+        "ref": "U?",
+        "position": [
+          0.0,
+          0.0
+        ],
+        "rotation_deg": 0.0,
+        "layer": "L1",
+        "pads": [],
+        "footprint_name": ""
+      },
+      {
+        "id": "fp-unknown",
+        "ref": "U?",
+        "position": [
+          0.0,
+          0.0
+        ],
+        "rotation_deg": 0.0,
+        "layer": "L1",
+        "pads": [],
+        "footprint_name": ""
+      },
+      {
+        "id": "fp-unknown",
+        "ref": "U?",
+        "position": [
+          0.0,
+          0.0
+        ],
+        "rotation_deg": 0.0,
+        "layer": "L1",
+        "pads": [],
+        "footprint_name": ""
+      },
+      {
+        "id": "fp-unknown",
+        "ref": "U?",
+        "position": [
+          0.0,
+          0.0
+        ],
+        "rotation_deg": 0.0,
+        "layer": "L1",
+        "pads": [],
+        "footprint_name": ""
+      },
+      {
+        "id": "fp-unknown",
+        "ref": "U?",
+        "position": [
+          0.0,
+          0.0
+        ],
+        "rotation_deg": 0.0,
+        "layer": "L1",
+        "pads": [],
+        "footprint_name": ""
+      },
+      {
+        "id": "fp-unknown",
+        "ref": "U?",
+        "position": [
+          0.0,
+          0.0
+        ],
+        "rotation_deg": 0.0,
+        "layer": "L1",
+        "pads": [],
+        "footprint_name": ""
+      },
+      {
+        "id": "fp-unknown",
+        "ref": "U?",
+        "position": [
+          0.0,
+          0.0
+        ],
+        "rotation_deg": 0.0,
+        "layer": "L1",
+        "pads": [],
+        "footprint_name": ""
+      },
+      {
+        "id": "fp-unknown",
+        "ref": "U?",
+        "position": [
+          0.0,
+          0.0
+        ],
+        "rotation_deg": 0.0,
+        "layer": "L1",
+        "pads": [],
+        "footprint_name": ""
+      },
+      {
+        "id": "fp-unknown",
+        "ref": "U?",
+        "position": [
+          0.0,
+          0.0
+        ],
+        "rotation_deg": 0.0,
+        "layer": "L1",
+        "pads": [],
+        "footprint_name": ""
+      },
+      {
+        "id": "fp-unknown",
+        "ref": "U?",
+        "position": [
+          0.0,
+          0.0
+        ],
+        "rotation_deg": 0.0,
+        "layer": "L1",
+        "pads": [],
+        "footprint_name": ""
+      },
+      {
+        "id": "fp-unknown",
+        "ref": "U?",
+        "position": [
+          0.0,
+          0.0
+        ],
+        "rotation_deg": 0.0,
+        "layer": "L1",
+        "pads": [],
+        "footprint_name": ""
+      },
+      {
+        "id": "fp-unknown",
+        "ref": "U?",
+        "position": [
+          0.0,
+          0.0
+        ],
+        "rotation_deg": 0.0,
+        "layer": "L1",
+        "pads": [],
+        "footprint_name": ""
+      },
+      {
+        "id": "fp-unknown",
+        "ref": "U?",
+        "position": [
+          0.0,
+          0.0
+        ],
+        "rotation_deg": 0.0,
+        "layer": "L1",
+        "pads": [],
+        "footprint_name": ""
+      },
+      {
+        "id": "fp-unknown",
+        "ref": "U?",
+        "position": [
+          0.0,
+          0.0
+        ],
+        "rotation_deg": 0.0,
+        "layer": "L1",
+        "pads": [],
+        "footprint_name": ""
+      },
+      {
+        "id": "fp-unknown",
+        "ref": "U?",
+        "position": [
+          0.0,
+          0.0
+        ],
+        "rotation_deg": 0.0,
+        "layer": "L1",
+        "pads": [],
+        "footprint_name": ""
+      },
+      {
+        "id": "fp-unknown",
+        "ref": "U?",
+        "position": [
+          0.0,
+          0.0
+        ],
+        "rotation_deg": 0.0,
+        "layer": "L1",
+        "pads": [],
+        "footprint_name": ""
+      },
+      {
+        "id": "fp-unknown",
+        "ref": "U?",
+        "position": [
+          0.0,
+          0.0
+        ],
+        "rotation_deg": 0.0,
+        "layer": "L1",
+        "pads": [],
+        "footprint_name": ""
+      },
+      {
+        "id": "fp-unknown",
+        "ref": "U?",
+        "position": [
+          0.0,
+          0.0
+        ],
+        "rotation_deg": 0.0,
+        "layer": "L1",
+        "pads": [],
+        "footprint_name": ""
+      },
+      {
+        "id": "fp-unknown",
+        "ref": "U?",
+        "position": [
+          0.0,
+          0.0
+        ],
+        "rotation_deg": 0.0,
+        "layer": "L1",
+        "pads": [],
+        "footprint_name": ""
+      },
+      {
+        "id": "fp-unknown",
+        "ref": "U?",
+        "position": [
+          0.0,
+          0.0
+        ],
+        "rotation_deg": 0.0,
+        "layer": "L1",
+        "pads": [],
+        "footprint_name": ""
+      },
+      {
+        "id": "fp-unknown",
+        "ref": "U?",
+        "position": [
+          0.0,
+          0.0
+        ],
+        "rotation_deg": 0.0,
+        "layer": "L1",
+        "pads": [],
+        "footprint_name": ""
+      },
+      {
+        "id": "fp-unknown",
+        "ref": "U?",
+        "position": [
+          0.0,
+          0.0
+        ],
+        "rotation_deg": 0.0,
+        "layer": "L1",
+        "pads": [],
+        "footprint_name": ""
+      },
+      {
+        "id": "fp-unknown",
+        "ref": "U?",
+        "position": [
+          0.0,
+          0.0
+        ],
+        "rotation_deg": 0.0,
+        "layer": "L1",
+        "pads": [],
+        "footprint_name": ""
+      }
+    ]
+  },
+  "meta": {
+    "source_engine": "altium",
+    "created_at": "2026-01-27T14:52:27.041513",
+    "updated_at": "2026-01-27T14:52:27.041520",
+    "created_by": "engine",
+    "tags": []
+  }
+}

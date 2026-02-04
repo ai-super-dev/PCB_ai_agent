@@ -1,0 +1,9 @@
+{
+  "id": "7801e410-10e9-4292-b70d-d8f877df03f9",
+  "type": "constraint.ruleSet",
+  "version": 1,
+  "created_at": "2026-01-27T02:42:10.907398",
+  "updated_at": "2026-01-27T02:42:10.907406",
+  "created_by": "engine",
+  "source_engine": "altium"
+}
