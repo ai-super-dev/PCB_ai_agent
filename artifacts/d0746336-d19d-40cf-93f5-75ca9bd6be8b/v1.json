@@ -1,0 +1,339 @@
+{
+  "id": "d0746336-d19d-40cf-93f5-75ca9bd6be8b",
+  "type": "constraint.ruleSet",
+  "version": 1,
+  "relations": [],
+  "data": {
+    "rules": [
+      {
+        "id": "rule-clearance",
+        "type": "clearance",
+        "scope": {
+          "nets": null,
+          "netclass": null,
+          "components": null,
+          "layers": null
+        },
+        "params": {
+          "min_clearance_mm": 0.2,
+          "min_width_mm": null,
+          "preferred_width_mm": null,
+          "max_width_mm": null,
+          "min_drill_mm": null,
+          "max_drill_mm": null,
+          "pair_gap_mm": null,
+          "max_skew_ps": null,
+          "target_length_mm": null,
+          "max_delta_mm": null,
+          "forbid_split_plane_crossing": null,
+          "min_plane_continuity_mm": null,
+          "min_spacing_mm": null,
+          "max_coupling_coeff": null,
+          "extensions": {}
+        },
+        "enabled": true,
+        "priority": 0
+      },
+      {
+        "id": "rule-trace-width",
+        "type": "traceWidth",
+        "scope": {
+          "nets": null,
+          "netclass": null,
+          "components": null,
+          "layers": null
+        },
+        "params": {
+          "min_clearance_mm": null,
+          "min_width_mm": 0.15,
+          "preferred_width_mm": 0.25,
+          "max_width_mm": null,
+          "min_drill_mm": null,
+          "max_drill_mm": null,
+          "pair_gap_mm": null,
+          "max_skew_ps": null,
+          "target_length_mm": null,
+          "max_delta_mm": null,
+          "forbid_split_plane_crossing": null,
+          "min_plane_continuity_mm": null,
+          "min_spacing_mm": null,
+          "max_coupling_coeff": null,
+          "extensions": {}
+        },
+        "enabled": true,
+        "priority": 0
+      },
+      {
+        "id": "auto-clearance_default",
+        "type": "clearance",
+        "scope": {
+          "nets": null,
+          "netclass": null,
+          "components": null,
+          "layers": null
+        },
+        "params": {
+          "min_clearance_mm": 0.2,
+          "min_width_mm": null,
+          "preferred_width_mm": null,
+          "max_width_mm": null,
+          "min_drill_mm": null,
+          "max_drill_mm": null,
+          "pair_gap_mm": null,
+          "max_skew_ps": null,
+          "target_length_mm": null,
+          "max_delta_mm": null,
+          "forbid_split_plane_crossing": null,
+          "min_plane_continuity_mm": null,
+          "min_spacing_mm": null,
+          "max_coupling_coeff": null,
+          "extensions": {}
+        },
+        "enabled": true,
+        "priority": 1
+      },
+      {
+        "id": "auto-width_default",
+        "type": "traceWidth",
+        "scope": {
+          "nets": null,
+          "netclass": null,
+          "components": null,
+          "layers": null
+        },
+        "params": {
+          "min_clearance_mm": null,
+          "min_width_mm": 0.25,
+          "preferred_width_mm": 0.25,
+          "max_width_mm": null,
+          "min_drill_mm": null,
+          "max_drill_mm": null,
+          "pair_gap_mm": null,
+          "max_skew_ps": null,
+          "target_length_mm": null,
+          "max_delta_mm": null,
+          "forbid_split_plane_crossing": null,
+          "min_plane_continuity_mm": null,
+          "min_spacing_mm": null,
+          "max_coupling_coeff": null,
+          "extensions": {}
+        },
+        "enabled": true,
+        "priority": 1
+      },
+      {
+        "id": "auto-via_default",
+        "type": "via",
+        "scope": {
+          "nets": null,
+          "netclass": null,
+          "components": null,
+          "layers": null
+        },
+        "params": {
+          "min_clearance_mm": null,
+          "min_width_mm": null,
+          "preferred_width_mm": null,
+          "max_width_mm": null,
+          "min_drill_mm": 0.3,
+          "max_drill_mm": null,
+          "pair_gap_mm": null,
+          "max_skew_ps": null,
+          "target_length_mm": null,
+          "max_delta_mm": null,
+          "forbid_split_plane_crossing": null,
+          "min_plane_continuity_mm": null,
+          "min_spacing_mm": null,
+          "max_coupling_coeff": null,
+          "extensions": {}
+        },
+        "enabled": true,
+        "priority": 1
+      },
+      {
+        "id": "auto-width_power",
+        "type": "traceWidth",
+        "scope": {
+          "nets": null,
+          "netclass": "Power",
+          "components": null,
+          "layers": null
+        },
+        "params": {
+          "min_clearance_mm": null,
+          "min_width_mm": 0.5,
+          "preferred_width_mm": 0.5,
+          "max_width_mm": null,
+          "min_drill_mm": null,
+          "max_drill_mm": null,
+          "pair_gap_mm": null,
+          "max_skew_ps": null,
+          "target_length_mm": null,
+          "max_delta_mm": null,
+          "forbid_split_plane_crossing": null,
+          "min_plane_continuity_mm": null,
+          "min_spacing_mm": null,
+          "max_coupling_coeff": null,
+          "extensions": {}
+        },
+        "enabled": true,
+        "priority": 2
+      },
+      {
+        "id": "auto-width_ground",
+        "type": "traceWidth",
+        "scope": {
+          "nets": null,
+          "netclass": "Ground",
+          "components": null,
+          "layers": null
+        },
+        "params": {
+          "min_clearance_mm": null,
+          "min_width_mm": 0.5,
+          "preferred_width_mm": 0.5,
+          "max_width_mm": null,
+          "min_drill_mm": null,
+          "max_drill_mm": null,
+          "pair_gap_mm": null,
+          "max_skew_ps": null,
+          "target_length_mm": null,
+          "max_delta_mm": null,
+          "forbid_split_plane_crossing": null,
+          "min_plane_continuity_mm": null,
+          "min_spacing_mm": null,
+          "max_coupling_coeff": null,
+          "extensions": {}
+        },
+        "enabled": true,
+        "priority": 2
+      },
+      {
+        "id": "auto-multilayer-via",
+        "type": "via",
+        "scope": {
+          "nets": null,
+          "netclass": null,
+          "components": null,
+          "layers": null
+        },
+        "params": {
+          "min_clearance_mm": null,
+          "min_width_mm": null,
+          "preferred_width_mm": null,
+          "max_width_mm": null,
+          "min_drill_mm": 0.2,
+          "max_drill_mm": 0.5,
+          "pair_gap_mm": null,
+          "max_skew_ps": null,
+          "target_length_mm": null,
+          "max_delta_mm": null,
+          "forbid_split_plane_crossing": null,
+          "min_plane_continuity_mm": null,
+          "min_spacing_mm": null,
+          "max_coupling_coeff": null,
+          "extensions": {}
+        },
+        "enabled": true,
+        "priority": 1
+      }
+    ],
+    "netclasses": [
+      {
+        "id": "nc-power",
+        "name": "Power",
+        "nets": [
+          "net-+30vin",
+          "net-+5vin",
+          "net-+5v",
+          "net--5v",
+          "net-12v"
+        ],
+        "defaults": {
+          "trace_width_mm": 0.5,
+          "clearance_mm": 0.2,
+          "via_size_mm": null
+        }
+      },
+      {
+        "id": "nc-ground",
+        "name": "Ground",
+        "nets": [
+          "net-gnd"
+        ],
+        "defaults": {
+          "trace_width_mm": 0.5,
+          "clearance_mm": 0.2,
+          "via_size_mm": null
+        }
+      },
+      {
+        "id": "nc-default",
+        "name": "Default",
+        "nets": [
+          "net-194out",
+          "net-netr222_1",
+          "net-+21v",
+          "net-netc170_1",
+          "net-netc166_2",
+          "net-netc147_1",
+          "net-netr101_1",
+          "net-netc149_2",
+          "net-netc148_2",
+          "net-netd9_2",
+          "net-netr98_1",
+          "net-3.3vfsalc",
+          "net-+30v",
+          "net-fljc",
+          "net-fs",
+          "net-netr102_1",
+          "net-netr106_2",
+          "net-netc135_2",
+          "net-netc136_2",
+          "net-netc155_2",
+          "net-netc156_2",
+          "net-netc178_1",
+          "net-netc172_2",
+          "net-netr113_2",
+          "net-netr111_2",
+          "net-netr110_2",
+          "net-netr110_1",
+          "net-netr115_2",
+          "net-netr108_1",
+          "net-netc138_2",
+          "net-netc139_2",
+          "net-netd13_2",
+          "net-netd8_2",
+          "net-netd8_1",
+          "net-+200v",
+          "net-netc158_2",
+          "net-netc173_1",
+          "net-netc165_2",
+          "net-netc163_1",
+          "net-netc161_2",
+          "net-netd14_1",
+          "net-netc169_1",
+          "net-netd13_1",
+          "net-netr124_2",
+          "net-netr127_1",
+          "net-netr126_2",
+          "net-netr127_2",
+          "net-netr124_1",
+          "net-netc147_2"
+        ],
+        "defaults": {
+          "trace_width_mm": 0.25,
+          "clearance_mm": 0.2,
+          "via_size_mm": null
+        }
+      }
+    ]
+  },
+  "meta": {
+    "source_engine": "altium",
+    "created_at": "2026-02-05T13:07:49.537536",
+    "updated_at": "2026-02-05T13:07:49.537542",
+    "created_by": "engine",
+    "tags": []
+  }
+}

@@ -436,6 +436,260 @@ class AltiumMCPServer:
             }
         ]
     
+    def get_design_rules(self) -> dict:
+        """
+        Get all design rules from the current PCB or from Altium export file
+        
+        Returns:
+            Dictionary with rules information
+        """
+        try:
+            # PRIORITY 1: Get rules from Altium export file (most complete)
+            # This has ALL rules exported directly from Altium
+            rules = []
+            
+            # Check for Altium export file (most recent)
+            base_path = Path(".")
+            altium_export_files = []
+            
+            # Check for altium_pcb_info.json first (most common)
+            if (base_path / "altium_pcb_info.json").exists():
+                altium_export_files.append(base_path / "altium_pcb_info.json")
+            
+            # Check for timestamped export files (altium_export_*.json)
+            altium_export_files.extend(sorted(
+                base_path.glob("altium_export_*.json"),
+                key=lambda p: p.stat().st_mtime,
+                reverse=True
+            ))
+            
+            # Also check in project directory
+            project_path = Path("PCB_Project")
+            if project_path.exists():
+                if (project_path / "altium_pcb_info.json").exists():
+                    altium_export_files.insert(0, project_path / "altium_pcb_info.json")
+                altium_export_files.extend(sorted(
+                    project_path.glob("altium_export_*.json"),
+                    key=lambda p: p.stat().st_mtime,
+                    reverse=True
+                ))
+            
+            # Try to read from most recent export file
+            export_file_used = None
+            for export_file in altium_export_files:
+                try:
+                    # Try reading with UTF-8 first, fallback to latin-1 if needed
+                    try:
+                        with open(export_file, 'r', encoding='utf-8', errors='replace') as f:
+                            content = f.read()
+                    except:
+                        with open(export_file, 'r', encoding='latin-1', errors='replace') as f:
+                            content = f.read()
+                    
+                    # Try to parse JSON, with better error handling
+                    try:
+                        export_data = json.loads(content)
+                    except json.JSONDecodeError as je:
+                        # Try to fix common JSON issues
+                        # Fix invalid escape sequences
+                        import re
+                        # Replace invalid backslashes (but keep valid ones)
+                        fixed_content = re.sub(r'\\(?![\\"/bfnrt]|u[0-9a-fA-F]{4})', r'\\\\', content)
+                        try:
+                            export_data = json.loads(fixed_content)
+                        except:
+                            print(f"JSON decode error in {export_file.name} at line {je.lineno}: {je.msg}")
+                            raise
+                    
+                    exported_rules = export_data.get('rules', [])
+                    if exported_rules and len(exported_rules) > 0:
+                        rules = exported_rules
+                        export_file_used = export_file
+                        print(f"Loaded {len(rules)} rules from {export_file.name}")
+                        
+                        # CRITICAL: If rules have 0.0 values, try to get actual values from PCB file
+                        # The DelphiScript API can't read rule values, but Python file reader can!
+                        pcb_file_path = export_data.get('file_name', '')
+                        if pcb_file_path:
+                            # Fix path separators for cross-platform compatibility
+                            pcb_file_path = pcb_file_path.replace('\\', os.sep).replace('/', os.sep)
+                            
+                            # Check if we need to merge values (if any clearance rule has 0.0)
+                            needs_merge = any(
+                                r.get('clearance_mm', 0) == 0.0 or 
+                                r.get('min_width_mm', 0) == 0.0 or
+                                r.get('min_hole_mm', 0) == 0.0
+                                for r in rules
+                            )
+                            
+                            if needs_merge and os.path.exists(pcb_file_path):
+                                try:
+                                    # Read actual rule values from PCB file using Python file reader
+                                    pcb_data = self.reader.read_pcb(pcb_file_path)
+                                    if pcb_data and 'rules' in pcb_data:
+                                        file_reader_rules = pcb_data['rules']
+                                        # Create a lookup by rule name (case-insensitive)
+                                        file_reader_lookup = {r.get('name', '').upper(): r for r in file_reader_rules}
+                                        
+                                        # Merge values from file reader into exported rules
+                                        merged_count = 0
+                                        for rule in rules:
+                                            rule_name = rule.get('name', '').upper()
+                                            if rule_name in file_reader_lookup:
+                                                file_rule = file_reader_lookup[rule_name]
+                                                # Update clearance value if it's 0.0
+                                                if rule.get('type') == 'clearance' and rule.get('clearance_mm', 0) == 0.0:
+                                                    new_value = file_rule.get('clearance_mm', 0.0)
+                                                    if new_value > 0:
+                                                        rule['clearance_mm'] = new_value
+                                                        merged_count += 1
+                                                # Update width values if they're 0.0
+                                                elif rule.get('type') == 'width':
+                                                    if rule.get('min_width_mm', 0) == 0.0:
+                                                        new_val = file_rule.get('min_width_mm', 0.0)
+                                                        if new_val > 0:
+                                                            rule['min_width_mm'] = new_val
+                                                            merged_count += 1
+                                                    if rule.get('preferred_width_mm', 0) == 0.0:
+                                                        new_val = file_rule.get('preferred_width_mm', 0.0)
+                                                        if new_val > 0:
+                                                            rule['preferred_width_mm'] = new_val
+                                                    if rule.get('max_width_mm', 0) == 0.0:
+                                                        new_val = file_rule.get('max_width_mm', 0.0)
+                                                        if new_val > 0:
+                                                            rule['max_width_mm'] = new_val
+                                                # Update via values
+                                                elif rule.get('type') == 'via':
+                                                    if rule.get('min_hole_mm', 0) == 0.0:
+                                                        new_val = file_rule.get('min_hole_mm', 0.0)
+                                                        if new_val > 0:
+                                                            rule['min_hole_mm'] = new_val
+                                                            merged_count += 1
+                                                    if rule.get('max_hole_mm', 0) == 0.0:
+                                                        new_val = file_rule.get('max_hole_mm', 0.0)
+                                                        if new_val > 0:
+                                                            rule['max_hole_mm'] = new_val
+                                        
+                                        if merged_count > 0:
+                                            print(f"Merged {merged_count} rule values from PCB file reader")
+                                except Exception as e:
+                                    print(f"Could not merge rule values from PCB file: {e}")
+                                    # Continue with exported rules even if merge fails
+                        
+                        break
+                except Exception as e:
+                    print(f"Error reading {export_file}: {e}")
+                    import traceback
+                    traceback.print_exc()
+                    continue
+            
+            # If we found rules from export, use them (don't fall back to constraint artifact)
+            # The constraint artifact only has auto-generated rules, not the real Altium rules
+            if rules:
+                # Rules found from Altium export - use them!
+                print(f"Using {len(rules)} rules from Altium export file")
+            elif altium_export_files:
+                # Export file exists but has no rules - might be empty or corrupted
+                return {
+                    "success": False,
+                    "error": "Export file found but contains no rules",
+                    "message": f"Found export file but it has no rules. Please re-export from Altium:\n1. In Altium Designer, run command_server.pas\n2. Execute 'ExportPCBInfo' procedure\n3. Make sure PCB has rules defined (Design → Rules)",
+                    "rules": [],
+                    "rules_by_category": {},
+                    "statistics": {"total": 0, "enabled": 0, "by_category": {}, "by_type": {}}
+                }
+            else:
+                # No export file found - user needs to export from Altium
+                return {
+                    "success": False,
+                    "error": "No Altium export file found",
+                    "message": "Please export PCB info from Altium Designer first:\n1. In Altium Designer: File → Run Script → command_server.pas\n2. Execute: 'ExportPCBInfo' procedure\n3. This creates altium_pcb_info.json with ALL rules from your PCB",
+                    "rules": [],
+                    "rules_by_category": {},
+                    "statistics": {"total": 0, "enabled": 0, "by_category": {}, "by_type": {}}
+                }
+            
+            # PRIORITY 2: Only use constraint artifact if NO export file exists at all
+            # (This should rarely happen - export file should always exist if user exported)
+            if not rules and self.constraint_artifact_id:
+                try:
+                    cir = self.drc.get_cir_from_artifact(self.constraint_artifact_id)
+                    if cir:
+                        # Convert C-IR rules to display format
+                        for rule in cir.rules:
+                            rule_dict = {
+                                "name": rule.id,
+                                "type": rule.type.value,
+                                "enabled": rule.enabled,
+                                "priority": rule.priority
+                            }
+                            
+                            # Add type-specific parameters
+                            if rule.type == RuleType.CLEARANCE:
+                                rule_dict["clearance_mm"] = rule.params.min_clearance_mm
+                                rule_dict["category"] = "Electrical"
+                            elif rule.type == RuleType.TRACE_WIDTH:
+                                rule_dict["min_width_mm"] = rule.params.min_width_mm
+                                rule_dict["preferred_width_mm"] = rule.params.preferred_width_mm
+                                rule_dict["max_width_mm"] = rule.params.max_width_mm
+                                rule_dict["category"] = "Routing"
+                            elif rule.type == RuleType.VIA:
+                                rule_dict["min_hole_mm"] = rule.params.min_drill_mm
+                                rule_dict["max_hole_mm"] = rule.params.max_drill_mm
+                                rule_dict["category"] = "Routing"
+                            
+                            # Add scope information
+                            if rule.scope.netclass:
+                                rule_dict["scope_first"] = f"InNetClass('{rule.scope.netclass}')"
+                            elif rule.scope.nets:
+                                rule_dict["scope_first"] = f"InNet({', '.join(rule.scope.nets)})"
+                            else:
+                                rule_dict["scope_first"] = "All"
+                            
+                            rules.append(rule_dict)
+                except Exception as e:
+                    print(f"Error reading from constraint artifact: {e}")
+            
+            # If no rules found at all, return helpful error
+            if not rules:
+                return {
+                    "success": False,
+                    "error": "No rules found",
+                    "message": "No design rules found. Please export from Altium:\n1. In Altium: File → Run Script → command_server.pas\n2. Execute: ExportPCBInfo\n3. This exports ALL rules to altium_pcb_info.json",
+                    "rules": [],
+                    "rules_by_category": {},
+                    "statistics": {"total": 0, "enabled": 0, "by_category": {}, "by_type": {}}
+                }
+            
+            # Group rules by category
+            rules_by_category = {}
+            for rule in rules:
+                category = rule.get('category', 'Other')
+                if category not in rules_by_category:
+                    rules_by_category[category] = []
+                rules_by_category[category].append(rule)
+            
+            # Count rules by type
+            rule_stats = {
+                "total": len(rules),
+                "enabled": len([r for r in rules if r.get('enabled', True)]),
+                "by_category": {cat: len(rules) for cat, rules in rules_by_category.items()},
+                "by_type": {}
+            }
+            
+            for rule in rules:
+                rule_type = rule.get('type', 'other')
+                rule_stats["by_type"][rule_type] = rule_stats["by_type"].get(rule_type, 0) + 1
+            
+            return {
+                "success": True,
+                "rules": rules,
+                "rules_by_category": rules_by_category,
+                "statistics": rule_stats
+            }
+        except Exception as e:
+            return {"error": str(e)}
+    
     def generate_routing_suggestions(self, filter_type: str = None) -> dict:
         """
         Generate intelligent routing suggestions based on actual PCB analysis.
@@ -690,6 +944,122 @@ class AltiumMCPServer:
         except Exception as e:
             return {"error": str(e)}
     
+    def auto_generate_drc_rules(self, update_existing: bool = True) -> dict:
+        """
+        Automatically generate DRC rules from current PCB design
+        
+        Args:
+            update_existing: If True, merge with existing rules; if False, replace
+            
+        Returns:
+            Dictionary with generated rules information
+        """
+        if not self.current_artifact_id:
+            return {"error": "No PCB loaded"}
+        
+        try:
+            constraint_artifact = self.drc.auto_generate_rules(
+                self.current_artifact_id,
+                constraint_artifact_id=self.constraint_artifact_id if update_existing else None,
+                update_existing=update_existing
+            )
+            
+            if constraint_artifact:
+                # Update current constraint artifact ID
+                self.constraint_artifact_id = constraint_artifact.id
+                
+                # Get rule count
+                cir = self.drc.get_cir_from_artifact(constraint_artifact.id)
+                rule_count = len(cir.rules) if cir else 0
+                
+                return {
+                    "success": True,
+                    "constraint_artifact_id": constraint_artifact.id,
+                    "rule_count": rule_count,
+                    "message": f"Generated {rule_count} DRC rules automatically"
+                }
+            else:
+                return {"error": "Failed to generate rules"}
+        except Exception as e:
+            return {"error": str(e)}
+    
+    def get_drc_suggestions(self, violations_artifact_id: Optional[str] = None) -> dict:
+        """
+        Get automatic suggestions based on DRC violations
+        
+        Args:
+            violations_artifact_id: Optional violations artifact ID
+            
+        Returns:
+            Dictionary with suggestions
+        """
+        if not self.current_artifact_id:
+            return {"error": "No PCB loaded"}
+        
+        try:
+            suggestions = self.drc.get_suggestions(
+                violations_artifact_id=violations_artifact_id,
+                board_artifact_id=self.current_artifact_id,
+                constraint_artifact_id=self.constraint_artifact_id
+            )
+            
+            summary = self.drc.suggestion_updater.get_suggestion_summary(suggestions)
+            
+            return {
+                "success": True,
+                "suggestions": suggestions,
+                "summary": summary,
+                "count": len(suggestions)
+            }
+        except Exception as e:
+            return {"error": str(e)}
+    
+    def update_drc_suggestions(self) -> dict:
+        """
+        Check for updates to DRC suggestions
+        
+        Returns:
+            Dictionary with update information
+        """
+        try:
+            update_info = self.drc.update_suggestions()
+            return update_info
+        except Exception as e:
+            return {"error": str(e)}
+    
+    def learn_from_drc_violations(self, violations_artifact_id: str) -> dict:
+        """
+        Learn from DRC violations and automatically update rules
+        
+        Args:
+            violations_artifact_id: Violations artifact ID
+            
+        Returns:
+            Dictionary with updated rules information
+        """
+        if not self.constraint_artifact_id:
+            return {"error": "No constraint rules loaded"}
+        
+        try:
+            updated_constraint = self.drc.learn_from_violations(
+                violations_artifact_id,
+                self.constraint_artifact_id
+            )
+            
+            if updated_constraint:
+                # Update current constraint artifact ID
+                self.constraint_artifact_id = updated_constraint.id
+                
+                return {
+                    "success": True,
+                    "constraint_artifact_id": updated_constraint.id,
+                    "message": "Rules updated based on violations"
+                }
+            else:
+                return {"error": "Failed to update rules"}
+        except Exception as e:
+            return {"error": str(e)}
+    
     # ==================== ALTIUM SCRIPT CLIENT ====================
     # For applying changes to Altium via command_server.pas
     # Small commands (~100 bytes) - no memory issues
@@ -813,6 +1183,30 @@ class MCPRequestHandler(BaseHTTPRequestHandler):
         elif path == "/drc/run":
             self._send_json(mcp_server.run_drc())
         
+        elif path == "/drc/auto-generate-rules":
+            # Parse query parameters
+            update_existing = True
+            if "?" in path:
+                query_string = path.split("?")[1]
+                params = parse_qs(query_string)
+                update_existing = params.get("update_existing", ["true"])[0].lower() == "true"
+            self._send_json(mcp_server.auto_generate_drc_rules(update_existing=update_existing))
+        
+        elif path.startswith("/drc/suggestions"):
+            # Parse query parameters
+            violations_artifact_id = None
+            if "?" in path:
+                query_string = path.split("?")[1]
+                params = parse_qs(query_string)
+                violations_artifact_id = params.get("violations_artifact_id", [None])[0]
+            self._send_json(mcp_server.get_drc_suggestions(violations_artifact_id=violations_artifact_id))
+        
+        elif path == "/drc/update-suggestions":
+            self._send_json(mcp_server.update_drc_suggestions())
+        
+        elif path == "/drc/rules" or path == "/design-rules":
+            self._send_json(mcp_server.get_design_rules())
+        
         elif path == "/altium/status":
             self._send_json(mcp_server.get_altium_status())
         
@@ -826,6 +1220,9 @@ class MCPRequestHandler(BaseHTTPRequestHandler):
                 "/pcb/info - Get loaded PCB information",
                 "/routing/suggestions - Get routing suggestions",
                 "/drc/run - Run DRC check",
+                "/drc/auto-generate-rules - Automatically generate DRC rules",
+                "/drc/suggestions - Get DRC violation suggestions",
+                "/drc/update-suggestions - Check for suggestion updates",
                 "POST /pcb/load - Load .PcbDoc file",
                 "POST /routing/route - Create route",
                 "POST /routing/via - Place via",
@@ -889,6 +1286,14 @@ class MCPRequestHandler(BaseHTTPRequestHandler):
         elif path == "/altium/apply":
             action = data.get("action", "ping")
             result = mcp_server.apply_to_altium(action, **data)
+            self._send_json(result)
+        
+        elif path == "/drc/learn":
+            violations_artifact_id = data.get("violations_artifact_id")
+            if not violations_artifact_id:
+                self._send_json({"error": "Missing 'violations_artifact_id' parameter"}, 400)
+                return
+            result = mcp_server.learn_from_drc_violations(violations_artifact_id)
             self._send_json(result)
         
         else:

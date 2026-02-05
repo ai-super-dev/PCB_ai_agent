@@ -409,6 +409,10 @@ class AgentPage(ctk.CTkFrame):
         # Menu items
         menu_items = [
             ("Run DRC", "run_drc", "Run Design Rule Check in Altium"),
+            ("View Design Rules", "view_design_rules", "View all design rules from Altium"),
+            ("Auto-Generate DRC Rules", "auto_generate_rules", "Automatically generate DRC rules from PCB design"),
+            ("Get DRC Suggestions", "get_drc_suggestions", "Get automatic suggestions based on DRC violations"),
+            ("Update DRC Suggestions", "update_drc_suggestions", "Check for updated DRC suggestions"),
             ("Refresh Data", "refresh", "Reload PCB data (from .PcbDoc file or Altium export)"),
             ("Routing Suggestions", "routing", "Generate AI routing suggestions"),
             ("List Components", "list_components", "Show all components"),
@@ -493,6 +497,14 @@ class AgentPage(ctk.CTkFrame):
             self._check_altium_status()
         elif action == "view_drc_report":
             self._open_drc_report()
+        elif action == "auto_generate_rules":
+            self._auto_generate_drc_rules()
+        elif action == "get_drc_suggestions":
+            self._get_drc_suggestions()
+        elif action == "update_drc_suggestions":
+            self._update_drc_suggestions()
+        elif action == "view_design_rules":
+            self._view_design_rules()
     
     def _run_altium_drc(self):
         """Check for existing DRC report or provide simple instructions"""
@@ -1238,6 +1250,308 @@ Chat with me to:
         else:
             # Show message if report doesn't exist
             self.add_message("DRC report not found. Run DRC in Altium Designer first (Tools → Design Rule Check).", is_user=False)
+    
+    def _auto_generate_drc_rules(self):
+        """Automatically generate DRC rules from PCB design"""
+        self.add_message("Generating DRC rules automatically from PCB design...", is_user=False)
+        self.set_status("Generating Rules...", "warning")
+        
+        def generate_rules():
+            try:
+                result = self.mcp_client.session.get("http://localhost:8765/drc/auto-generate-rules?update_existing=true")
+                
+                if result.status_code == 200:
+                    data = result.json()
+                    if data.get("success"):
+                        rule_count = data.get("rule_count", 0)
+                        msg = f"✅ **DRC Rules Generated Successfully!**\n\n"
+                        msg += f"**Generated {rule_count} design rules** based on your PCB design:\n\n"
+                        msg += "• Rules are automatically created based on:\n"
+                        msg += "  - Net types (Power, Ground, High-Speed, etc.)\n"
+                        msg += "  - Board size and complexity\n"
+                        msg += "  - Component density\n"
+                        msg += "  - Layer count\n\n"
+                        msg += "**Next steps:**\n"
+                        msg += "1. Run DRC to check for violations\n"
+                        msg += "2. Get suggestions to see recommendations\n"
+                        msg += "3. Rules will be used automatically in future DRC checks\n"
+                        
+                        self._safe_after(0, lambda: self.add_message(msg, is_user=False))
+                        self._safe_after(0, lambda: self.set_status("Rules Generated", "success"))
+                    else:
+                        error_msg = data.get("error", "Unknown error")
+                        self._safe_after(0, lambda: self.add_message(
+                            f"❌ Error generating rules: {error_msg}\n\n"
+                            "Make sure a PCB is loaded first (use Refresh Data).",
+                            is_user=False
+                        ))
+                        self._safe_after(0, lambda: self.set_status("Error", "error"))
+                else:
+                    self._safe_after(0, lambda: self.add_message(
+                        "❌ Failed to connect to MCP server. Make sure mcp_server.py is running.",
+                        is_user=False
+                    ))
+                    self._safe_after(0, lambda: self.set_status("Connection Error", "error"))
+            except Exception as e:
+                self._safe_after(0, lambda: self.add_message(
+                    f"❌ Error: {str(e)}",
+                    is_user=False
+                ))
+                self._safe_after(0, lambda: self.set_status("Error", "error"))
+        
+        threading.Thread(target=generate_rules, daemon=True).start()
+    
+    def _get_drc_suggestions(self):
+        """Get automatic suggestions based on DRC violations"""
+        self.add_message("Getting DRC suggestions...", is_user=False)
+        self.set_status("Analyzing...", "warning")
+        
+        def get_suggestions():
+            try:
+                result = self.mcp_client.session.get("http://localhost:8765/drc/suggestions")
+                
+                if result.status_code == 200:
+                    data = result.json()
+                    if data.get("success"):
+                        suggestions = data.get("suggestions", [])
+                        summary = data.get("summary", {})
+                        
+                        if suggestions:
+                            msg = f"📋 **DRC Suggestions** ({len(suggestions)} total)\n\n"
+                            
+                            # Group by priority
+                            by_priority = {}
+                            for s in suggestions:
+                                priority = s.get("priority", "medium")
+                                if priority not in by_priority:
+                                    by_priority[priority] = []
+                                by_priority[priority].append(s)
+                            
+                            # Show critical and high priority first
+                            for priority in ["critical", "high", "medium", "low"]:
+                                if priority in by_priority:
+                                    priority_label = priority.upper()
+                                    msg += f"**{priority_label} Priority:**\n"
+                                    for s in by_priority[priority][:5]:  # Show first 5 of each
+                                        msg += f"• {s.get('message', 'No message')}\n"
+                                        if s.get("action"):
+                                            msg += f"  → Action: {s.get('action')}\n"
+                                        if s.get("fixes"):
+                                            msg += f"  → Fixes: {', '.join(s.get('fixes', []))}\n"
+                                        msg += "\n"
+                            
+                            if len(suggestions) > 10:
+                                msg += f"\n... and {len(suggestions) - 10} more suggestions. "
+                                msg += "Run DRC and check suggestions again for details.\n"
+                            
+                            self._safe_after(0, lambda m=msg: self.add_message(m, is_user=False))
+                            self._safe_after(0, lambda: self.set_status("Suggestions Ready", "success"))
+                        else:
+                            self._safe_after(0, lambda: self.add_message(
+                                "✅ No DRC violations found! Your design passes all checks.",
+                                is_user=False
+                            ))
+                            self._safe_after(0, lambda: self.set_status("No Issues", "success"))
+                    else:
+                        error_msg = data.get("error", "Unknown error")
+                        self._safe_after(0, lambda: self.add_message(
+                            f"❌ Error getting suggestions: {error_msg}\n\n"
+                            "Make sure you've run DRC first.",
+                            is_user=False
+                        ))
+                        self._safe_after(0, lambda: self.set_status("Error", "error"))
+                else:
+                    self._safe_after(0, lambda: self.add_message(
+                        "❌ Failed to connect to MCP server.",
+                        is_user=False
+                    ))
+                    self._safe_after(0, lambda: self.set_status("Connection Error", "error"))
+            except Exception as e:
+                self._safe_after(0, lambda: self.add_message(
+                    f"❌ Error: {str(e)}",
+                    is_user=False
+                ))
+                self._safe_after(0, lambda: self.set_status("Error", "error"))
+        
+        threading.Thread(target=get_suggestions, daemon=True).start()
+    
+    def _update_drc_suggestions(self):
+        """Check for updates to DRC suggestions"""
+        self.add_message("Checking for suggestion updates...", is_user=False)
+        self.set_status("Checking...", "warning")
+        
+        def check_updates():
+            try:
+                result = self.mcp_client.session.get("http://localhost:8765/drc/update-suggestions")
+                
+                if result.status_code == 200:
+                    data = result.json()
+                    if data.get("updated"):
+                        msg = f"📊 **Suggestion Update**\n\n"
+                        msg += f"{data.get('message', 'Suggestions updated')}\n\n"
+                        msg += f"• Previous violations: {data.get('old_count', 0)}\n"
+                        msg += f"• Current violations: {data.get('new_count', 0)}\n"
+                        msg += f"• Fixed: {data.get('fixed_count', 0)}\n"
+                        msg += f"• New issues: {data.get('new_issues_count', 0)}\n\n"
+                        
+                        if data.get("improvement"):
+                            msg += "✅ Design is improving!\n"
+                        else:
+                            msg += "⚠️ Some new issues found.\n"
+                        
+                        msg += "\nUse 'Get DRC Suggestions' to see detailed recommendations."
+                        
+                        self._safe_after(0, lambda m=msg: self.add_message(m, is_user=False))
+                        self._safe_after(0, lambda: self.set_status("Updated", "success"))
+                    else:
+                        self._safe_after(0, lambda: self.add_message(
+                            data.get("message", "No updates available."),
+                            is_user=False
+                        ))
+                        self._safe_after(0, lambda: self.set_status("No Updates", "info"))
+                else:
+                    self._safe_after(0, lambda: self.add_message(
+                        "❌ Failed to connect to MCP server.",
+                        is_user=False
+                    ))
+                    self._safe_after(0, lambda: self.set_status("Connection Error", "error"))
+            except Exception as e:
+                self._safe_after(0, lambda: self.add_message(
+                    f"❌ Error: {str(e)}",
+                    is_user=False
+                ))
+                self._safe_after(0, lambda: self.set_status("Error", "error"))
+        
+        threading.Thread(target=check_updates, daemon=True).start()
+    
+    def _view_design_rules(self):
+        """View all design rules from Altium"""
+        self.add_message("Loading design rules from Altium...", is_user=False)
+        self.set_status("Loading Rules...", "warning")
+        
+        def load_rules():
+            try:
+                result = self.mcp_client.session.get("http://localhost:8765/drc/rules")
+                
+                if result.status_code == 200:
+                    data = result.json()
+                    if data.get("success"):
+                        rules = data.get("rules", [])
+                        stats = data.get("statistics", {})
+                        rules_by_category = data.get("rules_by_category", {})
+                        
+                        if rules:
+                            msg = f"📋 **Design Rules from Altium**\n\n"
+                            msg += f"**Total Rules:** {stats.get('total', 0)} "
+                            msg += f"(Enabled: {stats.get('enabled', 0)})\n\n"
+                            
+                            # Display rules grouped by category
+                            for category in ["Electrical", "Routing", "Placement", "Mask", "Plane", "Other"]:
+                                if category in rules_by_category:
+                                    msg += f"**{category} Rules:**\n"
+                                    for rule in rules_by_category[category]:
+                                        name = rule.get('name', 'Unnamed')
+                                        rule_type = rule.get('type', 'unknown')
+                                        enabled = "✅" if rule.get('enabled', True) else "❌"
+                                        
+                                        msg += f"{enabled} **{name}** ({rule_type})\n"
+                                        
+                                        # Show rule-specific parameters
+                                        if rule_type == "clearance":
+                                            clearance = rule.get('clearance_mm', 0)
+                                            msg += f"   • Minimum Clearance: {clearance:.3f}mm\n"
+                                            if rule.get('scope_first'):
+                                                msg += f"   • Scope: {rule.get('scope_first')}\n"
+                                        elif rule_type == "width":
+                                            min_w = rule.get('min_width_mm', 0)
+                                            pref_w = rule.get('preferred_width_mm', 0)
+                                            max_w = rule.get('max_width_mm', 0)
+                                            msg += f"   • Min: {min_w:.3f}mm, Preferred: {pref_w:.3f}mm"
+                                            if max_w > 0:
+                                                msg += f", Max: {max_w:.3f}mm"
+                                            msg += "\n"
+                                            if rule.get('scope_first'):
+                                                msg += f"   • Scope: {rule.get('scope_first')}\n"
+                                        elif rule_type == "via":
+                                            min_hole = rule.get('min_hole_mm', 0)
+                                            max_hole = rule.get('max_hole_mm', 0)
+                                            min_dia = rule.get('min_diameter_mm', 0)
+                                            msg += f"   • Hole: {min_hole:.3f}mm"
+                                            if max_hole > 0:
+                                                msg += f" - {max_hole:.3f}mm"
+                                            if min_dia > 0:
+                                                msg += f", Diameter: {min_dia:.3f}mm"
+                                            msg += "\n"
+                                        
+                                        priority = rule.get('priority', 0)
+                                        if priority > 0:
+                                            msg += f"   • Priority: {priority}\n"
+                                        
+                                        msg += "\n"
+                                    msg += "\n"
+                            
+                            msg += "\n**Note:** These are the actual rules from your Altium PCB file.\n"
+                            msg += "You can update rules via chat, e.g., 'Make clearance between +5V and +21V nets 0.508mm'"
+                            
+                            self._safe_after(0, lambda m=msg: self.add_message(m, is_user=False))
+                            self._safe_after(0, lambda: self.set_status("Rules Loaded", "success"))
+                    elif not data.get("success"):
+                        # Check if it's an error about missing export file
+                        error_msg = data.get("error", "").lower()
+                        message = data.get("message", "")
+                        
+                        if "export" in error_msg or "export" in message.lower():
+                            self._safe_after(0, lambda: self.add_message(
+                                "⚠️ **No Altium Export File Found**\n\n"
+                                "**To get all design rules from Altium:**\n\n"
+                                "1. **In Altium Designer:**\n"
+                                "   - Open your PCB file\n"
+                                "   - Run Script: `command_server.pas`\n"
+                                "   - Execute: `ExportPCBInfo` procedure\n"
+                                "   - This exports ALL rules to `altium_pcb_info.json`\n\n"
+                                "2. **Then refresh:**\n"
+                                "   - Click 'Refresh Data' in the menu\n"
+                                "   - Or click 'View Design Rules' again\n\n"
+                                "**Note:** The export includes ALL rules:\n"
+                                "• Clearance rules (Clearance_1, LBBZHUANYONG, etc.)\n"
+                                "• Routing rules (width, via)\n"
+                                "• SMT rules\n"
+                                "• Mask rules (PasteMaskExpansion, etc.)\n"
+                                "• Plane rules\n"
+                                "• And all other rule types",
+                                is_user=False
+                            ))
+                        else:
+                            self._safe_after(0, lambda: self.add_message(
+                                "⚠️ No design rules found in PCB.\n\n"
+                                "**To get rules:**\n"
+                                "1. Export PCB info from Altium (run ExportPCBInfo in command_server.pas)\n"
+                                "2. Then click 'Refresh Data' to reload",
+                                is_user=False
+                            ))
+                        self._safe_after(0, lambda: self.set_status("No Rules", "warning"))
+                    else:
+                        error_msg = data.get("error", "Unknown error")
+                        self._safe_after(0, lambda: self.add_message(
+                            f"❌ Error loading rules: {error_msg}\n\n"
+                            "Make sure a PCB is loaded first (use Refresh Data).",
+                            is_user=False
+                        ))
+                        self._safe_after(0, lambda: self.set_status("Error", "error"))
+                else:
+                    self._safe_after(0, lambda: self.add_message(
+                        "❌ Failed to connect to MCP server.",
+                        is_user=False
+                    ))
+                    self._safe_after(0, lambda: self.set_status("Connection Error", "error"))
+            except Exception as e:
+                self._safe_after(0, lambda: self.add_message(
+                    f"❌ Error: {str(e)}",
+                    is_user=False
+                ))
+                self._safe_after(0, lambda: self.set_status("Error", "error"))
+        
+        threading.Thread(target=load_rules, daemon=True).start()
     
     def _show_confirmation_modal(self, message: str):
         """Show confirmation modal dialog"""

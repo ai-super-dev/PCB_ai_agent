@@ -12,6 +12,8 @@ from core.ir.cir import ConstraintIR
 import json
 import subprocess
 from pathlib import Path
+from .auto_rule_generator import AutoDRCRuleGenerator
+from .auto_suggestion_updater import AutoSuggestionUpdater
 
 
 class DRCModule:
@@ -29,6 +31,9 @@ class DRCModule:
             artifact_store: Artifact store instance (creates new if None)
         """
         self.store = artifact_store or ArtifactStore()
+        self.auto_rule_generator = AutoDRCRuleGenerator()
+        self.suggestion_updater = AutoSuggestionUpdater()
+        self.last_violations = []  # Track last violations for auto-update
     
     def get_board_artifact(self, artifact_id: str) -> Optional[Artifact]:
         """Get board artifact from store"""
@@ -129,6 +134,9 @@ class DRCModule:
         
         # Store violations artifact
         stored = self.store.create(violations_artifact)
+        
+        # Update last violations for auto-suggestion updates
+        self.last_violations = violations
         
         return stored
     
@@ -389,3 +397,125 @@ class DRCModule:
             return []
         
         return artifact.data.get("violations", [])
+    
+    def auto_generate_rules(self, board_artifact_id: str, 
+                          constraint_artifact_id: Optional[str] = None,
+                          update_existing: bool = True) -> Optional[Artifact]:
+        """
+        Automatically generate DRC rules from PCB design
+        
+        Args:
+            board_artifact_id: Board artifact ID
+            constraint_artifact_id: Optional existing constraint artifact ID to merge with
+            update_existing: If True, merge with existing rules; if False, replace
+            
+        Returns:
+            Constraint artifact with generated rules or None if fails
+        """
+        gir = self.get_gir_from_artifact(board_artifact_id)
+        if not gir:
+            print("Error: Could not get G-IR from board artifact")
+            return None
+        
+        # Get existing rules if updating
+        existing_rules = None
+        if update_existing and constraint_artifact_id:
+            existing_rules = self.get_cir_from_artifact(constraint_artifact_id)
+        
+        # Generate rules
+        new_rules = self.auto_rule_generator.generate_rules_from_pcb(gir, existing_rules)
+        
+        # Create constraint artifact
+        from adapters.altium.importer import AltiumImporter
+        importer = AltiumImporter()
+        constraint = importer.create_constraint_ruleset_artifact(new_rules, "auto-generated")
+        constraint = self.store.create(constraint)
+        
+        return constraint
+    
+    def get_suggestions(self, violations_artifact_id: Optional[str] = None,
+                       violations: Optional[List[Dict[str, Any]]] = None) -> List[Dict[str, Any]]:
+        """
+        Get automatic suggestions based on DRC violations
+        
+        Args:
+            violations_artifact_id: Optional violations artifact ID
+            violations: Optional list of violations (if not using artifact)
+            
+        Returns:
+            List of suggestion dictionaries
+        """
+        # Get violations
+        if violations is None:
+            if violations_artifact_id:
+                violations = self.get_violations(violations_artifact_id)
+            else:
+                violations = self.last_violations
+        
+        # Get G-IR and C-IR for context
+        gir = None
+        rules = None
+        if self.current_artifact_id:
+            gir = self.get_gir_from_artifact(self.current_artifact_id)
+        if self.constraint_artifact_id:
+            rules = self.get_cir_from_artifact(self.constraint_artifact_id)
+        
+        # Generate suggestions
+        suggestions = self.suggestion_updater.generate_suggestions(violations, gir, rules)
+        
+        return suggestions
+    
+    def update_suggestions(self) -> Dict[str, Any]:
+        """
+        Check for updates to suggestions based on new violations
+        
+        Returns:
+            Dictionary with update information
+        """
+        current_violations = self.last_violations
+        if not current_violations:
+            return {
+                "updated": False,
+                "message": "No violations to compare"
+            }
+        
+        # Compare with previous violations
+        update_info = self.suggestion_updater.update_suggestions(
+            self.last_violations,
+            current_violations
+        )
+        
+        return update_info
+    
+    def learn_from_violations(self, violations_artifact_id: str) -> Optional[Artifact]:
+        """
+        Learn from violations and update rules automatically
+        
+        Args:
+            violations_artifact_id: Violations artifact ID
+            
+        Returns:
+            Updated constraint artifact or None
+        """
+        violations = self.get_violations(violations_artifact_id)
+        if not violations:
+            return None
+        
+        # Get current rules
+        if not self.constraint_artifact_id:
+            return None
+        
+        rules = self.get_cir_from_artifact(self.constraint_artifact_id)
+        if not rules:
+            return None
+        
+        # Update rules based on violations
+        updated_rules = self.auto_rule_generator.update_rules_from_violations(rules, violations)
+        
+        # Create updated constraint artifact
+        from adapters.altium.importer import AltiumImporter
+        importer = AltiumImporter()
+        constraint = importer.create_constraint_ruleset_artifact(updated_rules, "learned-from-violations")
+        constraint = self.store.create(constraint)
+        
+        return constraint
