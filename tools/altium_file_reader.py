@@ -214,11 +214,27 @@ class AltiumFileReader:
         return pairs
     
     def _convert_coord(self, value_str: str) -> float:
-        """Convert Altium coordinate string to mm."""
+        """Convert Altium coordinate string to mm (handles mil, mm, or internal units)."""
         try:
-            # Altium stores coordinates in internal units (0.01 mil = 0.254 um)
-            value = int(value_str)
-            return round(value * self.UNITS_TO_MM, 4)
+            value_str = str(value_str).strip()
+            if not value_str or value_str == '0':
+                return 0.0
+            
+            # Handle units: mil, mm, or internal units
+            if value_str.endswith('mil'):
+                # Value in mils (1 mil = 0.0254 mm)
+                return round(float(value_str.replace('mil', '')) * 0.0254, 4)
+            elif value_str.endswith('mm'):
+                return round(float(value_str.replace('mm', '')), 4)
+            else:
+                # Try as internal units or raw number
+                value = float(value_str)
+                # If it's a very large number, it's probably internal units
+                if abs(value) > 100000:
+                    return round(value * self.UNITS_TO_MM, 4)
+                else:
+                    # Assume mils for reasonable-sized numbers (common in rules)
+                    return round(value * 0.0254, 4)
         except:
             return 0.0
     
@@ -591,12 +607,42 @@ class AltiumFileReader:
         rules = []
         try:
             text = data.decode('latin-1', errors='ignore')
-            records = text.split('|RECORD=')
             
-            for record in records[1:]:
-                pairs = self._parse_key_value_pairs('|RECORD=' + record)
+            # Rules are separated by |NAME= markers (each rule has a NAME field)
+            # Split by |NAME= to find rule boundaries
+            # But we need to be careful - some fields might contain |NAME= in their values
+            # Better approach: find all |NAME= occurrences and extract the rule name, then parse backwards/forwards
+            
+            # Alternative: Look for |RULEKIND= as rule markers (each rule has one)
+            # Records appear to be separated by binary length prefixes, but we can find them by |RULEKIND=
+            
+            # Split by |RULEKIND= to find rule boundaries
+            parts = text.split('|RULEKIND=')
+            
+            for i, part in enumerate(parts[1:], 1):  # Skip first empty part
+                # This part contains a rule - parse it
+                # The rule kind is the first value after |RULEKIND=
+                rule_kind_end = part.find('|')
+                if rule_kind_end == -1:
+                    rule_kind = part.strip()
+                else:
+                    rule_kind = part[:rule_kind_end].strip()
                 
-                rule_kind = pairs.get('RULEKIND', '')
+                # Limit this record to avoid including the next rule
+                # Find the next |RULEKIND= marker (if this isn't the last part)
+                if i < len(parts) - 1:
+                    # There's a next rule - limit to reasonable length or next marker
+                    # But we already split, so just take up to a reasonable max length
+                    # (records are typically < 2000 chars)
+                    record_text = part[:5000]  # Limit to 5000 chars per record
+                else:
+                    record_text = part
+                
+                # Now parse all key-value pairs in this record
+                # Add back the RULEKIND= prefix for parsing
+                full_record = '|RULEKIND=' + record_text
+                pairs = self._parse_key_value_pairs(full_record)
+                
                 rule_name = pairs.get('NAME', '')
                 
                 if not rule_name:
@@ -612,17 +658,30 @@ class AltiumFileReader:
                 
                 # Extract specific rule values based on kind
                 if 'CLEARANCE' in rule_kind.upper():
-                    rule["clearance_mm"] = self._convert_coord(pairs.get('GAP', '0'))
+                    # Try multiple possible keys for clearance value (GENERICCLEARANCE is the main one)
+                    gap_value = pairs.get('GENERICCLEARANCE', '0') or pairs.get('GAP', '0') or pairs.get('MINIMUMGAP', '0') or pairs.get('CLEARANCE', '0')
+                    rule["clearance_mm"] = self._convert_coord(gap_value)
                     rule["type"] = "clearance"
-                elif 'WIDTH' in rule_kind.upper():
-                    rule["min_width_mm"] = self._convert_coord(pairs.get('MINWIDTH', '0'))
-                    rule["max_width_mm"] = self._convert_coord(pairs.get('MAXWIDTH', '0'))
-                    rule["preferred_width_mm"] = self._convert_coord(pairs.get('PREFEREDWIDTH', '0'))
+                elif 'WIDTH' in rule_kind.upper() or 'ROUTING' in rule_kind.upper():
+                    rule["min_width_mm"] = self._convert_coord(pairs.get('MINWIDTH', '0') or pairs.get('MINIMUMWIDTH', '0'))
+                    rule["max_width_mm"] = self._convert_coord(pairs.get('MAXWIDTH', '0') or pairs.get('MAXIMUMWIDTH', '0'))
+                    rule["preferred_width_mm"] = self._convert_coord(pairs.get('PREFEREDWIDTH', '0') or pairs.get('PREFERREDWIDTH', '0'))
                     rule["type"] = "width"
                 elif 'VIA' in rule_kind.upper():
-                    rule["min_hole_mm"] = self._convert_coord(pairs.get('MINHOLE', '0'))
-                    rule["max_hole_mm"] = self._convert_coord(pairs.get('MAXHOLE', '0'))
+                    rule["min_hole_mm"] = self._convert_coord(pairs.get('MINHOLE', '0') or pairs.get('MINIMUMHOLE', '0'))
+                    rule["max_hole_mm"] = self._convert_coord(pairs.get('MAXHOLE', '0') or pairs.get('MAXIMUMHOLE', '0'))
+                    rule["min_diameter_mm"] = self._convert_coord(pairs.get('MINDIAMETER', '0') or pairs.get('MINIMUMDIAMETER', '0'))
+                    rule["max_diameter_mm"] = self._convert_coord(pairs.get('MAXDIAMETER', '0') or pairs.get('MAXIMUMDIAMETER', '0'))
                     rule["type"] = "via"
+                elif 'SHORT' in rule_kind.upper() or 'SHORTCIRCUIT' in rule_kind.upper():
+                    rule["allowed"] = pairs.get('ALLOWED', 'FALSE') == 'TRUE'
+                    rule["type"] = "short_circuit"
+                elif 'MASK' in rule_kind.upper():
+                    rule["expansion_mm"] = self._convert_coord(pairs.get('EXPANSION', '0') or pairs.get('EXPANSIONTOP', '0'))
+                    if 'PASTE' in rule_kind.upper():
+                        rule["type"] = "paste_mask"
+                    else:
+                        rule["type"] = "solder_mask"
                 else:
                     rule["type"] = "other"
                 
@@ -630,6 +689,8 @@ class AltiumFileReader:
                     
         except Exception as e:
             print(f"Error in _parse_rules_records: {e}")
+            import traceback
+            traceback.print_exc()
             
         return rules
     

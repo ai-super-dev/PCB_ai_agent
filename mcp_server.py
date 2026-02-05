@@ -537,12 +537,15 @@ class AltiumMCPServer:
                                             rule_name = rule.get('name', '').upper()
                                             if rule_name in file_reader_lookup:
                                                 file_rule = file_reader_lookup[rule_name]
+                                                
                                                 # Update clearance value if it's 0.0
-                                                if rule.get('type') == 'clearance' and rule.get('clearance_mm', 0) == 0.0:
-                                                    new_value = file_rule.get('clearance_mm', 0.0)
-                                                    if new_value > 0:
-                                                        rule['clearance_mm'] = new_value
-                                                        merged_count += 1
+                                                if rule.get('type') == 'clearance':
+                                                    if rule.get('clearance_mm', 0) == 0.0:
+                                                        new_value = file_rule.get('clearance_mm', 0.0)
+                                                        if new_value > 0:
+                                                            rule['clearance_mm'] = new_value
+                                                            merged_count += 1
+                                                
                                                 # Update width values if they're 0.0
                                                 elif rule.get('type') == 'width':
                                                     if rule.get('min_width_mm', 0) == 0.0:
@@ -558,6 +561,7 @@ class AltiumMCPServer:
                                                         new_val = file_rule.get('max_width_mm', 0.0)
                                                         if new_val > 0:
                                                             rule['max_width_mm'] = new_val
+                                                
                                                 # Update via values
                                                 elif rule.get('type') == 'via':
                                                     if rule.get('min_hole_mm', 0) == 0.0:
@@ -569,9 +573,41 @@ class AltiumMCPServer:
                                                         new_val = file_rule.get('max_hole_mm', 0.0)
                                                         if new_val > 0:
                                                             rule['max_hole_mm'] = new_val
+                                                    if rule.get('min_diameter_mm', 0) == 0.0:
+                                                        new_val = file_rule.get('min_diameter_mm', 0.0)
+                                                        if new_val > 0:
+                                                            rule['min_diameter_mm'] = new_val
+                                                    if rule.get('max_diameter_mm', 0) == 0.0:
+                                                        new_val = file_rule.get('max_diameter_mm', 0.0)
+                                                        if new_val > 0:
+                                                            rule['max_diameter_mm'] = new_val
+                                                
+                                                # Update short circuit allowed status
+                                                elif rule.get('type') == 'short_circuit':
+                                                    if 'allowed' not in rule or rule.get('allowed') is None:
+                                                        rule['allowed'] = file_rule.get('allowed', False)
+                                                        merged_count += 1
+                                                
+                                                # Update mask expansion
+                                                elif rule.get('type') in ['solder_mask', 'paste_mask']:
+                                                    if rule.get('expansion_mm', 0) == 0.0:
+                                                        new_val = file_rule.get('expansion_mm', 0.0)
+                                                        if new_val > 0:
+                                                            rule['expansion_mm'] = new_val
+                                                            merged_count += 1
+                                                
+                                                # Update component clearance
+                                                elif rule.get('type') == 'component_clearance':
+                                                    if rule.get('clearance_mm', 0) == 0.0:
+                                                        new_value = file_rule.get('clearance_mm', 0.0)
+                                                        if new_value > 0:
+                                                            rule['clearance_mm'] = new_value
+                                                            merged_count += 1
                                         
                                         if merged_count > 0:
                                             print(f"Merged {merged_count} rule values from PCB file reader")
+                                        else:
+                                            print(f"Warning: Found {len(file_reader_rules)} rules in PCB file but could not merge values (names may not match)")
                                 except Exception as e:
                                     print(f"Could not merge rule values from PCB file: {e}")
                                     # Continue with exported rules even if merge fails
