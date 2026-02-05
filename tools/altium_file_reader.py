@@ -220,15 +220,28 @@ class AltiumFileReader:
             if not value_str or value_str == '0':
                 return 0.0
             
+            # Remove any non-printable characters (binary data that sometimes follows values)
+            # Keep only printable ASCII characters
+            import string
+            value_str = ''.join(c for c in value_str if c in string.printable).strip()
+            
             # Handle units: mil, mm, or internal units
-            if value_str.endswith('mil'):
-                # Value in mils (1 mil = 0.0254 mm)
-                return round(float(value_str.replace('mil', '')) * 0.0254, 4)
-            elif value_str.endswith('mm'):
-                return round(float(value_str.replace('mm', '')), 4)
-            else:
-                # Try as internal units or raw number
-                value = float(value_str)
+            if 'mil' in value_str.lower():
+                # Extract number before 'mil' (handles "33mil" or "33mil" + binary)
+                mil_match = re.search(r'([0-9.]+)\s*mil', value_str, re.IGNORECASE)
+                if mil_match:
+                    return round(float(mil_match.group(1)) * 0.0254, 4)
+            elif 'mm' in value_str.lower():
+                # Extract number before 'mm'
+                mm_match = re.search(r'([0-9.]+)\s*mm', value_str, re.IGNORECASE)
+                if mm_match:
+                    return round(float(mm_match.group(1)), 4)
+            
+            # Try as internal units or raw number
+            # Remove any non-numeric characters except decimal point and minus sign
+            numeric_str = re.sub(r'[^0-9.\-]', '', value_str)
+            if numeric_str:
+                value = float(numeric_str)
                 # If it's a very large number, it's probably internal units
                 if abs(value) > 100000:
                     return round(value * self.UNITS_TO_MM, 4)
@@ -657,31 +670,122 @@ class AltiumFileReader:
                 }
                 
                 # Extract specific rule values based on kind
-                if 'CLEARANCE' in rule_kind.upper():
-                    # Try multiple possible keys for clearance value (GENERICCLEARANCE is the main one)
+                # Check specific rule kinds first (more specific before general)
+                rule_kind_upper = rule_kind.upper()
+                
+                # Check for PLANE rules BEFORE general CLEARANCE (PlaneClearance is a specific type)
+                if 'PLANE' in rule_kind_upper and 'CLEARANCE' in rule_kind_upper:
+                    # Plane Clearance rules - uses CLEARANCE key (not GENERICCLEARANCE)
+                    clearance_value = pairs.get('CLEARANCE', '0') or pairs.get('GAP', '0')
+                    rule["clearance_mm"] = self._convert_coord(clearance_value)
+                    rule["type"] = "plane_clearance"
+                elif 'CLEARANCE' in rule_kind_upper:
+                    # General Clearance rules
                     gap_value = pairs.get('GENERICCLEARANCE', '0') or pairs.get('GAP', '0') or pairs.get('MINIMUMGAP', '0') or pairs.get('CLEARANCE', '0')
                     rule["clearance_mm"] = self._convert_coord(gap_value)
                     rule["type"] = "clearance"
-                elif 'WIDTH' in rule_kind.upper() or 'ROUTING' in rule_kind.upper():
-                    rule["min_width_mm"] = self._convert_coord(pairs.get('MINWIDTH', '0') or pairs.get('MINIMUMWIDTH', '0'))
-                    rule["max_width_mm"] = self._convert_coord(pairs.get('MAXWIDTH', '0') or pairs.get('MAXIMUMWIDTH', '0'))
+                elif 'ROUTINGVIAS' in rule_kind_upper or 'VIASTYLE' in rule_kind_upper:
+                    # Routing Via Style rules - Altium uses HOLEWIDTH, WIDTH, MINHOLEWIDTH, MINWIDTH, MAXHOLEWIDTH, MAXWIDTH
+                    rule["min_hole_mm"] = self._convert_coord(pairs.get('MINHOLEWIDTH', '0') or pairs.get('MINHOLE', '0'))
+                    rule["max_hole_mm"] = self._convert_coord(pairs.get('MAXHOLEWIDTH', '0') or pairs.get('MAXHOLE', '0'))
+                    rule["preferred_hole_mm"] = self._convert_coord(pairs.get('HOLEWIDTH', '0') or pairs.get('PREFEREDHOLE', '0'))
+                    rule["min_diameter_mm"] = self._convert_coord(pairs.get('MINWIDTH', '0') or pairs.get('MINDIAMETER', '0'))
+                    rule["max_diameter_mm"] = self._convert_coord(pairs.get('MAXWIDTH', '0') or pairs.get('MAXDIAMETER', '0'))
+                    rule["preferred_diameter_mm"] = self._convert_coord(pairs.get('WIDTH', '0') or pairs.get('PREFERREDDIAMETER', '0'))
+                    rule["via_style"] = pairs.get('VIASTYLE', '')
+                    rule["type"] = "via"
+                elif 'ROUTINGCORNERS' in rule_kind_upper:
+                    # Routing Corners rules - Altium uses CORNERSTYLE, MINSETBACK, MAXSETBACK
+                    rule["corner_style"] = pairs.get('CORNERSTYLE', '') or pairs.get('STYLE', '')
+                    rule["setback_mm"] = self._convert_coord(pairs.get('MINSETBACK', '0') or pairs.get('SETBACK', '0'))
+                    rule["setback_to_mm"] = self._convert_coord(pairs.get('MAXSETBACK', '0') or pairs.get('SETBACKTO', '0'))
+                    rule["type"] = "routing_corners"
+                elif 'ROUTINGTOPOLOGY' in rule_kind_upper:
+                    # Routing Topology rules
+                    topology = pairs.get('TOPOLOGY', '') or pairs.get('TOPOLOGYTYPE', '')
+                    # Clean topology string (remove binary characters)
+                    if topology:
+                        topology = re.sub(r'[\x00-\x1F\x7F-\xFF]', '', topology).strip()
+                    rule["topology"] = topology
+                    rule["type"] = "routing_topology"
+                elif 'ROUTINGPRIORITY' in rule_kind_upper:
+                    # Routing Priority rules
+                    rule["priority_value"] = int(pairs.get('PRIORITYVALUE', '0') or pairs.get('PRIORITY', '0'))
+                    rule["type"] = "routing_priority"
+                elif 'ROUTINGLAYERS' in rule_kind_upper:
+                    # Routing Layers rules
+                    rule["type"] = "routing_layers"
+                elif 'DIFFPAIRS' in rule_kind_upper or 'DIFFERENTIAL' in rule_kind_upper:
+                    # Differential Pairs Routing rules
+                    # Use TOPLAYER values as primary (most common)
+                    rule["min_width_mm"] = self._convert_coord(pairs.get('TOPLAYER_MINWIDTH', '0') or pairs.get('MINLIMIT', '0') or pairs.get('MINWIDTH', '0'))
+                    rule["max_width_mm"] = self._convert_coord(pairs.get('TOPLAYER_MAXWIDTH', '0') or pairs.get('MAXLIMIT', '0') or pairs.get('MAXWIDTH', '0'))
+                    rule["preferred_width_mm"] = self._convert_coord(pairs.get('TOPLAYER_PREFWIDTH', '0') or pairs.get('PREFERREDWIDTH', '0'))
+                    # Gap values - MINLIMIT and MAXLIMIT are often used for gap, MOSTFREQGAP is preferred gap
+                    rule["min_gap_mm"] = self._convert_coord(pairs.get('MINGAP', '0') or pairs.get('MINLIMIT', '0'))
+                    rule["max_gap_mm"] = self._convert_coord(pairs.get('MAXGAP', '0') or pairs.get('MAXLIMIT', '0'))
+                    rule["preferred_gap_mm"] = self._convert_coord(pairs.get('MOSTFREQGAP', '0') or pairs.get('PREFERREDGAP', '0'))
+                    # Max uncoupled length
+                    rule["max_uncoupled_length_mm"] = self._convert_coord(pairs.get('MAXUNCOUPLEDLENGTH', '0') or pairs.get('MAXLENGTH', '0'))
+                    rule["type"] = "diff_pairs_routing"
+                elif 'WIDTH' in rule_kind_upper:
+                    # Width rules - Altium uses MINLIMIT, MAXLIMIT, PREFEREDWIDTH
+                    rule["min_width_mm"] = self._convert_coord(pairs.get('MINLIMIT', '0') or pairs.get('MINWIDTH', '0') or pairs.get('MINIMUMWIDTH', '0'))
+                    rule["max_width_mm"] = self._convert_coord(pairs.get('MAXLIMIT', '0') or pairs.get('MAXWIDTH', '0') or pairs.get('MAXIMUMWIDTH', '0'))
                     rule["preferred_width_mm"] = self._convert_coord(pairs.get('PREFEREDWIDTH', '0') or pairs.get('PREFERREDWIDTH', '0'))
                     rule["type"] = "width"
-                elif 'VIA' in rule_kind.upper():
+                elif 'VIA' in rule_kind_upper and 'ROUTING' not in rule_kind_upper:
+                    # Via rules (not routing-related)
                     rule["min_hole_mm"] = self._convert_coord(pairs.get('MINHOLE', '0') or pairs.get('MINIMUMHOLE', '0'))
                     rule["max_hole_mm"] = self._convert_coord(pairs.get('MAXHOLE', '0') or pairs.get('MAXIMUMHOLE', '0'))
                     rule["min_diameter_mm"] = self._convert_coord(pairs.get('MINDIAMETER', '0') or pairs.get('MINIMUMDIAMETER', '0'))
                     rule["max_diameter_mm"] = self._convert_coord(pairs.get('MAXDIAMETER', '0') or pairs.get('MAXIMUMDIAMETER', '0'))
                     rule["type"] = "via"
-                elif 'SHORT' in rule_kind.upper() or 'SHORTCIRCUIT' in rule_kind.upper():
+                elif 'SHORT' in rule_kind_upper or 'SHORTCIRCUIT' in rule_kind_upper:
+                    # Short Circuit rules
                     rule["allowed"] = pairs.get('ALLOWED', 'FALSE') == 'TRUE'
                     rule["type"] = "short_circuit"
-                elif 'MASK' in rule_kind.upper():
-                    rule["expansion_mm"] = self._convert_coord(pairs.get('EXPANSION', '0') or pairs.get('EXPANSIONTOP', '0'))
-                    if 'PASTE' in rule_kind.upper():
+                elif 'MASK' in rule_kind_upper:
+                    # Mask rules - Altium uses EXPANSION key
+                    expansion_top = self._convert_coord(pairs.get('EXPANSION', '0') or pairs.get('EXPANSIONTOP', '0'))
+                    expansion_bottom = self._convert_coord(pairs.get('EXPANSIONBOTTOM', '0'))
+                    # If bottom expansion is not specified, use top expansion (common in Altium)
+                    if expansion_bottom == 0.0 and expansion_top > 0:
+                        expansion_bottom = expansion_top
+                    rule["expansion_mm"] = expansion_top
+                    rule["expansion_bottom_mm"] = expansion_bottom
+                    # Check for tenting flags
+                    rule["tented_top"] = pairs.get('ISTENTINGTOP', 'FALSE') == 'TRUE'
+                    rule["tented_bottom"] = pairs.get('ISTENTINGBOTTOM', 'FALSE') == 'TRUE'
+                    # Paste mask specific settings
+                    if 'PASTE' in rule_kind_upper:
+                        rule["use_paste_smd"] = pairs.get('USEPASTE', 'FALSE') == 'TRUE' or pairs.get('USEPASTESMD', 'FALSE') == 'TRUE'
+                        rule["use_top_paste_th"] = pairs.get('USETOPPASTE', 'FALSE') == 'TRUE' or pairs.get('USETOPPASTETH', 'FALSE') == 'TRUE'
+                        rule["use_bottom_paste_th"] = pairs.get('USEBOTTOMPASTE', 'FALSE') == 'TRUE' or pairs.get('USEBOTTOMPASTETH', 'FALSE') == 'TRUE'
+                        rule["measurement_method"] = pairs.get('MEASUREMENTMETHOD', 'Absolute') or pairs.get('METHOD', 'Absolute')
                         rule["type"] = "paste_mask"
                     else:
                         rule["type"] = "solder_mask"
+                elif 'PLANECONNECT' in rule_kind_upper or ('PLANE' in rule_kind_upper and 'CONNECT' in rule_kind_upper):
+                    # Plane Connect rules - Altium uses RELIEFEXPANSION, RELIEFAIRGAP, RELIEFCONDUCTORWIDTH, RELIEFENTRIES
+                    rule["connect_style"] = pairs.get('PLANECONNECTSTYLE', '') or pairs.get('CONNECTSTYLE', '')
+                    rule["expansion_mm"] = self._convert_coord(pairs.get('RELIEFEXPANSION', '0') or pairs.get('EXPANSION', '0'))
+                    rule["air_gap_mm"] = self._convert_coord(pairs.get('RELIEFAIRGAP', '0') or pairs.get('AIRGAP', '0'))
+                    rule["conductor_width_mm"] = self._convert_coord(pairs.get('RELIEFCONDUCTORWIDTH', '0') or pairs.get('CONDUCTORWIDTH', '0'))
+                    rule["conductor_count"] = int(pairs.get('RELIEFENTRIES', '0') or pairs.get('ENTRIES', '0') or '0')
+                    rule["type"] = "plane_connect"
+                elif 'PLANE' in rule_kind_upper and 'CLEARANCE' not in rule_kind_upper:
+                    # Other Plane rules (not clearance, not connect)
+                    rule["type"] = "plane"
+                elif 'TESTPOINT' in rule_kind_upper:
+                    # Testpoint rules
+                    rule["type"] = "testpoint"
+                elif 'SMT' in rule_kind_upper:
+                    # SMT rules
+                    rule["type"] = "smt"
+                elif 'UNROUTED' in rule_kind_upper:
+                    # Unrouted Net rules
+                    rule["type"] = "unrouted_net"
                 else:
                     rule["type"] = "other"
                 

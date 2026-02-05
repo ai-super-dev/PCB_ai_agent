@@ -1473,15 +1473,116 @@ Chat with me to:
                                             if rule.get('scope_first'):
                                                 msg += f"   • Scope: {rule.get('scope_first')}\n"
                                         elif rule_type == "via":
+                                            # Display all 6 parameters: Min/Max/Preferred for Hole and Diameter
                                             min_hole = rule.get('min_hole_mm', 0)
                                             max_hole = rule.get('max_hole_mm', 0)
+                                            pref_hole = rule.get('preferred_hole_mm', 0)
                                             min_dia = rule.get('min_diameter_mm', 0)
-                                            msg += f"   • Hole: {min_hole:.3f}mm"
+                                            max_dia = rule.get('max_diameter_mm', 0)
+                                            pref_dia = rule.get('preferred_diameter_mm', 0)
+                                            via_style = rule.get('via_style', '')
+                                            if via_style:
+                                                msg += f"   • Via Style: {via_style}\n"
+                                            msg += f"   • Via Hole Size: Min: {min_hole:.3f}mm"
+                                            if pref_hole > 0:
+                                                msg += f", Preferred: {pref_hole:.3f}mm"
                                             if max_hole > 0:
-                                                msg += f" - {max_hole:.3f}mm"
-                                            if min_dia > 0:
-                                                msg += f", Diameter: {min_dia:.3f}mm"
+                                                msg += f", Max: {max_hole:.3f}mm"
                                             msg += "\n"
+                                            msg += f"   • Via Diameter: Min: {min_dia:.3f}mm"
+                                            if pref_dia > 0:
+                                                msg += f", Preferred: {pref_dia:.3f}mm"
+                                            if max_dia > 0:
+                                                msg += f", Max: {max_dia:.3f}mm"
+                                            msg += "\n"
+                                        elif rule_type == "routing_corners":
+                                            style = rule.get('corner_style', '')
+                                            setback = rule.get('setback_mm', 0)
+                                            setback_to = rule.get('setback_to_mm', 0)
+                                            if style:
+                                                msg += f"   • Style: {style}\n"
+                                            if setback > 0:
+                                                # Always show "to" parameter even if same value
+                                                if setback_to > 0:
+                                                    msg += f"   • Setback: {setback:.3f}mm to {setback_to:.3f}mm\n"
+                                                else:
+                                                    msg += f"   • Setback: {setback:.3f}mm\n"
+                                        elif rule_type == "routing_topology":
+                                            topology = rule.get('topology', '')
+                                            if topology:
+                                                msg += f"   • Topology: {topology}\n"
+                                        elif rule_type == "diff_pairs_routing":
+                                            min_w = rule.get('min_width_mm', 0)
+                                            max_w = rule.get('max_width_mm', 0)
+                                            pref_w = rule.get('preferred_width_mm', 0)
+                                            min_gap = rule.get('min_gap_mm', 0)
+                                            max_gap = rule.get('max_gap_mm', 0)
+                                            pref_gap = rule.get('preferred_gap_mm', 0)
+                                            max_unc = rule.get('max_uncoupled_length_mm', 0)
+                                            msg += f"   • Min Width: {min_w:.3f}mm, Preferred: {pref_w:.3f}mm, Max: {max_w:.3f}mm\n"
+                                            msg += f"   • Min Gap: {min_gap:.3f}mm, Preferred: {pref_gap:.3f}mm, Max: {max_gap:.3f}mm\n"
+                                            if max_unc > 0:
+                                                msg += f"   • Max Uncoupled Length: {max_unc:.3f}mm\n"
+                                        elif rule_type == "plane_clearance":
+                                            clearance = rule.get('clearance_mm', 0)
+                                            msg += f"   • Clearance: {clearance:.3f}mm\n"
+                                        elif rule_type == "plane_connect":
+                                            style = rule.get('connect_style', '')
+                                            expansion = rule.get('expansion_mm', 0)
+                                            air_gap = rule.get('air_gap_mm', 0)
+                                            conductor_width = rule.get('conductor_width_mm', 0)
+                                            conductor_count = rule.get('conductor_count', 0)
+                                            if style:
+                                                msg += f"   • Connect Style: {style}\n"
+                                            if expansion > 0:
+                                                msg += f"   • Expansion: {expansion:.3f}mm\n"
+                                            if air_gap > 0:
+                                                msg += f"   • Air-Gap: {air_gap:.3f}mm\n"
+                                            if conductor_width > 0:
+                                                msg += f"   • Conductor Width: {conductor_width:.3f}mm\n"
+                                            if conductor_count > 0:
+                                                msg += f"   • Conductors: {conductor_count}\n"
+                                        elif rule_type == "paste_mask":
+                                            # Paste mask specific settings
+                                            use_paste_smd = rule.get('use_paste_smd', None)
+                                            use_top_paste_th = rule.get('use_top_paste_th', None)
+                                            use_bottom_paste_th = rule.get('use_bottom_paste_th', None)
+                                            measurement_method = rule.get('measurement_method', '')
+                                            expansion = rule.get('expansion_mm', 0)
+                                            expansion_bottom = rule.get('expansion_bottom_mm', 0)
+                                            
+                                            if use_paste_smd is not None:
+                                                msg += f"   • SMD Pads - Use Paste: {'Yes' if use_paste_smd else 'No'}\n"
+                                            if use_top_paste_th is not None:
+                                                msg += f"   • TH Pads - Use Top Paste: {'Yes' if use_top_paste_th else 'No'}\n"
+                                            if use_bottom_paste_th is not None:
+                                                msg += f"   • TH Pads - Use Bottom Paste: {'Yes' if use_bottom_paste_th else 'No'}\n"
+                                            if measurement_method:
+                                                msg += f"   • Measurement Method: {measurement_method}\n"
+                                            if expansion >= 0:  # Show even if 0
+                                                if expansion_bottom > 0 and expansion_bottom != expansion:
+                                                    msg += f"   • Expansion Top: {expansion:.3f}mm\n"
+                                                    msg += f"   • Expansion Bottom: {expansion_bottom:.3f}mm\n"
+                                                else:
+                                                    msg += f"   • Expansion: {expansion:.3f}mm\n"
+                                        elif rule_type == "solder_mask":
+                                            expansion = rule.get('expansion_mm', 0)
+                                            expansion_bottom = rule.get('expansion_bottom_mm', 0)
+                                            if expansion > 0:
+                                                if expansion_bottom > 0 and expansion_bottom != expansion:
+                                                    msg += f"   • Expansion Top: {expansion:.3f}mm\n"
+                                                    msg += f"   • Expansion Bottom: {expansion_bottom:.3f}mm\n"
+                                                else:
+                                                    msg += f"   • Expansion: {expansion:.3f}mm (top & bottom)\n"
+                                            tented_top = rule.get('tented_top', False)
+                                            tented_bottom = rule.get('tented_bottom', False)
+                                            if tented_top or tented_bottom:
+                                                tented_parts = []
+                                                if tented_top:
+                                                    tented_parts.append("top")
+                                                if tented_bottom:
+                                                    tented_parts.append("bottom")
+                                                msg += f"   • Tented: {', '.join(tented_parts)}\n"
                                         
                                         priority = rule.get('priority', 0)
                                         if priority > 0:

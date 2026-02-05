@@ -458,9 +458,11 @@ class AltiumImporter:
                 if min_hole <= 0:
                     continue  # Skip invalid rules
                 
-                params = RuleParams(min_via_drill_mm=min_hole)
-                if max_hole > 0:
-                    params.max_via_drill_mm = max_hole
+                # Create params with both min and max drill sizes
+                params = RuleParams(
+                    min_drill_mm=min_hole,
+                    max_drill_mm=max_hole if max_hole > 0 else None
+                )
                 
                 rules.append(Rule(
                     id=rule_id,

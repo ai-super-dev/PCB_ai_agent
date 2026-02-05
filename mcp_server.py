@@ -546,12 +546,18 @@ class AltiumMCPServer:
                                                     # Also update category based on type
                                                     if file_rule_type == 'clearance':
                                                         rule['category'] = 'Electrical'
-                                                    elif file_rule_type == 'width' or file_rule_type == 'via':
+                                                    elif file_rule_type in ['width', 'via', 'routing_corners', 'routing_topology', 'routing_priority', 'routing_layers']:
                                                         rule['category'] = 'Routing'
-                                                    elif file_rule_type == 'short_circuit':
+                                                    elif file_rule_type == 'short_circuit' or file_rule_type == 'unrouted_net':
                                                         rule['category'] = 'Electrical'
                                                     elif 'mask' in file_rule_type:
                                                         rule['category'] = 'Mask'
+                                                    elif file_rule_type == 'plane':
+                                                        rule['category'] = 'Plane'
+                                                    elif file_rule_type == 'testpoint':
+                                                        rule['category'] = 'Testpoint'
+                                                    elif file_rule_type == 'smt':
+                                                        rule['category'] = 'SMT'
                                                 
                                                 # Update clearance value if it's 0.0
                                                 if rule.get('type') == 'clearance':
@@ -596,6 +602,33 @@ class AltiumMCPServer:
                                                         new_val = file_rule.get('max_diameter_mm', 0.0)
                                                         if new_val > 0:
                                                             rule['max_diameter_mm'] = new_val
+                                                    # Merge preferred values
+                                                    if 'preferred_hole_mm' in file_rule:
+                                                        rule['preferred_hole_mm'] = file_rule['preferred_hole_mm']
+                                                    if 'preferred_diameter_mm' in file_rule:
+                                                        rule['preferred_diameter_mm'] = file_rule['preferred_diameter_mm']
+                                                    if 'via_style' in file_rule:
+                                                        rule['via_style'] = file_rule['via_style']
+                                                
+                                                # Update routing corners
+                                                elif rule.get('type') == 'routing_corners':
+                                                    # Merge all routing corner parameters
+                                                    for key in ['corner_style', 'setback_mm', 'setback_to_mm']:
+                                                        if key in file_rule:
+                                                            rule[key] = file_rule[key]
+                                                            merged_count += 1
+                                                
+                                                # Update routing topology
+                                                elif rule.get('type') == 'routing_topology':
+                                                    if 'topology' in file_rule:
+                                                        rule['topology'] = file_rule['topology']
+                                                        merged_count += 1
+                                                
+                                                # Update routing priority
+                                                elif rule.get('type') == 'routing_priority':
+                                                    if 'priority_value' in file_rule:
+                                                        rule['priority_value'] = file_rule['priority_value']
+                                                        merged_count += 1
                                                 
                                                 # Update short circuit allowed status
                                                 elif rule.get('type') == 'short_circuit':
@@ -604,12 +637,49 @@ class AltiumMCPServer:
                                                         merged_count += 1
                                                 
                                                 # Update mask expansion
-                                                elif rule.get('type') in ['solder_mask', 'paste_mask']:
-                                                    if rule.get('expansion_mm', 0) == 0.0:
-                                                        new_val = file_rule.get('expansion_mm', 0.0)
-                                                        if new_val > 0:
-                                                            rule['expansion_mm'] = new_val
+                                                elif rule.get('type') == 'paste_mask':
+                                                    # Merge all paste mask parameters
+                                                    for key in ['expansion_mm', 'expansion_bottom_mm', 'tented_top', 'tented_bottom', 
+                                                               'use_paste_smd', 'use_top_paste_th', 'use_bottom_paste_th', 'measurement_method']:
+                                                        if key in file_rule:
+                                                            rule[key] = file_rule[key]
                                                             merged_count += 1
+                                                elif rule.get('type') == 'solder_mask':
+                                                    # Merge all solder mask parameters
+                                                    for key in ['expansion_mm', 'expansion_bottom_mm', 'tented_top', 'tented_bottom']:
+                                                        if key in file_rule:
+                                                            rule[key] = file_rule[key]
+                                                            merged_count += 1
+                                                # Update diff pairs routing
+                                                elif rule.get('type') == 'diff_pairs_routing' or (rule.get('name', '').upper() == 'DIFFPAIRSROUTING'):
+                                                    # Merge all diff pairs parameters
+                                                    for key in ['min_width_mm', 'max_width_mm', 'preferred_width_mm', 
+                                                               'min_gap_mm', 'max_gap_mm', 'preferred_gap_mm', 'max_uncoupled_length_mm']:
+                                                        if key in file_rule:
+                                                            rule[key] = file_rule[key]
+                                                            merged_count += 1
+                                                    rule['type'] = 'diff_pairs_routing'  # Ensure correct type
+                                                    rule['category'] = 'Routing'  # Ensure correct category
+                                                
+                                                # Update plane clearance
+                                                elif rule.get('type') == 'plane_clearance' or (rule.get('name', '').upper() == 'PLANECLEARANCE'):
+                                                    # Always merge plane clearance (even if exported value is 0.0)
+                                                    new_value = file_rule.get('clearance_mm', 0.0)
+                                                    if new_value > 0:
+                                                        rule['clearance_mm'] = new_value
+                                                        rule['type'] = 'plane_clearance'  # Ensure correct type
+                                                        rule['category'] = 'Plane'  # Ensure correct category
+                                                        merged_count += 1
+                                                
+                                                # Update plane connect
+                                                elif rule.get('type') == 'plane_connect' or (rule.get('name', '').upper() == 'PLANECONNECT'):
+                                                    # Merge all plane connect parameters
+                                                    for key in ['connect_style', 'expansion_mm', 'air_gap_mm', 'conductor_width_mm', 'conductor_count']:
+                                                        if key in file_rule:
+                                                            rule[key] = file_rule[key]
+                                                            merged_count += 1
+                                                    rule['type'] = 'plane_connect'  # Ensure correct type
+                                                    rule['category'] = 'Plane'  # Ensure correct category
                                                 
                                                 # Update component clearance
                                                 elif rule.get('type') == 'component_clearance':
@@ -617,6 +687,24 @@ class AltiumMCPServer:
                                                         new_value = file_rule.get('clearance_mm', 0.0)
                                                         if new_value > 0:
                                                             rule['clearance_mm'] = new_value
+                                                            merged_count += 1
+                                                
+                                                # CRITICAL: Merge ALL other fields from file reader that are missing or 0
+                                                # This ensures we get all parameters (corner_style, topology, via_style, preferred values, etc.)
+                                                excluded_keys = {'name', 'kind', 'enabled', 'priority', 'scope', 'type'}
+                                                for key, value in file_rule.items():
+                                                    if key not in excluded_keys:
+                                                        # If the rule doesn't have this key, or it's 0/empty, use file reader value
+                                                        if key not in rule:
+                                                            rule[key] = value
+                                                            if not (isinstance(value, (int, float)) and value == 0):
+                                                                merged_count += 1
+                                                        elif isinstance(rule.get(key), (int, float)) and rule.get(key) == 0:
+                                                            if isinstance(value, (int, float)) and value != 0:
+                                                                rule[key] = value
+                                                                merged_count += 1
+                                                        elif not rule.get(key) and value:
+                                                            rule[key] = value
                                                             merged_count += 1
                                         
                                         if merged_count > 0:
