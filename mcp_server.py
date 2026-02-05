@@ -538,6 +538,21 @@ class AltiumMCPServer:
                                             if rule_name in file_reader_lookup:
                                                 file_rule = file_reader_lookup[rule_name]
                                                 
+                                                # CRITICAL: Update rule type from file reader (handles custom-named rules)
+                                                # This ensures LBBZHUANYONG, KZBZHUANYONG etc. are correctly typed
+                                                file_rule_type = file_rule.get('type', '')
+                                                if file_rule_type and file_rule_type != 'other':
+                                                    rule['type'] = file_rule_type
+                                                    # Also update category based on type
+                                                    if file_rule_type == 'clearance':
+                                                        rule['category'] = 'Electrical'
+                                                    elif file_rule_type == 'width' or file_rule_type == 'via':
+                                                        rule['category'] = 'Routing'
+                                                    elif file_rule_type == 'short_circuit':
+                                                        rule['category'] = 'Electrical'
+                                                    elif 'mask' in file_rule_type:
+                                                        rule['category'] = 'Mask'
+                                                
                                                 # Update clearance value if it's 0.0
                                                 if rule.get('type') == 'clearance':
                                                     if rule.get('clearance_mm', 0) == 0.0:

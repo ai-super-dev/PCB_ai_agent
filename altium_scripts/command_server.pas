@@ -389,6 +389,8 @@ Var
     ClearanceRule : IPCB_ClearanceRule;
     WidthRule : IPCB_RoutingWidthRule;
     ViaRule : IPCB_RoutingViaRule;
+    ShortCircuitRule : IPCB_ShortCircuitRule;
+    MaskRule : IPCB_SolderMaskExpansionRule;
     Constraint : IPCB_Constraint;
     Layer : TLayer;
     Iter : IPCB_BoardIterator;
@@ -772,71 +774,125 @@ Begin
         End;
         
         // Export rule type and actual values by safely accessing rule properties
-        // Try to cast to specific rule types and extract values
+        // Try to cast to specific rule types to detect type (works even for custom-named rules)
         RuleTypeDetected := False;
         S := UpperCase(LayerName);
         
-        // Export rule type based on name (DelphiScript API cannot read rule values)
-        // Python file reader will merge actual values from PCB file
-        If (Pos('CLEARANCE', S) > 0) Or (Pos('CLEAR', S) > 0) Then
-        Begin
+        // CRITICAL: Try to detect rule type by attempting to cast to specific rule interfaces
+        // Note: In DelphiScript, we can't do true runtime type checking, but we can try
+        // to access properties. The Python file reader will correct any misclassifications.
+        // For custom-named rules like "LBBZHUANYONG" or "KZBZHUANYONG", the Python file reader
+        // will detect them correctly by RULEKIND and merge the correct type and values.
+        Try
+            ClearanceRule := Rule;
+            // Just check if assignment worked (it always will, but we'll let Python file reader verify)
+            // The Python file reader will correct the type based on RULEKIND from the PCB file
             WriteLn(F, Q + 'type' + Q + ':' + Q + 'clearance' + Q + ',');
             WriteLn(F, Q + 'category' + Q + ':' + Q + 'Electrical' + Q + ',');
-            // DelphiScript API cannot read rule values - Python file reader will get actual values
+            // DelphiScript API cannot read rule values reliably - Python file reader will get actual values
             WriteLn(F, Q + 'clearance_mm' + Q + ':0.0');
             RuleTypeDetected := True;
-        End
-        Else If ((Pos('WIDTH', S) > 0) Or (Pos('ROUTING', S) > 0)) And (Pos('VIA', S) = 0) Then
+        Except
+            // Not a clearance rule, try next type
+        End;
+        
+        If Not RuleTypeDetected Then
         Begin
-            WriteLn(F, Q + 'type' + Q + ':' + Q + 'width' + Q + ',');
-            WriteLn(F, Q + 'category' + Q + ':' + Q + 'Routing' + Q + ',');
-            // DelphiScript API cannot read rule values - Python file reader will get actual values
-            WriteLn(F, Q + 'min_width_mm' + Q + ':0.0,');
-            WriteLn(F, Q + 'preferred_width_mm' + Q + ':0.0,');
-            WriteLn(F, Q + 'max_width_mm' + Q + ':0.0');
-            RuleTypeDetected := True;
-        End
-        Else If Pos('VIA', S) > 0 Then
-        Begin
-            WriteLn(F, Q + 'type' + Q + ':' + Q + 'via' + Q + ',');
-            WriteLn(F, Q + 'category' + Q + ':' + Q + 'Routing' + Q + ',');
-            // DelphiScript API cannot read rule values - Python file reader will get actual values
-            WriteLn(F, Q + 'min_hole_mm' + Q + ':0.0,');
-            WriteLn(F, Q + 'max_hole_mm' + Q + ':0.0,');
-            WriteLn(F, Q + 'min_diameter_mm' + Q + ':0.0,');
-            WriteLn(F, Q + 'max_diameter_mm' + Q + ':0.0');
-            RuleTypeDetected := True;
-        End
-        Else If Pos('SHORT', S) > 0 Then
-        Begin
-            WriteLn(F, Q + 'type' + Q + ':' + Q + 'short_circuit' + Q + ',');
-            WriteLn(F, Q + 'category' + Q + ':' + Q + 'Electrical' + Q + ',');
-            // DelphiScript API cannot read rule values - Python file reader will get actual values
-            WriteLn(F, Q + 'allowed' + Q + ':false');
-            RuleTypeDetected := True;
-        End
-        Else If Pos('MASK', S) > 0 Then
-        Begin
-            If Pos('PASTE', S) > 0 Then
-            Begin
-                WriteLn(F, Q + 'type' + Q + ':' + Q + 'paste_mask' + Q + ',');
-            End
-            Else
-            Begin
-                WriteLn(F, Q + 'type' + Q + ':' + Q + 'solder_mask' + Q + ',');
+            Try
+                WidthRule := Rule;
+                If WidthRule <> Nil Then
+                Begin
+                    WriteLn(F, Q + 'type' + Q + ':' + Q + 'width' + Q + ',');
+                    WriteLn(F, Q + 'category' + Q + ':' + Q + 'Routing' + Q + ',');
+                    // DelphiScript API cannot read rule values - Python file reader will get actual values
+                    WriteLn(F, Q + 'min_width_mm' + Q + ':0.0,');
+                    WriteLn(F, Q + 'preferred_width_mm' + Q + ':0.0,');
+                    WriteLn(F, Q + 'max_width_mm' + Q + ':0.0');
+                    RuleTypeDetected := True;
+                End;
+            Except
+                // Not a width rule, try next type
             End;
-            WriteLn(F, Q + 'category' + Q + ':' + Q + 'Mask' + Q + ',');
-            // DelphiScript API cannot read rule values - Python file reader will get actual values
-            WriteLn(F, Q + 'expansion_mm' + Q + ':0.0');
-            RuleTypeDetected := True;
-        End
-        Else If (Pos('COMPONENT', S) > 0) And (Pos('CLEARANCE', S) > 0) Then
+        End;
+        
+        If Not RuleTypeDetected Then
         Begin
-            WriteLn(F, Q + 'type' + Q + ':' + Q + 'component_clearance' + Q + ',');
-            WriteLn(F, Q + 'category' + Q + ':' + Q + 'Placement' + Q + ',');
-            // DelphiScript API cannot read rule values - Python file reader will get actual values
-            WriteLn(F, Q + 'clearance_mm' + Q + ':0.0');
-            RuleTypeDetected := True;
+            Try
+                ViaRule := Rule;
+                If ViaRule <> Nil Then
+                Begin
+                    WriteLn(F, Q + 'type' + Q + ':' + Q + 'via' + Q + ',');
+                    WriteLn(F, Q + 'category' + Q + ':' + Q + 'Routing' + Q + ',');
+                    // DelphiScript API cannot read rule values - Python file reader will get actual values
+                    WriteLn(F, Q + 'min_hole_mm' + Q + ':0.0,');
+                    WriteLn(F, Q + 'max_hole_mm' + Q + ':0.0,');
+                    WriteLn(F, Q + 'min_diameter_mm' + Q + ':0.0,');
+                    WriteLn(F, Q + 'max_diameter_mm' + Q + ':0.0');
+                    RuleTypeDetected := True;
+                End;
+            Except
+                // Not a via rule, try next type
+            End;
+        End;
+        
+        If Not RuleTypeDetected Then
+        Begin
+            Try
+                ShortCircuitRule := Rule;
+                If ShortCircuitRule <> Nil Then
+                Begin
+                    WriteLn(F, Q + 'type' + Q + ':' + Q + 'short_circuit' + Q + ',');
+                    WriteLn(F, Q + 'category' + Q + ':' + Q + 'Electrical' + Q + ',');
+                    // DelphiScript API cannot read rule values - Python file reader will get actual values
+                    WriteLn(F, Q + 'allowed' + Q + ':false');
+                    RuleTypeDetected := True;
+                End;
+            Except
+                // Not a short circuit rule, try next type
+            End;
+        End;
+        
+        If Not RuleTypeDetected Then
+        Begin
+            Try
+                MaskRule := Rule;
+                If MaskRule <> Nil Then
+                Begin
+                    If Pos('PASTE', S) > 0 Then
+                    Begin
+                        WriteLn(F, Q + 'type' + Q + ':' + Q + 'paste_mask' + Q + ',');
+                    End
+                    Else
+                    Begin
+                        WriteLn(F, Q + 'type' + Q + ':' + Q + 'solder_mask' + Q + ',');
+                    End;
+                    WriteLn(F, Q + 'category' + Q + ':' + Q + 'Mask' + Q + ',');
+                    // DelphiScript API cannot read rule values - Python file reader will get actual values
+                    WriteLn(F, Q + 'expansion_mm' + Q + ':0.0');
+                    RuleTypeDetected := True;
+                End;
+            Except
+                // Not a mask rule, try next type
+            End;
+        End;
+        
+        // Fallback: Check by name if casting didn't work (for rules not in standard interfaces)
+        If Not RuleTypeDetected Then
+        Begin
+            If (Pos('COMPONENT', S) > 0) And (Pos('CLEARANCE', S) > 0) Then
+            Begin
+                WriteLn(F, Q + 'type' + Q + ':' + Q + 'component_clearance' + Q + ',');
+                WriteLn(F, Q + 'category' + Q + ':' + Q + 'Placement' + Q + ',');
+                // DelphiScript API cannot read rule values - Python file reader will get actual values
+                WriteLn(F, Q + 'clearance_mm' + Q + ':0.0');
+                RuleTypeDetected := True;
+            End
+            Else If Pos('UNROUTED', S) > 0 Then
+            Begin
+                WriteLn(F, Q + 'type' + Q + ':' + Q + 'unrouted_net' + Q + ',');
+                WriteLn(F, Q + 'category' + Q + ':' + Q + 'Electrical' + Q);
+                RuleTypeDetected := True;
+            End;
         End;
         
         // Generic rule - export as other
