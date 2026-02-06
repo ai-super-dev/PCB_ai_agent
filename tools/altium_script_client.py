@@ -92,8 +92,8 @@ class AltiumScriptClient:
         action = command.get("action", "unknown")
         
         # Determine timeout based on action
-        # Rule creation can take longer due to SavePCBFile + ExportPCBInfo
-        if action in ("create_rule", "update_rule", "export_pcb_info"):
+        # Rule creation/update/delete can take longer due to SavePCBFile + ExportPCBInfo
+        if action in ("create_rule", "update_rule", "delete_rule", "export_pcb_info"):
             timeout = max(self.timeout, 30)  # At least 30 seconds for heavy operations
         else:
             timeout = self.timeout
@@ -453,6 +453,25 @@ class AltiumScriptClient:
         # Add parameters as individual fields with param_ prefix
         for key, value in parameters.items():
             command[f"param_{key}"] = value
+        return self._send_command(command)
+    
+    def delete_rule(self, rule_name: str) -> Dict[str, Any]:
+        """
+        Delete an existing design rule in Altium.
+        
+        Args:
+            rule_name: Name of the rule to delete
+            
+        Returns:
+            Result dict with success/error
+        """
+        # DEBUG: Log the rule name being sent
+        print(f"DEBUG: delete_rule called with rule_name: [{rule_name}]")
+        
+        command = {
+            "action": "delete_rule",
+            "rule_name": rule_name
+        }
         return self._send_command(command)
 
 

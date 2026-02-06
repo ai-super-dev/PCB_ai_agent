@@ -1380,6 +1380,59 @@ Begin
 End;
 
 {..............................................................................}
+{ DELETE RULE                                                                  }
+{..............................................................................}
+Function DeleteRule(RuleName : String) : Boolean;
+Var
+    Board : IPCB_Board;
+    Rule : IPCB_Rule;
+    Iter : IPCB_BoardIterator;
+    Found : Boolean;
+Begin
+    Result := False;
+    Board := GetBoard;
+    If Board = Nil Then Exit;
+    
+    Found := False;
+    RuleName := Trim(RuleName);
+    
+    Iter := Board.BoardIterator_Create;
+    Iter.AddFilter_ObjectSet(MkSet(eRuleObject));
+    Iter.AddFilter_LayerSet(AllLayers);
+    
+    Rule := Iter.FirstPCBObject;
+    While Rule <> Nil Do
+    Begin
+        If UpperCase(Trim(Rule.Name)) = UpperCase(RuleName) Then
+        Begin
+            Found := True;
+            Break;
+        End;
+        Rule := Iter.NextPCBObject;
+    End;
+    
+    Board.BoardIterator_Destroy(Iter);
+    
+    If Not Found Then
+    Begin
+        WriteRes(False, 'Rule not found: ' + RuleName);
+        Exit;
+    End;
+    
+    // Delete the rule
+    Try
+        PCBServer.PreProcess;
+        Board.RemovePCBObject(Rule);
+        PCBServer.PostProcess;
+        Board.GraphicallyInvalidate;
+        Result := True;
+    Except
+        WriteRes(False, 'Error deleting rule: ' + RuleName);
+        Result := False;
+    End;
+End;
+
+{..............................................................................}
 { PROCESS COMMAND                                                              }
 {..............................................................................}
 Procedure ProcessCommand;
@@ -1547,7 +1600,24 @@ Begin
                     End;
                 End;
                 
-                Sleep(500);  // Additional delay to ensure board state is fully updated
+                Sleep(1000);  // Longer delay to ensure board state is fully updated and rule is committed
+                
+                // CRITICAL: Force a complete board refresh before exporting
+                // This ensures ExportPCBInfo sees the newly added rule
+                Board := GetBoard;
+                If Board <> Nil Then
+                Begin
+                    Try
+                        PCBServer.PreProcess;
+                        PCBServer.PostProcess;
+                        Board.GraphicallyInvalidate;
+                        // Force board to recognize all changes
+                        Board.ViewManager_UpdateLayerTabs;
+                    Except
+                    End;
+                End;
+                
+                Sleep(500);  // Additional delay after refresh
                 
                 // Export in SILENT mode (no ShowMessage, no WriteRes from ExportPCBInfo)
                 SilentMode := True;
@@ -1615,6 +1685,35 @@ Begin
             Else
             Begin
                 WriteRes(False, 'Failed to update rule ' + RuleName + ' (rule not found or invalid parameters)');
+            End;
+        End;
+    End
+    
+    // DELETE RULE
+    Else If Act = 'delete_rule' Then
+    Begin
+        RuleName := ParseValue(Cmd, 'rule_name');
+        
+        If RuleName = '' Then
+        Begin
+            WriteRes(False, 'Missing rule_name');
+        End
+        Else
+        Begin
+            OK := DeleteRule(RuleName);
+            If OK Then
+            Begin
+                SavePCBFile;
+                
+                SilentMode := True;
+                ExportPCBInfo;
+                SilentMode := False;
+                
+                WriteRes(True, 'Rule ' + RuleName + ' deleted successfully. PCB saved and info exported.');
+            End
+            Else
+            Begin
+                WriteRes(False, 'Failed to delete rule: ' + RuleName);
             End;
         End;
     End

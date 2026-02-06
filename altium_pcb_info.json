@@ -1366,6 +1366,15 @@
 }],
 "tracks":[
 {
+"net":"FLJC",
+"layer":"Bottom Layer",
+"x1_mm":147.637,
+"y1_mm":9.471,
+"x2_mm":147.637,
+"y2_mm":9.493,
+"width_mm":0.381
+},
+{
 "net":"",
 "layer":"Keep-Out Layer",
 "x1_mm":22.116,
@@ -1436,2949 +1445,6 @@
 "x2_mm":4.699,
 "y2_mm":85.471,
 "width_mm":0.1
-},
-{
-"net":"FLJC",
-"layer":"Bottom Layer",
-"x1_mm":147.637,
-"y1_mm":9.471,
-"x2_mm":147.637,
-"y2_mm":9.493,
-"width_mm":0.381
-},
-{
-"net":"NetC170_1",
-"layer":"Top Layer",
-"x1_mm":106.878,
-"y1_mm":24.074,
-"x2_mm":107.188,
-"y2_mm":24.384,
-"width_mm":0.381
-},
-{
-"net":"NetC170_1",
-"layer":"Top Layer",
-"x1_mm":107.188,
-"y1_mm":24.384,
-"x2_mm":109.037,
-"y2_mm":24.384,
-"width_mm":0.381
-},
-{
-"net":"NetC170_1",
-"layer":"Top Layer",
-"x1_mm":103.886,
-"y1_mm":24.074,
-"x2_mm":105.537,
-"y2_mm":24.074,
-"width_mm":0.381
-},
-{
-"net":"NetC170_1",
-"layer":"Top Layer",
-"x1_mm":105.537,
-"y1_mm":24.074,
-"x2_mm":106.878,
-"y2_mm":24.074,
-"width_mm":0.381
-},
-{
-"net":"NetC158_2",
-"layer":"Top Layer",
-"x1_mm":103.886,
-"y1_mm":25.654,
-"x2_mm":105.537,
-"y2_mm":25.654,
-"width_mm":0.381
-},
-{
-"net":"NetC158_2",
-"layer":"Top Layer",
-"x1_mm":105.537,
-"y1_mm":25.654,
-"x2_mm":109.037,
-"y2_mm":25.654,
-"width_mm":0.381
-},
-{
-"net":"NetC163_1",
-"layer":"Top Layer",
-"x1_mm":106.398,
-"y1_mm":19.332,
-"x2_mm":106.426,
-"y2_mm":19.36,
-"width_mm":0.381
-},
-{
-"net":"NetC163_1",
-"layer":"Top Layer",
-"x1_mm":103.124,
-"y1_mm":19.332,
-"x2_mm":106.398,
-"y2_mm":19.332,
-"width_mm":0.381
-},
-{
-"net":"NetC163_1",
-"layer":"Top Layer",
-"x1_mm":105.664,
-"y1_mm":21.844,
-"x2_mm":106.934,
-"y2_mm":23.114,
-"width_mm":0.381
-},
-{
-"net":"NetC163_1",
-"layer":"Top Layer",
-"x1_mm":106.934,
-"y1_mm":23.114,
-"x2_mm":109.037,
-"y2_mm":23.114,
-"width_mm":0.381
-},
-{
-"net":"NetC163_1",
-"layer":"Top Layer",
-"x1_mm":105.664,
-"y1_mm":19.431,
-"x2_mm":105.664,
-"y2_mm":21.844,
-"width_mm":0.381
-},
-{
-"net":"NetR115_2",
-"layer":"Top Layer",
-"x1_mm":103.378,
-"y1_mm":26.924,
-"x2_mm":109.037,
-"y2_mm":26.924,
-"width_mm":0.381
-},
-{
-"net":"NetR115_2",
-"layer":"Top Layer",
-"x1_mm":103.0605,
-"y1_mm":27.2415,
-"x2_mm":103.0605,
-"y2_mm":28.138,
-"width_mm":0.381
-},
-{
-"net":"NetR115_2",
-"layer":"Top Layer",
-"x1_mm":103.0605,
-"y1_mm":27.2415,
-"x2_mm":103.378,
-"y2_mm":26.924,
-"width_mm":0.381
-},
-{
-"net":"NetR115_2",
-"layer":"Top Layer",
-"x1_mm":102.235,
-"y1_mm":28.138,
-"x2_mm":103.0605,
-"y2_mm":28.138,
-"width_mm":0.381
-},
-{
-"net":"NetR115_2",
-"layer":"Top Layer",
-"x1_mm":103.0605,
-"y1_mm":28.138,
-"x2_mm":103.886,
-"y2_mm":28.138,
-"width_mm":0.381
-},
-{
-"net":"NetC161_2",
-"layer":"Top Layer",
-"x1_mm":108.783,
-"y1_mm":29.718,
-"x2_mm":109.037,
-"y2_mm":29.464,
-"width_mm":0.381
-},
-{
-"net":"NetC161_2",
-"layer":"Top Layer",
-"x1_mm":103.886,
-"y1_mm":29.718,
-"x2_mm":105.537,
-"y2_mm":29.718,
-"width_mm":0.381
-},
-{
-"net":"NetC161_2",
-"layer":"Top Layer",
-"x1_mm":105.537,
-"y1_mm":29.718,
-"x2_mm":108.783,
-"y2_mm":29.718,
-"width_mm":0.381
-},
-{
-"net":"NetR108_1",
-"layer":"Top Layer",
-"x1_mm":105.537,
-"y1_mm":28.138,
-"x2_mm":108.981,
-"y2_mm":28.138,
-"width_mm":0.381
-},
-{
-"net":"NetR108_1",
-"layer":"Top Layer",
-"x1_mm":108.981,
-"y1_mm":28.138,
-"x2_mm":109.037,
-"y2_mm":28.194,
-"width_mm":0.381
-},
-{
-"net":"NetC166_2",
-"layer":"Top Layer",
-"x1_mm":79.502,
-"y1_mm":15.308,
-"x2_mm":82.804,
-"y2_mm":15.308,
-"width_mm":0.381
-},
-{
-"net":"NetC166_2",
-"layer":"Top Layer",
-"x1_mm":82.804,
-"y1_mm":13.716,
-"x2_mm":82.884,
-"y2_mm":13.796,
-"width_mm":0.381
-},
-{
-"net":"NetC166_2",
-"layer":"Top Layer",
-"x1_mm":82.884,
-"y1_mm":13.796,
-"x2_mm":92.71,
-"y2_mm":13.796,
-"width_mm":0.381
-},
-{
-"net":"NetC166_2",
-"layer":"Top Layer",
-"x1_mm":82.804,
-"y1_mm":12.888,
-"x2_mm":82.804,
-"y2_mm":13.716,
-"width_mm":0.381
-},
-{
-"net":"NetC166_2",
-"layer":"Top Layer",
-"x1_mm":82.804,
-"y1_mm":13.716,
-"x2_mm":82.804,
-"y2_mm":15.308,
-"width_mm":0.381
-},
-{
-"net":"NetC166_2",
-"layer":"Top Layer",
-"x1_mm":98.044,
-"y1_mm":11.684,
-"x2_mm":102.529,
-"y2_mm":11.684,
-"width_mm":0.381
-},
-{
-"net":"NetC166_2",
-"layer":"Top Layer",
-"x1_mm":95.932,
-"y1_mm":13.796,
-"x2_mm":98.044,
-"y2_mm":11.684,
-"width_mm":0.381
-},
-{
-"net":"NetC166_2",
-"layer":"Top Layer",
-"x1_mm":92.71,
-"y1_mm":13.796,
-"x2_mm":95.932,
-"y2_mm":13.796,
-"width_mm":0.381
-},
-{
-"net":"NetC138_2",
-"layer":"Top Layer",
-"x1_mm":115.791,
-"y1_mm":16.383,
-"x2_mm":115.824,
-"y2_mm":16.416,
-"width_mm":0.381
-},
-{
-"net":"NetC138_2",
-"layer":"Top Layer",
-"x1_mm":115.824,
-"y1_mm":16.416,
-"x2_mm":115.824,
-"y2_mm":18.288,
-"width_mm":0.381
-},
-{
-"net":"NetC138_2",
-"layer":"Top Layer",
-"x1_mm":115.791,
-"y1_mm":14.638,
-"x2_mm":115.791,
-"y2_mm":16.383,
-"width_mm":0.381
-},
-{
-"net":"NetC138_2",
-"layer":"Top Layer",
-"x1_mm":115.791,
-"y1_mm":14.638,
-"x2_mm":116.84,
-"y2_mm":13.589,
-"width_mm":0.381
-},
-{
-"net":"NetC138_2",
-"layer":"Top Layer",
-"x1_mm":117.734,
-"y1_mm":14.483,
-"x2_mm":117.734,
-"y2_mm":17.272,
-"width_mm":0.381
-},
-{
-"net":"NetC138_2",
-"layer":"Top Layer",
-"x1_mm":116.84,
-"y1_mm":13.589,
-"x2_mm":117.734,
-"y2_mm":14.483,
-"width_mm":0.381
-},
-{
-"net":"+5V",
-"layer":"Top Layer",
-"x1_mm":132.5245,
-"y1_mm":10.0355,
-"x2_mm":132.5245,
-"y2_mm":10.1005,
-"width_mm":0.381
-},
-{
-"net":"+5V",
-"layer":"Top Layer",
-"x1_mm":132.145,
-"y1_mm":10.48,
-"x2_mm":132.5245,
-"y2_mm":10.1005,
-"width_mm":0.381
-},
-{
-"net":"+5V",
-"layer":"Top Layer",
-"x1_mm":132.08,
-"y1_mm":10.48,
-"x2_mm":132.145,
-"y2_mm":10.48,
-"width_mm":0.381
-},
-{
-"net":"+5V",
-"layer":"Top Layer",
-"x1_mm":129.397,
-"y1_mm":11.43,
-"x2_mm":129.44382,
-"y2_mm":11.43,
-"width_mm":0.381
-},
-{
-"net":"+5V",
-"layer":"Top Layer",
-"x1_mm":129.44382,
-"y1_mm":11.43,
-"x2_mm":129.55331,
-"y2_mm":11.3205,
-"width_mm":0.381
-},
-{
-"net":"+5V",
-"layer":"Top Layer",
-"x1_mm":129.55331,
-"y1_mm":10.78169,
-"x2_mm":129.55331,
-"y2_mm":11.3205,
-"width_mm":0.381
-},
-{
-"net":"+5V",
-"layer":"Top Layer",
-"x1_mm":129.55331,
-"y1_mm":10.78169,
-"x2_mm":130.175,
-"y2_mm":10.16,
-"width_mm":0.381
-},
-{
-"net":"+5V",
-"layer":"Top Layer",
-"x1_mm":130.175,
-"y1_mm":10.16,
-"x2_mm":131.76,
-"y2_mm":10.16,
-"width_mm":0.381
-},
-{
-"net":"+5V",
-"layer":"Top Layer",
-"x1_mm":131.76,
-"y1_mm":10.16,
-"x2_mm":132.08,
-"y2_mm":10.48,
-"width_mm":0.381
-},
-{
-"net":"+5V",
-"layer":"Top Layer",
-"x1_mm":129.397,
-"y1_mm":11.43,
-"x2_mm":129.397,
-"y2_mm":13.351,
-"width_mm":0.381
-},
-{
-"net":"NetC139_2",
-"layer":"Top Layer",
-"x1_mm":118.34,
-"y1_mm":7.136,
-"x2_mm":118.364,
-"y2_mm":7.112,
-"width_mm":0.381
-},
-{
-"net":"NetC139_2",
-"layer":"Top Layer",
-"x1_mm":118.364,
-"y1_mm":7.112,
-"x2_mm":120.086,
-"y2_mm":7.112,
-"width_mm":0.381
-},
-{
-"net":"NetC139_2",
-"layer":"Top Layer",
-"x1_mm":118.34,
-"y1_mm":7.136,
-"x2_mm":118.34,
-"y2_mm":10.789,
-"width_mm":0.381
-},
-{
-"net":"3.3VFSALC",
-"layer":"Top Layer",
-"x1_mm":121.666,
-"y1_mm":7.112,
-"x2_mm":121.666,
-"y2_mm":9.068,
-"width_mm":0.381
-},
-{
-"net":"+30V",
-"layer":"Top Layer",
-"x1_mm":67.691,
-"y1_mm":49.784,
-"x2_mm":67.771,
-"y2_mm":49.704,
-"width_mm":0.381
-},
-{
-"net":"+30V",
-"layer":"Top Layer",
-"x1_mm":67.771,
-"y1_mm":49.704,
-"x2_mm":78.2635,
-"y2_mm":49.704,
-"width_mm":0.381
-},
-{
-"net":"NetR102_1",
-"layer":"Top Layer",
-"x1_mm":82.324,
-"y1_mm":45.974,
-"x2_mm":82.324,
-"y2_mm":47.625,
-"width_mm":0.381
-},
-{
-"net":"NetR102_1",
-"layer":"Top Layer",
-"x1_mm":82.324,
-"y1_mm":47.625,
-"x2_mm":84.582,
-"y2_mm":47.625,
-"width_mm":0.381
-},
-{
-"net":"+30V",
-"layer":"Top Layer",
-"x1_mm":82.175,
-"y1_mm":49.11818,
-"x2_mm":82.175,
-"y2_mm":49.1345,
-"width_mm":0.381
-},
-{
-"net":"+30V",
-"layer":"Top Layer",
-"x1_mm":82.39819,
-"y1_mm":48.895,
-"x2_mm":84.582,
-"y2_mm":48.895,
-"width_mm":0.381
-},
-{
-"net":"+30V",
-"layer":"Top Layer",
-"x1_mm":81.5655,
-"y1_mm":49.704,
-"x2_mm":81.6055,
-"y2_mm":49.704,
-"width_mm":0.381
-},
-{
-"net":"+30V",
-"layer":"Top Layer",
-"x1_mm":81.6055,
-"y1_mm":49.704,
-"x2_mm":82.175,
-"y2_mm":49.1345,
-"width_mm":0.381
-},
-{
-"net":"+30V",
-"layer":"Top Layer",
-"x1_mm":82.175,
-"y1_mm":49.11818,
-"x2_mm":82.39819,
-"y2_mm":48.895,
-"width_mm":0.381
-},
-{
-"net":"+30V",
-"layer":"Top Layer",
-"x1_mm":80.645,
-"y1_mm":49.704,
-"x2_mm":80.744,
-"y2_mm":49.605,
-"width_mm":0.381
-},
-{
-"net":"+30V",
-"layer":"Top Layer",
-"x1_mm":80.744,
-"y1_mm":47.625,
-"x2_mm":80.744,
-"y2_mm":49.605,
-"width_mm":0.381
-},
-{
-"net":"+30V",
-"layer":"Top Layer",
-"x1_mm":78.2635,
-"y1_mm":49.704,
-"x2_mm":80.645,
-"y2_mm":49.704,
-"width_mm":0.381
-},
-{
-"net":"+30V",
-"layer":"Top Layer",
-"x1_mm":80.645,
-"y1_mm":49.704,
-"x2_mm":81.5655,
-"y2_mm":49.704,
-"width_mm":0.381
-},
-{
-"net":"NetC147_1",
-"layer":"Top Layer",
-"x1_mm":86.0425,
-"y1_mm":52.8765,
-"x2_mm":86.252,
-"y2_mm":53.086,
-"width_mm":0.381
-},
-{
-"net":"NetC147_1",
-"layer":"Top Layer",
-"x1_mm":84.582,
-"y1_mm":51.336,
-"x2_mm":86.0425,
-"y2_mm":52.7965,
-"width_mm":0.381
-},
-{
-"net":"NetC147_1",
-"layer":"Top Layer",
-"x1_mm":84.582,
-"y1_mm":50.165,
-"x2_mm":84.582,
-"y2_mm":51.336,
-"width_mm":0.381
-},
-{
-"net":"NetC147_1",
-"layer":"Top Layer",
-"x1_mm":86.0425,
-"y1_mm":52.7965,
-"x2_mm":86.0425,
-"y2_mm":52.8765,
-"width_mm":0.381
-},
-{
-"net":"NetC147_1",
-"layer":"Top Layer",
-"x1_mm":86.252,
-"y1_mm":53.086,
-"x2_mm":86.332,
-"y2_mm":53.086,
-"width_mm":0.381
-},
-{
-"net":"NetC147_2",
-"layer":"Top Layer",
-"x1_mm":87.992,
-"y1_mm":53.086,
-"x2_mm":88.2015,
-"y2_mm":52.8765,
-"width_mm":0.381
-},
-{
-"net":"NetC147_2",
-"layer":"Top Layer",
-"x1_mm":88.2015,
-"y1_mm":52.7965,
-"x2_mm":88.2015,
-"y2_mm":52.8765,
-"width_mm":0.381
-},
-{
-"net":"NetC147_2",
-"layer":"Top Layer",
-"x1_mm":88.2015,
-"y1_mm":52.7965,
-"x2_mm":89.587,
-"y2_mm":51.411,
-"width_mm":0.381
-},
-{
-"net":"NetC147_2",
-"layer":"Top Layer",
-"x1_mm":89.587,
-"y1_mm":50.165,
-"x2_mm":89.587,
-"y2_mm":51.411,
-"width_mm":0.381
-},
-{
-"net":"NetC147_2",
-"layer":"Top Layer",
-"x1_mm":87.912,
-"y1_mm":53.086,
-"x2_mm":87.992,
-"y2_mm":53.086,
-"width_mm":0.381
-},
-{
-"net":"NetR106_2",
-"layer":"Top Layer",
-"x1_mm":82.7595,
-"y1_mm":44.5325,
-"x2_mm":84.05815,
-"y2_mm":45.83115,
-"width_mm":0.381
-},
-{
-"net":"NetR106_2",
-"layer":"Top Layer",
-"x1_mm":84.05815,
-"y1_mm":45.83115,
-"x2_mm":84.05815,
-"y2_mm":46.30465,
-"width_mm":0.381
-},
-{
-"net":"NetR106_2",
-"layer":"Top Layer",
-"x1_mm":84.05815,
-"y1_mm":46.30465,
-"x2_mm":84.1085,
-"y2_mm":46.355,
-"width_mm":0.381
-},
-{
-"net":"NetR106_2",
-"layer":"Top Layer",
-"x1_mm":84.1085,
-"y1_mm":46.355,
-"x2_mm":84.582,
-"y2_mm":46.355,
-"width_mm":0.381
-},
-{
-"net":"NetR106_2",
-"layer":"Top Layer",
-"x1_mm":82.324,
-"y1_mm":44.323,
-"x2_mm":82.5335,
-"y2_mm":44.5325,
-"width_mm":0.381
-},
-{
-"net":"NetR106_2",
-"layer":"Top Layer",
-"x1_mm":82.5335,
-"y1_mm":44.5325,
-"x2_mm":82.7595,
-"y2_mm":44.5325,
-"width_mm":0.381
-},
-{
-"net":"NetC156_2",
-"layer":"Top Layer",
-"x1_mm":92.075,
-"y1_mm":49.728,
-"x2_mm":93.853,
-"y2_mm":49.728,
-"width_mm":0.381
-},
-{
-"net":"NetC156_2",
-"layer":"Top Layer",
-"x1_mm":89.587,
-"y1_mm":47.625,
-"x2_mm":91.313,
-"y2_mm":47.625,
-"width_mm":0.381
-},
-{
-"net":"NetR101_1",
-"layer":"Top Layer",
-"x1_mm":93.853,
-"y1_mm":47.78,
-"x2_mm":95.56,
-"y2_mm":47.78,
-"width_mm":0.381
-},
-{
-"net":"NetR101_1",
-"layer":"Top Layer",
-"x1_mm":95.56,
-"y1_mm":47.78,
-"x2_mm":95.758,
-"y2_mm":47.978,
-"width_mm":0.381
-},
-{
-"net":"GND",
-"layer":"Top Layer",
-"x1_mm":88.0142,
-"y1_mm":49.065,
-"x2_mm":88.1842,
-"y2_mm":48.895,
-"width_mm":0.381
-},
-{
-"net":"GND",
-"layer":"Top Layer",
-"x1_mm":88.1842,
-"y1_mm":48.895,
-"x2_mm":89.587,
-"y2_mm":48.895,
-"width_mm":0.381
-},
-{
-"net":"GND",
-"layer":"Top Layer",
-"x1_mm":87.982,
-"y1_mm":49.065,
-"x2_mm":88.0142,
-"y2_mm":49.065,
-"width_mm":0.381
-},
-{
-"net":"12V",
-"layer":"Top Layer",
-"x1_mm":106.786,
-"y1_mm":39.45,
-"x2_mm":106.807,
-"y2_mm":39.429,
-"width_mm":0.381
-},
-{
-"net":"12V",
-"layer":"Top Layer",
-"x1_mm":90.176,
-"y1_mm":39.45,
-"x2_mm":93.478,
-"y2_mm":39.45,
-"width_mm":0.381
-},
-{
-"net":"12V",
-"layer":"Top Layer",
-"x1_mm":93.478,
-"y1_mm":39.45,
-"x2_mm":96.78,
-"y2_mm":39.45,
-"width_mm":0.381
-},
-{
-"net":"12V",
-"layer":"Top Layer",
-"x1_mm":96.78,
-"y1_mm":39.45,
-"x2_mm":100.082,
-"y2_mm":39.45,
-"width_mm":0.381
-},
-{
-"net":"12V",
-"layer":"Top Layer",
-"x1_mm":106.807,
-"y1_mm":39.429,
-"x2_mm":107.033,
-"y2_mm":39.203,
-"width_mm":0.381
-},
-{
-"net":"NetC161_2",
-"layer":"Top Layer",
-"x1_mm":120.083,
-"y1_mm":34.163,
-"x2_mm":120.083,
-"y2_mm":37.973,
-"width_mm":0.381
-},
-{
-"net":"NetC161_2",
-"layer":"Top Layer",
-"x1_mm":111.92769,
-"y1_mm":32.35469,
-"x2_mm":111.92769,
-"y2_mm":32.8935,
-"width_mm":0.381
-},
-{
-"net":"NetC161_2",
-"layer":"Top Layer",
-"x1_mm":109.83532,
-"y1_mm":30.26232,
-"x2_mm":111.92769,
-"y2_mm":32.35469,
-"width_mm":0.381
-},
-{
-"net":"NetC161_2",
-"layer":"Top Layer",
-"x1_mm":109.83532,
-"y1_mm":29.7235,
-"x2_mm":109.83532,
-"y2_mm":30.26232,
-"width_mm":0.381
-},
-{
-"net":"NetC161_2",
-"layer":"Top Layer",
-"x1_mm":109.57582,
-"y1_mm":29.464,
-"x2_mm":109.83532,
-"y2_mm":29.7235,
-"width_mm":0.381
-},
-{
-"net":"NetC161_2",
-"layer":"Top Layer",
-"x1_mm":109.037,
-"y1_mm":29.464,
-"x2_mm":109.57582,
-"y2_mm":29.464,
-"width_mm":0.381
-},
-{
-"net":"NetC161_2",
-"layer":"Top Layer",
-"x1_mm":113.23719,
-"y1_mm":34.203,
-"x2_mm":113.284,
-"y2_mm":34.203,
-"width_mm":0.381
-},
-{
-"net":"NetC161_2",
-"layer":"Top Layer",
-"x1_mm":111.92769,
-"y1_mm":32.8935,
-"x2_mm":113.23719,
-"y2_mm":34.203,
-"width_mm":0.381
-},
-{
-"net":"NetC161_2",
-"layer":"Top Layer",
-"x1_mm":113.284,
-"y1_mm":34.203,
-"x2_mm":120.043,
-"y2_mm":34.203,
-"width_mm":0.381
-},
-{
-"net":"NetC161_2",
-"layer":"Top Layer",
-"x1_mm":120.043,
-"y1_mm":34.203,
-"x2_mm":120.083,
-"y2_mm":34.163,
-"width_mm":0.381
-},
-{
-"net":"NetC158_2",
-"layer":"Top Layer",
-"x1_mm":94.996,
-"y1_mm":29.405,
-"x2_mm":98.425,
-"y2_mm":29.405,
-"width_mm":0.381
-},
-{
-"net":"NetC158_2",
-"layer":"Top Layer",
-"x1_mm":98.425,
-"y1_mm":27.051,
-"x2_mm":98.425,
-"y2_mm":29.405,
-"width_mm":0.381
-},
-{
-"net":"NetC158_2",
-"layer":"Top Layer",
-"x1_mm":98.425,
-"y1_mm":27.051,
-"x2_mm":99.822,
-"y2_mm":25.654,
-"width_mm":0.381
-},
-{
-"net":"NetC158_2",
-"layer":"Top Layer",
-"x1_mm":99.822,
-"y1_mm":25.654,
-"x2_mm":103.886,
-"y2_mm":25.654,
-"width_mm":0.381
-},
-{
-"net":"NetC147_2",
-"layer":"Top Layer",
-"x1_mm":83.568,
-"y1_mm":30.48,
-"x2_mm":83.568,
-"y2_mm":35.729,
-"width_mm":0.381
-},
-{
-"net":"NetC147_2",
-"layer":"Top Layer",
-"x1_mm":83.568,
-"y1_mm":35.729,
-"x2_mm":84.074,
-"y2_mm":36.235,
-"width_mm":0.381
-},
-{
-"net":"12V",
-"layer":"Top Layer",
-"x1_mm":89.71739,
-"y1_mm":39.45,
-"x2_mm":90.176,
-"y2_mm":39.45,
-"width_mm":0.381
-},
-{
-"net":"12V",
-"layer":"Top Layer",
-"x1_mm":89.14789,
-"y1_mm":40.0195,
-"x2_mm":89.71739,
-"y2_mm":39.45,
-"width_mm":0.381
-},
-{
-"net":"12V",
-"layer":"Top Layer",
-"x1_mm":89.14789,
-"y1_mm":40.0195,
-"x2_mm":89.14789,
-"y2_mm":40.47811,
-"width_mm":0.381
-},
-{
-"net":"12V",
-"layer":"Top Layer",
-"x1_mm":88.42231,
-"y1_mm":41.20368,
-"x2_mm":89.14789,
-"y2_mm":40.47811,
-"width_mm":0.381
-},
-{
-"net":"12V",
-"layer":"Top Layer",
-"x1_mm":84.10532,
-"y1_mm":41.20368,
-"x2_mm":88.42231,
-"y2_mm":41.20368,
-"width_mm":0.381
-},
-{
-"net":"12V",
-"layer":"Top Layer",
-"x1_mm":84.074,
-"y1_mm":41.235,
-"x2_mm":84.10532,
-"y2_mm":41.20368,
-"width_mm":0.381
-},
-{
-"net":"NetC149_2",
-"layer":"Top Layer",
-"x1_mm":136.21,
-"y1_mm":12.446,
-"x2_mm":136.37,
-"y2_mm":12.286,
-"width_mm":0.381
-},
-{
-"net":"NetC149_2",
-"layer":"Top Layer",
-"x1_mm":136.37,
-"y1_mm":10.287,
-"x2_mm":136.37,
-"y2_mm":12.286,
-"width_mm":0.381
-},
-{
-"net":"NetC149_2",
-"layer":"Top Layer",
-"x1_mm":136.144,
-"y1_mm":12.38,
-"x2_mm":136.21,
-"y2_mm":12.446,
-"width_mm":0.381
-},
-{
-"net":"NetC149_2",
-"layer":"Top Layer",
-"x1_mm":132.08,
-"y1_mm":12.38,
-"x2_mm":136.144,
-"y2_mm":12.38,
-"width_mm":0.381
-},
-{
-"net":"NetC149_2",
-"layer":"Top Layer",
-"x1_mm":132.08,
-"y1_mm":15.192,
-"x2_mm":132.114,
-"y2_mm":15.226,
-"width_mm":0.381
-},
-{
-"net":"NetC149_2",
-"layer":"Top Layer",
-"x1_mm":132.08,
-"y1_mm":12.38,
-"x2_mm":132.08,
-"y2_mm":15.192,
-"width_mm":0.381
-},
-{
-"net":"NetC148_2",
-"layer":"Top Layer",
-"x1_mm":126.405,
-"y1_mm":20.506,
-"x2_mm":127.085,
-"y2_mm":19.826,
-"width_mm":0.381
-},
-{
-"net":"NetC148_2",
-"layer":"Top Layer",
-"x1_mm":126.365,
-"y1_mm":20.506,
-"x2_mm":126.405,
-"y2_mm":20.506,
-"width_mm":0.381
-},
-{
-"net":"NetC148_2",
-"layer":"Top Layer",
-"x1_mm":132.08,
-"y1_mm":19.86,
-"x2_mm":132.114,
-"y2_mm":19.826,
-"width_mm":0.381
-},
-{
-"net":"NetC148_2",
-"layer":"Top Layer",
-"x1_mm":132.08,
-"y1_mm":19.86,
-"x2_mm":132.08,
-"y2_mm":22.418,
-"width_mm":0.381
-},
-{
-"net":"NetC148_2",
-"layer":"Top Layer",
-"x1_mm":127.085,
-"y1_mm":19.826,
-"x2_mm":132.114,
-"y2_mm":19.826,
-"width_mm":0.381
-},
-{
-"net":"12V",
-"layer":"Top Layer",
-"x1_mm":133.797,
-"y1_mm":24.13,
-"x2_mm":133.797,
-"y2_mm":36.068,
-"width_mm":0.381
-},
-{
-"net":"NetC135_2",
-"layer":"Top Layer",
-"x1_mm":140.778,
-"y1_mm":35.24,
-"x2_mm":140.843,
-"y2_mm":35.24,
-"width_mm":0.381
-},
-{
-"net":"NetC135_2",
-"layer":"Top Layer",
-"x1_mm":140.3985,
-"y1_mm":35.6195,
-"x2_mm":140.778,
-"y2_mm":35.24,
-"width_mm":0.381
-},
-{
-"net":"NetC135_2",
-"layer":"Top Layer",
-"x1_mm":140.3985,
-"y1_mm":35.6195,
-"x2_mm":140.3985,
-"y2_mm":35.6845,
-"width_mm":0.381
-},
-{
-"net":"NetC135_2",
-"layer":"Top Layer",
-"x1_mm":140.015,
-"y1_mm":36.068,
-"x2_mm":140.3985,
-"y2_mm":35.6845,
-"width_mm":0.381
-},
-{
-"net":"NetC135_2",
-"layer":"Top Layer",
-"x1_mm":143.718,
-"y1_mm":35.24,
-"x2_mm":143.798,
-"y2_mm":35.32,
-"width_mm":0.381
-},
-{
-"net":"NetC135_2",
-"layer":"Top Layer",
-"x1_mm":140.843,
-"y1_mm":35.24,
-"x2_mm":143.718,
-"y2_mm":35.24,
-"width_mm":0.381
-},
-{
-"net":"NetC135_2",
-"layer":"Top Layer",
-"x1_mm":135.697,
-"y1_mm":36.068,
-"x2_mm":140.015,
-"y2_mm":36.068,
-"width_mm":0.381
-},
-{
-"net":"+5VIN",
-"layer":"Top Layer",
-"x1_mm":143.495,
-"y1_mm":25.705,
-"x2_mm":143.764,
-"y2_mm":25.974,
-"width_mm":0.381
-},
-{
-"net":"+5VIN",
-"layer":"Top Layer",
-"x1_mm":140.843,
-"y1_mm":25.705,
-"x2_mm":143.495,
-"y2_mm":25.705,
-"width_mm":0.381
-},
-{
-"net":"NetC136_2",
-"layer":"Top Layer",
-"x1_mm":143.798,
-"y1_mm":27.908,
-"x2_mm":143.798,
-"y2_mm":30.72,
-"width_mm":0.381
-},
-{
-"net":"NetC136_2",
-"layer":"Top Layer",
-"x1_mm":143.764,
-"y1_mm":27.874,
-"x2_mm":143.798,
-"y2_mm":27.908,
-"width_mm":0.381
-},
-{
-"net":"NetC136_2",
-"layer":"Top Layer",
-"x1_mm":147.701,
-"y1_mm":27.874,
-"x2_mm":147.767,
-"y2_mm":27.94,
-"width_mm":0.381
-},
-{
-"net":"NetC136_2",
-"layer":"Top Layer",
-"x1_mm":143.764,
-"y1_mm":27.874,
-"x2_mm":147.701,
-"y2_mm":27.874,
-"width_mm":0.381
-},
-{
-"net":"NetC136_2",
-"layer":"Top Layer",
-"x1_mm":147.767,
-"y1_mm":26.195,
-"x2_mm":147.767,
-"y2_mm":27.94,
-"width_mm":0.381
-},
-{
-"net":"NetC136_2",
-"layer":"Top Layer",
-"x1_mm":147.767,
-"y1_mm":26.195,
-"x2_mm":147.927,
-"y2_mm":26.035,
-"width_mm":0.381
-},
-{
-"net":"+5VIN",
-"layer":"Top Layer",
-"x1_mm":144.2085,
-"y1_mm":25.5295,
-"x2_mm":144.2085,
-"y2_mm":25.5945,
-"width_mm":0.381
-},
-{
-"net":"+5VIN",
-"layer":"Top Layer",
-"x1_mm":143.829,
-"y1_mm":25.974,
-"x2_mm":144.2085,
-"y2_mm":25.5945,
-"width_mm":0.381
-},
-{
-"net":"+5VIN",
-"layer":"Top Layer",
-"x1_mm":143.764,
-"y1_mm":25.974,
-"x2_mm":143.829,
-"y2_mm":25.974,
-"width_mm":0.381
-},
-{
-"net":"+5V",
-"layer":"Top Layer",
-"x1_mm":119.634,
-"y1_mm":17.272,
-"x2_mm":121.539,
-"y2_mm":17.272,
-"width_mm":0.381
-},
-{
-"net":"+5V",
-"layer":"Top Layer",
-"x1_mm":124.714,
-"y1_mm":14.097,
-"x2_mm":128.651,
-"y2_mm":14.097,
-"width_mm":0.381
-},
-{
-"net":"+5V",
-"layer":"Top Layer",
-"x1_mm":128.651,
-"y1_mm":14.097,
-"x2_mm":129.397,
-"y2_mm":13.351,
-"width_mm":0.381
-},
-{
-"net":"+21V",
-"layer":"Top Layer",
-"x1_mm":61.07732,
-"y1_mm":80.38132,
-"x2_mm":61.214,
-"y2_mm":80.518,
-"width_mm":0.381
-},
-{
-"net":"+30V",
-"layer":"Top Layer",
-"x1_mm":60.66191,
-"y1_mm":69.215,
-"x2_mm":63.61732,
-"y2_mm":66.25959,
-"width_mm":0.381
-},
-{
-"net":"NetD13_2",
-"layer":"Top Layer",
-"x1_mm":71.793,
-"y1_mm":82.407,
-"x2_mm":73.622,
-"y2_mm":82.407,
-"width_mm":0.381
-},
-{
-"net":"NetD14_1",
-"layer":"Top Layer",
-"x1_mm":75.222,
-"y1_mm":82.407,
-"x2_mm":77.051,
-"y2_mm":82.407,
-"width_mm":0.381
-},
-{
-"net":"+30V",
-"layer":"Top Layer",
-"x1_mm":58.646,
-"y1_mm":51.534,
-"x2_mm":58.674,
-"y2_mm":51.562,
-"width_mm":0.381
-},
-{
-"net":"+30V",
-"layer":"Top Layer",
-"x1_mm":51.689,
-"y1_mm":51.534,
-"x2_mm":53.848,
-"y2_mm":51.534,
-"width_mm":0.381
-},
-{
-"net":"+30V",
-"layer":"Top Layer",
-"x1_mm":53.848,
-"y1_mm":51.534,
-"x2_mm":58.646,
-"y2_mm":51.534,
-"width_mm":0.381
-},
-{
-"net":"NetC169_1",
-"layer":"Top Layer",
-"x1_mm":50.927,
-"y1_mm":31.242,
-"x2_mm":54.17,
-"y2_mm":31.242,
-"width_mm":0.381
-},
-{
-"net":"NetC169_1",
-"layer":"Top Layer",
-"x1_mm":52.31701,
-"y1_mm":37.72599,
-"x2_mm":52.31701,
-"y2_mm":40.37632,
-"width_mm":0.381
-},
-{
-"net":"NetC169_1",
-"layer":"Top Layer",
-"x1_mm":52.31701,
-"y1_mm":37.72599,
-"x2_mm":54.61,
-"y2_mm":35.433,
-"width_mm":0.381
-},
-{
-"net":"NetC169_1",
-"layer":"Top Layer",
-"x1_mm":54.17,
-"y1_mm":31.242,
-"x2_mm":54.61,
-"y2_mm":31.682,
-"width_mm":0.381
-},
-{
-"net":"NetC165_2",
-"layer":"Top Layer",
-"x1_mm":54.356,
-"y1_mm":18.857,
-"x2_mm":54.356,
-"y2_mm":21.114,
-"width_mm":0.381
-},
-{
-"net":"NetC172_2",
-"layer":"Top Layer",
-"x1_mm":45.974,
-"y1_mm":31.71,
-"x2_mm":45.974,
-"y2_mm":38.735,
-"width_mm":0.381
-},
-{
-"net":"NetD8_1",
-"layer":"Top Layer",
-"x1_mm":50.038,
-"y1_mm":45.466,
-"x2_mm":50.038,
-"y2_mm":52.578,
-"width_mm":0.381
-},
-{
-"net":"NetD8_1",
-"layer":"Top Layer",
-"x1_mm":50.038,
-"y1_mm":52.578,
-"x2_mm":50.574,
-"y2_mm":53.114,
-"width_mm":0.381
-},
-{
-"net":"NetD8_1",
-"layer":"Top Layer",
-"x1_mm":50.574,
-"y1_mm":53.114,
-"x2_mm":51.689,
-"y2_mm":53.114,
-"width_mm":0.381
-},
-{
-"net":"NetR113_2",
-"layer":"Top Layer",
-"x1_mm":45.438,
-"y1_mm":20.955,
-"x2_mm":45.438,
-"y2_mm":22.606,
-"width_mm":0.381
-},
-{
-"net":"NetC172_2",
-"layer":"Top Layer",
-"x1_mm":45.887,
-"y1_mm":31.623,
-"x2_mm":47.018,
-"y2_mm":30.492,
-"width_mm":0.381
-},
-{
-"net":"NetC155_2",
-"layer":"Top Layer",
-"x1_mm":93.754,
-"y1_mm":53.058,
-"x2_mm":93.853,
-"y2_mm":52.959,
-"width_mm":0.381
-},
-{
-"net":"NetC155_2",
-"layer":"Top Layer",
-"x1_mm":93.853,
-"y1_mm":51.308,
-"x2_mm":93.853,
-"y2_mm":52.959,
-"width_mm":0.381
-},
-{
-"net":"NetR98_1",
-"layer":"Top Layer",
-"x1_mm":93.853,
-"y1_mm":44.351,
-"x2_mm":93.853,
-"y2_mm":46.2,
-"width_mm":0.381
-},
-{
-"net":"NetR98_1",
-"layer":"Top Layer",
-"x1_mm":89.587,
-"y1_mm":46.355,
-"x2_mm":93.853,
-"y2_mm":46.355,
-"width_mm":0.381
-},
-{
-"net":"12V",
-"layer":"Top Layer",
-"x1_mm":93.853,
-"y1_mm":39.825,
-"x2_mm":93.853,
-"y2_mm":42.771,
-"width_mm":0.381
-},
-{
-"net":"12V",
-"layer":"Top Layer",
-"x1_mm":93.478,
-"y1_mm":39.45,
-"x2_mm":93.853,
-"y2_mm":39.825,
-"width_mm":0.381
-},
-{
-"net":"NetC156_2",
-"layer":"Top Layer",
-"x1_mm":91.313,
-"y1_mm":47.625,
-"x2_mm":92.075,
-"y2_mm":48.387,
-"width_mm":0.381
-},
-{
-"net":"NetC156_2",
-"layer":"Top Layer",
-"x1_mm":92.075,
-"y1_mm":48.387,
-"x2_mm":92.075,
-"y2_mm":49.728,
-"width_mm":0.381
-},
-{
-"net":"GND",
-"layer":"Top Layer",
-"x1_mm":90.57185,
-"y1_mm":48.91585,
-"x2_mm":91.059,
-"y2_mm":49.403,
-"width_mm":0.381
-},
-{
-"net":"GND",
-"layer":"Top Layer",
-"x1_mm":89.60785,
-"y1_mm":48.91585,
-"x2_mm":90.57185,
-"y2_mm":48.91585,
-"width_mm":0.381
-},
-{
-"net":"GND",
-"layer":"Top Layer",
-"x1_mm":89.587,
-"y1_mm":48.895,
-"x2_mm":89.60785,
-"y2_mm":48.91585,
-"width_mm":0.381
-},
-{
-"net":"GND",
-"layer":"Top Layer",
-"x1_mm":91.059,
-"y1_mm":49.403,
-"x2_mm":91.059,
-"y2_mm":50.673,
-"width_mm":0.381
-},
-{
-"net":"GND",
-"layer":"Top Layer",
-"x1_mm":92.075,
-"y1_mm":51.24489,
-"x2_mm":92.075,
-"y2_mm":51.308,
-"width_mm":0.381
-},
-{
-"net":"GND",
-"layer":"Top Layer",
-"x1_mm":91.059,
-"y1_mm":50.673,
-"x2_mm":91.42139,
-"y2_mm":51.03539,
-"width_mm":0.381
-},
-{
-"net":"GND",
-"layer":"Top Layer",
-"x1_mm":91.42139,
-"y1_mm":51.03539,
-"x2_mm":91.8655,
-"y2_mm":51.03539,
-"width_mm":0.381
-},
-{
-"net":"GND",
-"layer":"Top Layer",
-"x1_mm":91.8655,
-"y1_mm":51.03539,
-"x2_mm":92.075,
-"y2_mm":51.24489,
-"width_mm":0.381
-},
-{
-"net":"GND",
-"layer":"Top Layer",
-"x1_mm":92.174,
-"y1_mm":51.407,
-"x2_mm":92.174,
-"y2_mm":53.058,
-"width_mm":0.381
-},
-{
-"net":"GND",
-"layer":"Top Layer",
-"x1_mm":92.075,
-"y1_mm":51.308,
-"x2_mm":92.174,
-"y2_mm":51.407,
-"width_mm":0.381
-},
-{
-"net":"+5V",
-"layer":"Top Layer",
-"x1_mm":132.5245,
-"y1_mm":10.0355,
-"x2_mm":135.089,
-"y2_mm":7.471,
-"width_mm":0.381
-},
-{
-"net":"12V",
-"layer":"Top Layer",
-"x1_mm":141.097,
-"y1_mm":24.003,
-"x2_mm":145.637,
-"y2_mm":19.463,
-"width_mm":0.381
-},
-{
-"net":"12V",
-"layer":"Top Layer",
-"x1_mm":132.395,
-"y1_mm":24.003,
-"x2_mm":141.097,
-"y2_mm":24.003,
-"width_mm":0.381
-},
-{
-"net":"12V",
-"layer":"Top Layer",
-"x1_mm":145.637,
-"y1_mm":9.493,
-"x2_mm":145.637,
-"y2_mm":19.463,
-"width_mm":0.381
-},
-{
-"net":"+200V",
-"layer":"Top Layer",
-"x1_mm":54.356,
-"y1_mm":10.668,
-"x2_mm":54.356,
-"y2_mm":16.957,
-"width_mm":0.254
-},
-{
-"net":"+200V",
-"layer":"Top Layer",
-"x1_mm":54.229,
-"y1_mm":10.541,
-"x2_mm":54.356,
-"y2_mm":10.668,
-"width_mm":0.254
-},
-{
-"net":"-5V",
-"layer":"Top Layer",
-"x1_mm":82.738,
-"y1_mm":10.922,
-"x2_mm":82.804,
-"y2_mm":10.988,
-"width_mm":0.254
-},
-{
-"net":"-5V",
-"layer":"Top Layer",
-"x1_mm":80.391,
-"y1_mm":10.922,
-"x2_mm":82.738,
-"y2_mm":10.922,
-"width_mm":0.254
-},
-{
-"net":"+5V",
-"layer":"Top Layer",
-"x1_mm":121.539,
-"y1_mm":17.272,
-"x2_mm":122.809,
-"y2_mm":16.002,
-"width_mm":0.381
-},
-{
-"net":"+5V",
-"layer":"Top Layer",
-"x1_mm":122.809,
-"y1_mm":16.002,
-"x2_mm":124.714,
-"y2_mm":14.097,
-"width_mm":0.381
-},
-{
-"net":"FLJC",
-"layer":"Top Layer",
-"x1_mm":147.637,
-"y1_mm":9.493,
-"x2_mm":147.701,
-"y2_mm":9.557,
-"width_mm":0.381
-},
-{
-"net":"3.3VFSALC",
-"layer":"Top Layer",
-"x1_mm":121.9555,
-"y1_mm":6.8225,
-"x2_mm":121.9555,
-"y2_mm":6.9025,
-"width_mm":0.381
-},
-{
-"net":"3.3VFSALC",
-"layer":"Top Layer",
-"x1_mm":121.746,
-"y1_mm":7.112,
-"x2_mm":121.9555,
-"y2_mm":6.9025,
-"width_mm":0.381
-},
-{
-"net":"3.3VFSALC",
-"layer":"Top Layer",
-"x1_mm":121.666,
-"y1_mm":7.112,
-"x2_mm":121.746,
-"y2_mm":7.112,
-"width_mm":0.381
-},
-{
-"net":"NetC147_2",
-"layer":"Top Layer",
-"x1_mm":83.568,
-"y1_mm":30.48,
-"x2_mm":86.995,
-"y2_mm":30.48,
-"width_mm":0.381
-},
-{
-"net":"12V",
-"layer":"Top Layer",
-"x1_mm":133.797,
-"y1_mm":36.068,
-"x2_mm":133.797,
-"y2_mm":36.133,
-"width_mm":0.381
-},
-{
-"net":"12V",
-"layer":"Top Layer",
-"x1_mm":133.4175,
-"y1_mm":36.5125,
-"x2_mm":133.797,
-"y2_mm":36.133,
-"width_mm":0.381
-},
-{
-"net":"12V",
-"layer":"Top Layer",
-"x1_mm":133.3525,
-"y1_mm":36.5125,
-"x2_mm":133.4175,
-"y2_mm":36.5125,
-"width_mm":0.381
-},
-{
-"net":"12V",
-"layer":"Top Layer",
-"x1_mm":107.033,
-"y1_mm":39.203,
-"x2_mm":113.284,
-"y2_mm":39.203,
-"width_mm":0.381
-},
-{
-"net":"12V",
-"layer":"Top Layer",
-"x1_mm":113.284,
-"y1_mm":39.203,
-"x2_mm":114.55311,
-"y2_mm":40.47211,
-"width_mm":0.381
-},
-{
-"net":"12V",
-"layer":"Top Layer",
-"x1_mm":114.55311,
-"y1_mm":40.47211,
-"x2_mm":129.39289,
-"y2_mm":40.47211,
-"width_mm":0.381
-},
-{
-"net":"12V",
-"layer":"Top Layer",
-"x1_mm":129.39289,
-"y1_mm":40.47211,
-"x2_mm":133.3525,
-"y2_mm":36.5125,
-"width_mm":0.381
-},
-{
-"net":"NetC158_2",
-"layer":"Top Layer",
-"x1_mm":107.529,
-"y1_mm":11.684,
-"x2_mm":107.529,
-"y2_mm":17.653,
-"width_mm":0.381
-},
-{
-"net":"NetC158_2",
-"layer":"Top Layer",
-"x1_mm":112.395,
-"y1_mm":20.828,
-"x2_mm":112.395,
-"y2_mm":25.654,
-"width_mm":0.381
-},
-{
-"net":"NetC158_2",
-"layer":"Top Layer",
-"x1_mm":109.037,
-"y1_mm":25.654,
-"x2_mm":112.395,
-"y2_mm":25.654,
-"width_mm":0.381
-},
-{
-"net":"NetC158_2",
-"layer":"Top Layer",
-"x1_mm":112.395,
-"y1_mm":25.654,
-"x2_mm":118.237,
-"y2_mm":25.654,
-"width_mm":0.381
-},
-{
-"net":"NetC158_2",
-"layer":"Top Layer",
-"x1_mm":109.319,
-"y1_mm":17.752,
-"x2_mm":112.395,
-"y2_mm":20.828,
-"width_mm":0.381
-},
-{
-"net":"NetC158_2",
-"layer":"Top Layer",
-"x1_mm":104.775,
-"y1_mm":17.752,
-"x2_mm":109.319,
-"y2_mm":17.752,
-"width_mm":0.381
-},
-{
-"net":"NetC158_2",
-"layer":"Top Layer",
-"x1_mm":103.124,
-"y1_mm":17.752,
-"x2_mm":104.775,
-"y2_mm":17.752,
-"width_mm":0.381
-},
-{
-"net":"NetC165_2",
-"layer":"Top Layer",
-"x1_mm":49.718,
-"y1_mm":18.857,
-"x2_mm":54.356,
-"y2_mm":18.857,
-"width_mm":0.381
-},
-{
-"net":"NetR110_2",
-"layer":"Top Layer",
-"x1_mm":49.911,
-"y1_mm":60.861,
-"x2_mm":49.911,
-"y2_mm":61.722,
-"width_mm":0.381
-},
-{
-"net":"NetR110_2",
-"layer":"Top Layer",
-"x1_mm":49.911,
-"y1_mm":61.722,
-"x2_mm":49.911,
-"y2_mm":62.583,
-"width_mm":0.381
-},
-{
-"net":"GND",
-"layer":"Top Layer",
-"x1_mm":62.794,
-"y1_mm":80.518,
-"x2_mm":64.516,
-"y2_mm":80.518,
-"width_mm":0.381
-},
-{
-"net":"NetC147_2",
-"layer":"Top Layer",
-"x1_mm":87.912,
-"y1_mm":53.086,
-"x2_mm":87.912,
-"y2_mm":54.00582,
-"width_mm":0.381
-},
-{
-"net":"NetC147_2",
-"layer":"Top Layer",
-"x1_mm":87.68882,
-"y1_mm":54.229,
-"x2_mm":87.912,
-"y2_mm":54.00582,
-"width_mm":0.381
-},
-{
-"net":"NetC147_2",
-"layer":"Top Layer",
-"x1_mm":85.471,
-"y1_mm":54.229,
-"x2_mm":87.68882,
-"y2_mm":54.229,
-"width_mm":0.381
-},
-{
-"net":"NetC147_2",
-"layer":"Top Layer",
-"x1_mm":83.947,
-"y1_mm":52.705,
-"x2_mm":85.471,
-"y2_mm":54.229,
-"width_mm":0.381
-},
-{
-"net":"3.3VFSALC",
-"layer":"Top Layer",
-"x1_mm":145.57562,
-"y1_mm":6.63762,
-"x2_mm":145.57562,
-"y2_mm":7.40962,
-"width_mm":0.381
-},
-{
-"net":"3.3VFSALC",
-"layer":"Top Layer",
-"x1_mm":145.57562,
-"y1_mm":7.40962,
-"x2_mm":145.637,
-"y2_mm":7.471,
-"width_mm":0.381
-},
-{
-"net":"3.3VFSALC",
-"layer":"Top Layer",
-"x1_mm":121.9555,
-"y1_mm":6.8225,
-"x2_mm":122.682,
-"y2_mm":6.096,
-"width_mm":0.381
-},
-{
-"net":"3.3VFSALC",
-"layer":"Top Layer",
-"x1_mm":122.682,
-"y1_mm":6.096,
-"x2_mm":145.034,
-"y2_mm":6.096,
-"width_mm":0.381
-},
-{
-"net":"3.3VFSALC",
-"layer":"Top Layer",
-"x1_mm":145.034,
-"y1_mm":6.096,
-"x2_mm":145.57562,
-"y2_mm":6.63762,
-"width_mm":0.381
-},
-{
-"net":"NetD13_1",
-"layer":"Top Layer",
-"x1_mm":66.096,
-"y1_mm":80.518,
-"x2_mm":66.207,
-"y2_mm":80.629,
-"width_mm":0.381
-},
-{
-"net":"NetR126_2",
-"layer":"Top Layer",
-"x1_mm":81.976,
-"y1_mm":74.869,
-"x2_mm":81.976,
-"y2_mm":76.851,
-"width_mm":0.508
-},
-{
-"net":"NetR126_2",
-"layer":"Top Layer",
-"x1_mm":81.976,
-"y1_mm":74.869,
-"x2_mm":82.042,
-"y2_mm":74.803,
-"width_mm":0.381
-},
-{
-"net":"NetR124_1",
-"layer":"Top Layer",
-"x1_mm":81.026,
-"y1_mm":78.851,
-"x2_mm":81.085,
-"y2_mm":78.91,
-"width_mm":0.381
-},
-{
-"net":"NetR127_2",
-"layer":"Top Layer",
-"x1_mm":76.388,
-"y1_mm":76.008,
-"x2_mm":76.388,
-"y2_mm":76.073,
-"width_mm":0.381
-},
-{
-"net":"NetR127_2",
-"layer":"Top Layer",
-"x1_mm":76.388,
-"y1_mm":76.008,
-"x2_mm":76.7675,
-"y2_mm":75.6285,
-"width_mm":0.381
-},
-{
-"net":"NetD13_1",
-"layer":"Top Layer",
-"x1_mm":66.096,
-"y1_mm":80.518,
-"x2_mm":66.15732,
-"y2_mm":80.518,
-"width_mm":0.381
-},
-{
-"net":"NetD13_1",
-"layer":"Top Layer",
-"x1_mm":66.15732,
-"y1_mm":80.518,
-"x2_mm":70.193,
-"y2_mm":80.518,
-"width_mm":1
-},
-{
-"net":"NetD13_1",
-"layer":"Top Layer",
-"x1_mm":70.193,
-"y1_mm":79.144,
-"x2_mm":70.193,
-"y2_mm":80.518,
-"width_mm":1
-},
-{
-"net":"NetR127_1",
-"layer":"Top Layer",
-"x1_mm":74.25,
-"y1_mm":76.311,
-"x2_mm":74.488,
-"y2_mm":76.073,
-"width_mm":0.381
-},
-{
-"net":"NetR126_2",
-"layer":"Top Layer",
-"x1_mm":82.042,
-"y1_mm":72.997,
-"x2_mm":82.042,
-"y2_mm":74.803,
-"width_mm":0.508
-},
-{
-"net":"NetR126_2",
-"layer":"Top Layer",
-"x1_mm":81.943,
-"y1_mm":72.898,
-"x2_mm":82.042,
-"y2_mm":72.997,
-"width_mm":0.381
-},
-{
-"net":"NetR127_2",
-"layer":"Top Layer",
-"x1_mm":76.388,
-"y1_mm":76.073,
-"x2_mm":80.142,
-"y2_mm":76.073,
-"width_mm":0.381
-},
-{
-"net":"NetR127_2",
-"layer":"Top Layer",
-"x1_mm":80.142,
-"y1_mm":74.803,
-"x2_mm":80.142,
-"y2_mm":76.073,
-"width_mm":0.381
-},
-{
-"net":"NetR127_2",
-"layer":"Top Layer",
-"x1_mm":80.142,
-"y1_mm":76.073,
-"x2_mm":80.142,
-"y2_mm":76.637,
-"width_mm":0.381
-},
-{
-"net":"+30V",
-"layer":"Top Layer",
-"x1_mm":80.363,
-"y1_mm":70.358,
-"x2_mm":80.363,
-"y2_mm":72.898,
-"width_mm":0.508
-},
-{
-"net":"NetR124_1",
-"layer":"Top Layer",
-"x1_mm":81.01,
-"y1_mm":78.867,
-"x2_mm":81.026,
-"y2_mm":78.851,
-"width_mm":0.381
-},
-{
-"net":"NetR124_1",
-"layer":"Top Layer",
-"x1_mm":77.91,
-"y1_mm":78.867,
-"x2_mm":81.01,
-"y2_mm":78.867,
-"width_mm":0.508
-},
-{
-"net":"+21V",
-"layer":"Top Layer",
-"x1_mm":53.594,
-"y1_mm":71.814,
-"x2_mm":53.6595,
-"y2_mm":71.814,
-"width_mm":0.381
-},
-{
-"net":"+21V",
-"layer":"Top Layer",
-"x1_mm":54.229,
-"y1_mm":72.3835,
-"x2_mm":54.229,
-"y2_mm":77.597,
-"width_mm":0.504
-},
-{
-"net":"+21V",
-"layer":"Top Layer",
-"x1_mm":53.6595,
-"y1_mm":71.814,
-"x2_mm":54.229,
-"y2_mm":72.3835,
-"width_mm":0.381
-},
-{
-"net":"+21V",
-"layer":"Top Layer",
-"x1_mm":60.57932,
-"y1_mm":77.597,
-"x2_mm":61.07732,
-"y2_mm":77.099,
-"width_mm":0.504
-},
-{
-"net":"+30V",
-"layer":"Top Layer",
-"x1_mm":55.812,
-"y1_mm":65.405,
-"x2_mm":60.53491,
-"y2_mm":65.405,
-"width_mm":0.381
-},
-{
-"net":"FS",
-"layer":"Top Layer",
-"x1_mm":71.4375,
-"y1_mm":74.6085,
-"x2_mm":71.4375,
-"y2_mm":74.6735,
-"width_mm":0.381
-},
-{
-"net":"FS",
-"layer":"Top Layer",
-"x1_mm":71.4375,
-"y1_mm":74.6085,
-"x2_mm":71.817,
-"y2_mm":74.229,
-"width_mm":0.381
-},
-{
-"net":"FS",
-"layer":"Top Layer",
-"x1_mm":71.817,
-"y1_mm":74.229,
-"x2_mm":71.882,
-"y2_mm":74.229,
-"width_mm":0.381
-},
-{
-"net":"FS",
-"layer":"Top Layer",
-"x1_mm":68.453,
-"y1_mm":76.454,
-"x2_mm":69.657,
-"y2_mm":76.454,
-"width_mm":0.381
-},
-{
-"net":"FS",
-"layer":"Top Layer",
-"x1_mm":69.657,
-"y1_mm":76.454,
-"x2_mm":71.4375,
-"y2_mm":74.6735,
-"width_mm":0.381
-},
-{
-"net":"NetR127_1",
-"layer":"Top Layer",
-"x1_mm":74.62732,
-"y1_mm":75.08968,
-"x2_mm":74.62732,
-"y2_mm":75.93368,
-"width_mm":0.381
-},
-{
-"net":"NetR127_1",
-"layer":"Top Layer",
-"x1_mm":74.488,
-"y1_mm":76.073,
-"x2_mm":74.62732,
-"y2_mm":75.93368,
-"width_mm":0.381
-},
-{
-"net":"NetR222_1",
-"layer":"Top Layer",
-"x1_mm":71.882,
-"y1_mm":72.329,
-"x2_mm":71.959,
-"y2_mm":72.406,
-"width_mm":0.381
-},
-{
-"net":"NetR222_1",
-"layer":"Top Layer",
-"x1_mm":71.959,
-"y1_mm":72.406,
-"x2_mm":74.361,
-"y2_mm":72.406,
-"width_mm":0.381
-},
-{
-"net":"GND",
-"layer":"Top Layer",
-"x1_mm":76.3705,
-"y1_mm":72.517,
-"x2_mm":77.724,
-"y2_mm":72.517,
-"width_mm":0.381
-},
-{
-"net":"GND",
-"layer":"Top Layer",
-"x1_mm":76.261,
-"y1_mm":72.406,
-"x2_mm":76.261,
-"y2_mm":72.4075,
-"width_mm":0.381
-},
-{
-"net":"GND",
-"layer":"Top Layer",
-"x1_mm":76.261,
-"y1_mm":72.4075,
-"x2_mm":76.3705,
-"y2_mm":72.517,
-"width_mm":0.381
-},
-{
-"net":"+21V",
-"layer":"Top Layer",
-"x1_mm":61.07732,
-"y1_mm":76.71499,
-"x2_mm":61.07732,
-"y2_mm":77.099,
-"width_mm":0.381
-},
-{
-"net":"+21V",
-"layer":"Top Layer",
-"x1_mm":61.07732,
-"y1_mm":77.099,
-"x2_mm":61.07732,
-"y2_mm":80.38132,
-"width_mm":1
-},
-{
-"net":"+21V",
-"layer":"Top Layer",
-"x1_mm":47.879,
-"y1_mm":77.597,
-"x2_mm":54.229,
-"y2_mm":77.597,
-"width_mm":0.504
-},
-{
-"net":"+21V",
-"layer":"Top Layer",
-"x1_mm":54.229,
-"y1_mm":77.597,
-"x2_mm":60.57932,
-"y2_mm":77.597,
-"width_mm":1
-},
-{
-"net":"NetR127_1",
-"layer":"Top Layer",
-"x1_mm":74.62732,
-"y1_mm":75.08968,
-"x2_mm":75.311,
-"y2_mm":74.406,
-"width_mm":0.381
-},
-{
-"net":"NetR127_1",
-"layer":"Top Layer",
-"x1_mm":75.311,
-"y1_mm":74.406,
-"x2_mm":75.3745,
-"y2_mm":74.3425,
-"width_mm":0.381
-},
-{
-"net":"+5VIN",
-"layer":"Top Layer",
-"x1_mm":144.2085,
-"y1_mm":25.5295,
-"x2_mm":149.225,
-"y2_mm":20.513,
-"width_mm":0.381
-},
-{
-"net":"+5VIN",
-"layer":"Top Layer",
-"x1_mm":149.225,
-"y1_mm":9.059,
-"x2_mm":149.225,
-"y2_mm":20.513,
-"width_mm":0.381
-},
-{
-"net":"FLJC",
-"layer":"Top Layer",
-"x1_mm":147.637,
-"y1_mm":9.493,
-"x2_mm":147.637,
-"y2_mm":13.399,
-"width_mm":0.381
-},
-{
-"net":"194out",
-"layer":"Top Layer",
-"x1_mm":147.574,
-"y1_mm":14.986,
-"x2_mm":147.574,
-"y2_mm":17.399,
-"width_mm":0.381
-},
-{
-"net":"+30V",
-"layer":"Top Layer",
-"x1_mm":82.044,
-"y1_mm":62.23,
-"x2_mm":82.6135,
-"y2_mm":61.6605,
-"width_mm":0.381
-},
-{
-"net":"194out",
-"layer":"Top Layer",
-"x1_mm":90.17,
-"y1_mm":53.213,
-"x2_mm":90.17,
-"y2_mm":53.312,
-"width_mm":0.381
-},
-{
-"net":"194out",
-"layer":"Top Layer",
-"x1_mm":87.884,
-"y1_mm":55.518,
-"x2_mm":87.884,
-"y2_mm":55.598,
-"width_mm":0.381
-},
-{
-"net":"194out",
-"layer":"Top Layer",
-"x1_mm":88.1735,
-"y1_mm":55.3085,
-"x2_mm":90.17,
-"y2_mm":53.312,
-"width_mm":0.381
-},
-{
-"net":"194out",
-"layer":"Top Layer",
-"x1_mm":88.0935,
-"y1_mm":55.3085,
-"x2_mm":88.1735,
-"y2_mm":55.3085,
-"width_mm":0.381
-},
-{
-"net":"194out",
-"layer":"Top Layer",
-"x1_mm":87.884,
-"y1_mm":55.518,
-"x2_mm":88.0935,
-"y2_mm":55.3085,
-"width_mm":0.381
-},
-{
-"net":"194out",
-"layer":"Top Layer",
-"x1_mm":86.233,
-"y1_mm":55.598,
-"x2_mm":87.884,
-"y2_mm":55.598,
-"width_mm":0.381
-},
-{
-"net":"194out",
-"layer":"Top Layer",
-"x1_mm":86.134,
-"y1_mm":55.499,
-"x2_mm":86.233,
-"y2_mm":55.598,
-"width_mm":0.381
-},
-{
-"net":"194out",
-"layer":"Top Layer",
-"x1_mm":84.328,
-"y1_mm":55.499,
-"x2_mm":86.134,
-"y2_mm":55.499,
-"width_mm":0.381
-},
-{
-"net":"NetC173_1",
-"layer":"Top Layer",
-"x1_mm":84.5875,
-"y1_mm":57.6585,
-"x2_mm":87.374,
-"y2_mm":60.445,
-"width_mm":0.381
-},
-{
-"net":"NetC173_1",
-"layer":"Top Layer",
-"x1_mm":84.5875,
-"y1_mm":57.4085,
-"x2_mm":84.5875,
-"y2_mm":57.6585,
-"width_mm":0.381
-},
-{
-"net":"NetC173_1",
-"layer":"Top Layer",
-"x1_mm":84.578,
-"y1_mm":57.399,
-"x2_mm":84.5875,
-"y2_mm":57.4085,
-"width_mm":0.381
-},
-{
-"net":"NetC173_1",
-"layer":"Top Layer",
-"x1_mm":84.328,
-"y1_mm":57.399,
-"x2_mm":84.578,
-"y2_mm":57.399,
-"width_mm":0.381
-},
-{
-"net":"NetC173_1",
-"layer":"Top Layer",
-"x1_mm":87.374,
-"y1_mm":60.445,
-"x2_mm":87.374,
-"y2_mm":62.23,
-"width_mm":0.381
-},
-{
-"net":"+30V",
-"layer":"Top Layer",
-"x1_mm":81.578,
-"y1_mm":61.764,
-"x2_mm":82.044,
-"y2_mm":62.23,
-"width_mm":0.381
-},
-{
-"net":"+30V",
-"layer":"Top Layer",
-"x1_mm":81.578,
-"y1_mm":57.399,
-"x2_mm":81.578,
-"y2_mm":61.764,
-"width_mm":0.381
-},
-{
-"net":"+5V",
-"layer":"Top Layer",
-"x1_mm":76.454,
-"y1_mm":55.598,
-"x2_mm":78.232,
-"y2_mm":55.598,
-"width_mm":0.254
-},
-{
-"net":"+5V",
-"layer":"Top Layer",
-"x1_mm":78.232,
-"y1_mm":55.598,
-"x2_mm":78.331,
-"y2_mm":55.499,
-"width_mm":0.254
-},
-{
-"net":"GND",
-"layer":"Top Layer",
-"x1_mm":86.233,
-"y1_mm":57.178,
-"x2_mm":87.884,
-"y2_mm":57.178,
-"width_mm":0.381
-},
-{
-"net":"GND",
-"layer":"Top Layer",
-"x1_mm":85.504,
-"y1_mm":56.449,
-"x2_mm":85.9435,
-"y2_mm":56.8885,
-"width_mm":0.381
-},
-{
-"net":"GND",
-"layer":"Top Layer",
-"x1_mm":84.328,
-"y1_mm":56.449,
-"x2_mm":85.504,
-"y2_mm":56.449,
-"width_mm":0.381
-},
-{
-"net":"GND",
-"layer":"Top Layer",
-"x1_mm":86.233,
-"y1_mm":57.098,
-"x2_mm":86.233,
-"y2_mm":57.178,
-"width_mm":0.381
-},
-{
-"net":"GND",
-"layer":"Top Layer",
-"x1_mm":86.0235,
-"y1_mm":56.8885,
-"x2_mm":86.233,
-"y2_mm":57.098,
-"width_mm":0.381
-},
-{
-"net":"GND",
-"layer":"Top Layer",
-"x1_mm":85.9435,
-"y1_mm":56.8885,
-"x2_mm":86.0235,
-"y2_mm":56.8885,
-"width_mm":0.381
-},
-{
-"net":"GND",
-"layer":"Top Layer",
-"x1_mm":83.373,
-"y1_mm":56.449,
-"x2_mm":84.328,
-"y2_mm":56.449,
-"width_mm":0.381
-},
-{
-"net":"GND",
-"layer":"Top Layer",
-"x1_mm":82.931,
-"y1_mm":56.007,
-"x2_mm":83.373,
-"y2_mm":56.449,
-"width_mm":0.381
-},
-{
-"net":"GND",
-"layer":"Top Layer",
-"x1_mm":82.175,
-"y1_mm":53.7335,
-"x2_mm":82.931,
-"y2_mm":54.4895,
-"width_mm":0.381
-},
-{
-"net":"GND",
-"layer":"Top Layer",
-"x1_mm":81.6055,
-"y1_mm":53.124,
-"x2_mm":82.175,
-"y2_mm":53.6935,
-"width_mm":0.381
-},
-{
-"net":"GND",
-"layer":"Top Layer",
-"x1_mm":82.931,
-"y1_mm":54.4895,
-"x2_mm":82.931,
-"y2_mm":56.007,
-"width_mm":0.381
-},
-{
-"net":"GND",
-"layer":"Top Layer",
-"x1_mm":82.175,
-"y1_mm":53.6935,
-"x2_mm":82.175,
-"y2_mm":53.7335,
-"width_mm":0.381
-},
-{
-"net":"GND",
-"layer":"Top Layer",
-"x1_mm":78.2635,
-"y1_mm":53.124,
-"x2_mm":81.5655,
-"y2_mm":53.124,
-"width_mm":0.381
-},
-{
-"net":"GND",
-"layer":"Top Layer",
-"x1_mm":81.5655,
-"y1_mm":53.124,
-"x2_mm":81.6055,
-"y2_mm":53.124,
-"width_mm":0.381
-},
-{
-"net":"NetC169_1",
-"layer":"Top Layer",
-"x1_mm":54.61,
-"y1_mm":31.682,
-"x2_mm":54.61,
-"y2_mm":35.433,
-"width_mm":0.381
-},
-{
-"net":"NetC172_2",
-"layer":"Top Layer",
-"x1_mm":47.018,
-"y1_mm":22.606,
-"x2_mm":47.018,
-"y2_mm":30.492,
-"width_mm":0.381
-},
-{
-"net":"NetR113_2",
-"layer":"Top Layer",
-"x1_mm":45.1295,
-"y1_mm":22.8155,
-"x2_mm":45.1295,
-"y2_mm":24.7205,
-"width_mm":0.381
-},
-{
-"net":"NetR113_2",
-"layer":"Top Layer",
-"x1_mm":45.085,
-"y1_mm":24.765,
-"x2_mm":45.1295,
-"y2_mm":24.7205,
-"width_mm":0.381
-},
-{
-"net":"NetR111_2",
-"layer":"Top Layer",
-"x1_mm":47.752,
-"y1_mm":64.163,
-"x2_mm":49.911,
-"y2_mm":64.163,
-"width_mm":0.381
-},
-{
-"net":"NetR111_2",
-"layer":"Top Layer",
-"x1_mm":46.101,
-"y1_mm":62.512,
-"x2_mm":47.752,
-"y2_mm":64.163,
-"width_mm":0.381
-},
-{
-"net":"NetR110_2",
-"layer":"Top Layer",
-"x1_mm":47.752,
-"y1_mm":61.722,
-"x2_mm":49.911,
-"y2_mm":61.722,
-"width_mm":0.381
-},
-{
-"net":"NetR110_2",
-"layer":"Top Layer",
-"x1_mm":46.101,
-"y1_mm":60.071,
-"x2_mm":47.752,
-"y2_mm":61.722,
-"width_mm":0.381
-},
-{
-"net":"NetR110_1",
-"layer":"Top Layer",
-"x1_mm":47.724,
-"y1_mm":59.281,
-"x2_mm":49.911,
-"y2_mm":59.281,
-"width_mm":0.381
-},
-{
-"net":"NetR110_1",
-"layer":"Top Layer",
-"x1_mm":46.101,
-"y1_mm":57.658,
-"x2_mm":47.724,
-"y2_mm":59.281,
-"width_mm":0.381
-},
-{
-"net":"+5V",
-"layer":"Top Layer",
-"x1_mm":78.331,
-"y1_mm":55.499,
-"x2_mm":81.578,
-"y2_mm":55.499,
-"width_mm":0.254
-},
-{
-"net":"+5V",
-"layer":"Top Layer",
-"x1_mm":135.089,
-"y1_mm":7.471,
-"x2_mm":143.637,
-"y2_mm":7.471,
-"width_mm":0.381
-},
-{
-"net":"+5VIN",
-"layer":"Top Layer",
-"x1_mm":147.637,
-"y1_mm":7.471,
-"x2_mm":149.225,
-"y2_mm":9.059,
-"width_mm":0.381
-},
-{
-"net":"NetR124_2",
-"layer":"Top Layer",
-"x1_mm":72.131,
-"y1_mm":79.121,
-"x2_mm":74.236,
-"y2_mm":79.121,
-"width_mm":0.381
-},
-{
-"net":"NetR124_2",
-"layer":"Top Layer",
-"x1_mm":74.236,
-"y1_mm":79.121,
-"x2_mm":74.49,
-"y2_mm":78.867,
-"width_mm":0.381
-},
-{
-"net":"NetD13_1",
-"layer":"Top Layer",
-"x1_mm":66.15732,
-"y1_mm":76.71499,
-"x2_mm":66.15732,
-"y2_mm":80.518,
-"width_mm":1
-},
-{
-"net":"NetD13_1",
-"layer":"Top Layer",
-"x1_mm":70.193,
-"y1_mm":80.518,
-"x2_mm":70.193,
-"y2_mm":82.169,
-"width_mm":1
-},
-{
-"net":"12V",
-"layer":"Top Layer",
-"x1_mm":100.082,
-"y1_mm":39.45,
-"x2_mm":106.786,
-"y2_mm":39.45,
-"width_mm":0.381
-},
-{
-"net":"GND",
-"layer":"Top Layer",
-"x1_mm":47.018,
-"y1_mm":18.768,
-"x2_mm":47.117,
-"y2_mm":18.669,
-"width_mm":0.381
-},
-{
-"net":"GND",
-"layer":"Top Layer",
-"x1_mm":47.018,
-"y1_mm":18.768,
-"x2_mm":47.018,
-"y2_mm":20.955,
-"width_mm":0.381
-},
-{
-"net":"NetD9_2",
-"layer":"Top Layer",
-"x1_mm":48.26,
-"y1_mm":52.108,
-"x2_mm":48.26,
-"y2_mm":53.683,
-"width_mm":0.254
-},
-{
-"net":"NetD8_2",
-"layer":"Top Layer",
-"x1_mm":48.26,
-"y1_mm":49.187,
-"x2_mm":48.26,
-"y2_mm":50.508,
-"width_mm":0.254
-},
-{
-"net":"NetD8_1",
-"layer":"Top Layer",
-"x1_mm":48.90468,
-"y1_mm":45.45632,
-"x2_mm":52.31701,
-"y2_mm":45.45632,
-"width_mm":0.381
-},
-{
-"net":"NetD8_1",
-"layer":"Top Layer",
-"x1_mm":48.26,
-"y1_mm":46.101,
-"x2_mm":48.90468,
-"y2_mm":45.45632,
-"width_mm":0.381
-},
-{
-"net":"NetD8_1",
-"layer":"Top Layer",
-"x1_mm":48.26,
-"y1_mm":46.101,
-"x2_mm":48.26,
-"y2_mm":47.587,
-"width_mm":0.381
-},
-{
-"net":"NetD8_1",
-"layer":"Top Layer",
-"x1_mm":51.689,
-"y1_mm":53.114,
-"x2_mm":51.689,
-"y2_mm":54.864,
-"width_mm":0.381
 },
 {
 "net":"",
@@ -10051,6 +7117,2994 @@
 "width_mm":0.1
 },
 {
+"net":"NetC170_1",
+"layer":"Top Layer",
+"x1_mm":106.878,
+"y1_mm":24.074,
+"x2_mm":107.188,
+"y2_mm":24.384,
+"width_mm":0.381
+},
+{
+"net":"NetC170_1",
+"layer":"Top Layer",
+"x1_mm":107.188,
+"y1_mm":24.384,
+"x2_mm":109.037,
+"y2_mm":24.384,
+"width_mm":0.381
+},
+{
+"net":"NetC170_1",
+"layer":"Top Layer",
+"x1_mm":103.886,
+"y1_mm":24.074,
+"x2_mm":105.537,
+"y2_mm":24.074,
+"width_mm":0.381
+},
+{
+"net":"NetC170_1",
+"layer":"Top Layer",
+"x1_mm":105.537,
+"y1_mm":24.074,
+"x2_mm":106.878,
+"y2_mm":24.074,
+"width_mm":0.381
+},
+{
+"net":"NetC158_2",
+"layer":"Top Layer",
+"x1_mm":103.886,
+"y1_mm":25.654,
+"x2_mm":105.537,
+"y2_mm":25.654,
+"width_mm":0.381
+},
+{
+"net":"NetC158_2",
+"layer":"Top Layer",
+"x1_mm":105.537,
+"y1_mm":25.654,
+"x2_mm":109.037,
+"y2_mm":25.654,
+"width_mm":0.381
+},
+{
+"net":"NetC163_1",
+"layer":"Top Layer",
+"x1_mm":106.398,
+"y1_mm":19.332,
+"x2_mm":106.426,
+"y2_mm":19.36,
+"width_mm":0.381
+},
+{
+"net":"NetC163_1",
+"layer":"Top Layer",
+"x1_mm":103.124,
+"y1_mm":19.332,
+"x2_mm":106.398,
+"y2_mm":19.332,
+"width_mm":0.381
+},
+{
+"net":"NetC163_1",
+"layer":"Top Layer",
+"x1_mm":105.664,
+"y1_mm":21.844,
+"x2_mm":106.934,
+"y2_mm":23.114,
+"width_mm":0.381
+},
+{
+"net":"NetC163_1",
+"layer":"Top Layer",
+"x1_mm":106.934,
+"y1_mm":23.114,
+"x2_mm":109.037,
+"y2_mm":23.114,
+"width_mm":0.381
+},
+{
+"net":"NetC163_1",
+"layer":"Top Layer",
+"x1_mm":105.664,
+"y1_mm":19.431,
+"x2_mm":105.664,
+"y2_mm":21.844,
+"width_mm":0.381
+},
+{
+"net":"NetR115_2",
+"layer":"Top Layer",
+"x1_mm":103.378,
+"y1_mm":26.924,
+"x2_mm":109.037,
+"y2_mm":26.924,
+"width_mm":0.381
+},
+{
+"net":"NetR115_2",
+"layer":"Top Layer",
+"x1_mm":103.0605,
+"y1_mm":27.2415,
+"x2_mm":103.0605,
+"y2_mm":28.138,
+"width_mm":0.381
+},
+{
+"net":"NetR115_2",
+"layer":"Top Layer",
+"x1_mm":103.0605,
+"y1_mm":27.2415,
+"x2_mm":103.378,
+"y2_mm":26.924,
+"width_mm":0.381
+},
+{
+"net":"NetR115_2",
+"layer":"Top Layer",
+"x1_mm":102.235,
+"y1_mm":28.138,
+"x2_mm":103.0605,
+"y2_mm":28.138,
+"width_mm":0.381
+},
+{
+"net":"NetR115_2",
+"layer":"Top Layer",
+"x1_mm":103.0605,
+"y1_mm":28.138,
+"x2_mm":103.886,
+"y2_mm":28.138,
+"width_mm":0.381
+},
+{
+"net":"NetC161_2",
+"layer":"Top Layer",
+"x1_mm":108.783,
+"y1_mm":29.718,
+"x2_mm":109.037,
+"y2_mm":29.464,
+"width_mm":0.381
+},
+{
+"net":"NetC161_2",
+"layer":"Top Layer",
+"x1_mm":103.886,
+"y1_mm":29.718,
+"x2_mm":105.537,
+"y2_mm":29.718,
+"width_mm":0.381
+},
+{
+"net":"NetC161_2",
+"layer":"Top Layer",
+"x1_mm":105.537,
+"y1_mm":29.718,
+"x2_mm":108.783,
+"y2_mm":29.718,
+"width_mm":0.381
+},
+{
+"net":"NetR108_1",
+"layer":"Top Layer",
+"x1_mm":105.537,
+"y1_mm":28.138,
+"x2_mm":108.981,
+"y2_mm":28.138,
+"width_mm":0.381
+},
+{
+"net":"NetR108_1",
+"layer":"Top Layer",
+"x1_mm":108.981,
+"y1_mm":28.138,
+"x2_mm":109.037,
+"y2_mm":28.194,
+"width_mm":0.381
+},
+{
+"net":"NetC166_2",
+"layer":"Top Layer",
+"x1_mm":79.502,
+"y1_mm":15.308,
+"x2_mm":82.804,
+"y2_mm":15.308,
+"width_mm":0.381
+},
+{
+"net":"NetC166_2",
+"layer":"Top Layer",
+"x1_mm":82.804,
+"y1_mm":13.716,
+"x2_mm":82.884,
+"y2_mm":13.796,
+"width_mm":0.381
+},
+{
+"net":"NetC166_2",
+"layer":"Top Layer",
+"x1_mm":82.884,
+"y1_mm":13.796,
+"x2_mm":92.71,
+"y2_mm":13.796,
+"width_mm":0.381
+},
+{
+"net":"NetC166_2",
+"layer":"Top Layer",
+"x1_mm":82.804,
+"y1_mm":12.888,
+"x2_mm":82.804,
+"y2_mm":13.716,
+"width_mm":0.381
+},
+{
+"net":"NetC166_2",
+"layer":"Top Layer",
+"x1_mm":82.804,
+"y1_mm":13.716,
+"x2_mm":82.804,
+"y2_mm":15.308,
+"width_mm":0.381
+},
+{
+"net":"NetC166_2",
+"layer":"Top Layer",
+"x1_mm":98.044,
+"y1_mm":11.684,
+"x2_mm":102.529,
+"y2_mm":11.684,
+"width_mm":0.381
+},
+{
+"net":"NetC166_2",
+"layer":"Top Layer",
+"x1_mm":95.932,
+"y1_mm":13.796,
+"x2_mm":98.044,
+"y2_mm":11.684,
+"width_mm":0.381
+},
+{
+"net":"NetC166_2",
+"layer":"Top Layer",
+"x1_mm":92.71,
+"y1_mm":13.796,
+"x2_mm":95.932,
+"y2_mm":13.796,
+"width_mm":0.381
+},
+{
+"net":"NetC138_2",
+"layer":"Top Layer",
+"x1_mm":115.791,
+"y1_mm":16.383,
+"x2_mm":115.824,
+"y2_mm":16.416,
+"width_mm":0.381
+},
+{
+"net":"NetC138_2",
+"layer":"Top Layer",
+"x1_mm":115.824,
+"y1_mm":16.416,
+"x2_mm":115.824,
+"y2_mm":18.288,
+"width_mm":0.381
+},
+{
+"net":"NetC138_2",
+"layer":"Top Layer",
+"x1_mm":115.791,
+"y1_mm":14.638,
+"x2_mm":115.791,
+"y2_mm":16.383,
+"width_mm":0.381
+},
+{
+"net":"NetC138_2",
+"layer":"Top Layer",
+"x1_mm":115.791,
+"y1_mm":14.638,
+"x2_mm":116.84,
+"y2_mm":13.589,
+"width_mm":0.381
+},
+{
+"net":"NetC138_2",
+"layer":"Top Layer",
+"x1_mm":117.734,
+"y1_mm":14.483,
+"x2_mm":117.734,
+"y2_mm":17.272,
+"width_mm":0.381
+},
+{
+"net":"NetC138_2",
+"layer":"Top Layer",
+"x1_mm":116.84,
+"y1_mm":13.589,
+"x2_mm":117.734,
+"y2_mm":14.483,
+"width_mm":0.381
+},
+{
+"net":"+5V",
+"layer":"Top Layer",
+"x1_mm":132.5245,
+"y1_mm":10.0355,
+"x2_mm":132.5245,
+"y2_mm":10.1005,
+"width_mm":0.381
+},
+{
+"net":"+5V",
+"layer":"Top Layer",
+"x1_mm":132.145,
+"y1_mm":10.48,
+"x2_mm":132.5245,
+"y2_mm":10.1005,
+"width_mm":0.381
+},
+{
+"net":"+5V",
+"layer":"Top Layer",
+"x1_mm":132.08,
+"y1_mm":10.48,
+"x2_mm":132.145,
+"y2_mm":10.48,
+"width_mm":0.381
+},
+{
+"net":"+5V",
+"layer":"Top Layer",
+"x1_mm":129.397,
+"y1_mm":11.43,
+"x2_mm":129.44382,
+"y2_mm":11.43,
+"width_mm":0.381
+},
+{
+"net":"+5V",
+"layer":"Top Layer",
+"x1_mm":129.44382,
+"y1_mm":11.43,
+"x2_mm":129.55331,
+"y2_mm":11.3205,
+"width_mm":0.381
+},
+{
+"net":"+5V",
+"layer":"Top Layer",
+"x1_mm":129.55331,
+"y1_mm":10.78169,
+"x2_mm":129.55331,
+"y2_mm":11.3205,
+"width_mm":0.381
+},
+{
+"net":"+5V",
+"layer":"Top Layer",
+"x1_mm":129.55331,
+"y1_mm":10.78169,
+"x2_mm":130.175,
+"y2_mm":10.16,
+"width_mm":0.381
+},
+{
+"net":"+5V",
+"layer":"Top Layer",
+"x1_mm":130.175,
+"y1_mm":10.16,
+"x2_mm":131.76,
+"y2_mm":10.16,
+"width_mm":0.381
+},
+{
+"net":"+5V",
+"layer":"Top Layer",
+"x1_mm":131.76,
+"y1_mm":10.16,
+"x2_mm":132.08,
+"y2_mm":10.48,
+"width_mm":0.381
+},
+{
+"net":"+5V",
+"layer":"Top Layer",
+"x1_mm":129.397,
+"y1_mm":11.43,
+"x2_mm":129.397,
+"y2_mm":13.351,
+"width_mm":0.381
+},
+{
+"net":"NetC139_2",
+"layer":"Top Layer",
+"x1_mm":118.34,
+"y1_mm":7.136,
+"x2_mm":118.364,
+"y2_mm":7.112,
+"width_mm":0.381
+},
+{
+"net":"NetC139_2",
+"layer":"Top Layer",
+"x1_mm":118.364,
+"y1_mm":7.112,
+"x2_mm":120.086,
+"y2_mm":7.112,
+"width_mm":0.381
+},
+{
+"net":"NetC139_2",
+"layer":"Top Layer",
+"x1_mm":118.34,
+"y1_mm":7.136,
+"x2_mm":118.34,
+"y2_mm":10.789,
+"width_mm":0.381
+},
+{
+"net":"3.3VFSALC",
+"layer":"Top Layer",
+"x1_mm":121.666,
+"y1_mm":7.112,
+"x2_mm":121.666,
+"y2_mm":9.068,
+"width_mm":0.381
+},
+{
+"net":"+30V",
+"layer":"Top Layer",
+"x1_mm":67.691,
+"y1_mm":49.784,
+"x2_mm":67.771,
+"y2_mm":49.704,
+"width_mm":0.381
+},
+{
+"net":"+30V",
+"layer":"Top Layer",
+"x1_mm":67.771,
+"y1_mm":49.704,
+"x2_mm":78.2635,
+"y2_mm":49.704,
+"width_mm":0.381
+},
+{
+"net":"NetR102_1",
+"layer":"Top Layer",
+"x1_mm":82.324,
+"y1_mm":45.974,
+"x2_mm":82.324,
+"y2_mm":47.625,
+"width_mm":0.381
+},
+{
+"net":"NetR102_1",
+"layer":"Top Layer",
+"x1_mm":82.324,
+"y1_mm":47.625,
+"x2_mm":84.582,
+"y2_mm":47.625,
+"width_mm":0.381
+},
+{
+"net":"+30V",
+"layer":"Top Layer",
+"x1_mm":82.175,
+"y1_mm":49.11818,
+"x2_mm":82.175,
+"y2_mm":49.1345,
+"width_mm":0.381
+},
+{
+"net":"+30V",
+"layer":"Top Layer",
+"x1_mm":82.39819,
+"y1_mm":48.895,
+"x2_mm":84.582,
+"y2_mm":48.895,
+"width_mm":0.381
+},
+{
+"net":"+30V",
+"layer":"Top Layer",
+"x1_mm":81.5655,
+"y1_mm":49.704,
+"x2_mm":81.6055,
+"y2_mm":49.704,
+"width_mm":0.381
+},
+{
+"net":"+30V",
+"layer":"Top Layer",
+"x1_mm":81.6055,
+"y1_mm":49.704,
+"x2_mm":82.175,
+"y2_mm":49.1345,
+"width_mm":0.381
+},
+{
+"net":"+30V",
+"layer":"Top Layer",
+"x1_mm":82.175,
+"y1_mm":49.11818,
+"x2_mm":82.39819,
+"y2_mm":48.895,
+"width_mm":0.381
+},
+{
+"net":"+30V",
+"layer":"Top Layer",
+"x1_mm":80.645,
+"y1_mm":49.704,
+"x2_mm":80.744,
+"y2_mm":49.605,
+"width_mm":0.381
+},
+{
+"net":"+30V",
+"layer":"Top Layer",
+"x1_mm":80.744,
+"y1_mm":47.625,
+"x2_mm":80.744,
+"y2_mm":49.605,
+"width_mm":0.381
+},
+{
+"net":"+30V",
+"layer":"Top Layer",
+"x1_mm":78.2635,
+"y1_mm":49.704,
+"x2_mm":80.645,
+"y2_mm":49.704,
+"width_mm":0.381
+},
+{
+"net":"+30V",
+"layer":"Top Layer",
+"x1_mm":80.645,
+"y1_mm":49.704,
+"x2_mm":81.5655,
+"y2_mm":49.704,
+"width_mm":0.381
+},
+{
+"net":"NetC147_1",
+"layer":"Top Layer",
+"x1_mm":86.0425,
+"y1_mm":52.8765,
+"x2_mm":86.252,
+"y2_mm":53.086,
+"width_mm":0.381
+},
+{
+"net":"NetC147_1",
+"layer":"Top Layer",
+"x1_mm":84.582,
+"y1_mm":51.336,
+"x2_mm":86.0425,
+"y2_mm":52.7965,
+"width_mm":0.381
+},
+{
+"net":"NetC147_1",
+"layer":"Top Layer",
+"x1_mm":84.582,
+"y1_mm":50.165,
+"x2_mm":84.582,
+"y2_mm":51.336,
+"width_mm":0.381
+},
+{
+"net":"NetC147_1",
+"layer":"Top Layer",
+"x1_mm":86.0425,
+"y1_mm":52.7965,
+"x2_mm":86.0425,
+"y2_mm":52.8765,
+"width_mm":0.381
+},
+{
+"net":"NetC147_1",
+"layer":"Top Layer",
+"x1_mm":86.252,
+"y1_mm":53.086,
+"x2_mm":86.332,
+"y2_mm":53.086,
+"width_mm":0.381
+},
+{
+"net":"NetC147_2",
+"layer":"Top Layer",
+"x1_mm":87.992,
+"y1_mm":53.086,
+"x2_mm":88.2015,
+"y2_mm":52.8765,
+"width_mm":0.381
+},
+{
+"net":"NetC147_2",
+"layer":"Top Layer",
+"x1_mm":88.2015,
+"y1_mm":52.7965,
+"x2_mm":88.2015,
+"y2_mm":52.8765,
+"width_mm":0.381
+},
+{
+"net":"NetC147_2",
+"layer":"Top Layer",
+"x1_mm":88.2015,
+"y1_mm":52.7965,
+"x2_mm":89.587,
+"y2_mm":51.411,
+"width_mm":0.381
+},
+{
+"net":"NetC147_2",
+"layer":"Top Layer",
+"x1_mm":89.587,
+"y1_mm":50.165,
+"x2_mm":89.587,
+"y2_mm":51.411,
+"width_mm":0.381
+},
+{
+"net":"NetC147_2",
+"layer":"Top Layer",
+"x1_mm":87.912,
+"y1_mm":53.086,
+"x2_mm":87.992,
+"y2_mm":53.086,
+"width_mm":0.381
+},
+{
+"net":"NetR106_2",
+"layer":"Top Layer",
+"x1_mm":82.7595,
+"y1_mm":44.5325,
+"x2_mm":84.05815,
+"y2_mm":45.83115,
+"width_mm":0.381
+},
+{
+"net":"NetR106_2",
+"layer":"Top Layer",
+"x1_mm":84.05815,
+"y1_mm":45.83115,
+"x2_mm":84.05815,
+"y2_mm":46.30465,
+"width_mm":0.381
+},
+{
+"net":"NetR106_2",
+"layer":"Top Layer",
+"x1_mm":84.05815,
+"y1_mm":46.30465,
+"x2_mm":84.1085,
+"y2_mm":46.355,
+"width_mm":0.381
+},
+{
+"net":"NetR106_2",
+"layer":"Top Layer",
+"x1_mm":84.1085,
+"y1_mm":46.355,
+"x2_mm":84.582,
+"y2_mm":46.355,
+"width_mm":0.381
+},
+{
+"net":"NetR106_2",
+"layer":"Top Layer",
+"x1_mm":82.324,
+"y1_mm":44.323,
+"x2_mm":82.5335,
+"y2_mm":44.5325,
+"width_mm":0.381
+},
+{
+"net":"NetR106_2",
+"layer":"Top Layer",
+"x1_mm":82.5335,
+"y1_mm":44.5325,
+"x2_mm":82.7595,
+"y2_mm":44.5325,
+"width_mm":0.381
+},
+{
+"net":"NetC156_2",
+"layer":"Top Layer",
+"x1_mm":92.075,
+"y1_mm":49.728,
+"x2_mm":93.853,
+"y2_mm":49.728,
+"width_mm":0.381
+},
+{
+"net":"NetC156_2",
+"layer":"Top Layer",
+"x1_mm":89.587,
+"y1_mm":47.625,
+"x2_mm":91.313,
+"y2_mm":47.625,
+"width_mm":0.381
+},
+{
+"net":"NetR101_1",
+"layer":"Top Layer",
+"x1_mm":93.853,
+"y1_mm":47.78,
+"x2_mm":95.56,
+"y2_mm":47.78,
+"width_mm":0.381
+},
+{
+"net":"NetR101_1",
+"layer":"Top Layer",
+"x1_mm":95.56,
+"y1_mm":47.78,
+"x2_mm":95.758,
+"y2_mm":47.978,
+"width_mm":0.381
+},
+{
+"net":"GND",
+"layer":"Top Layer",
+"x1_mm":88.0142,
+"y1_mm":49.065,
+"x2_mm":88.1842,
+"y2_mm":48.895,
+"width_mm":0.381
+},
+{
+"net":"GND",
+"layer":"Top Layer",
+"x1_mm":88.1842,
+"y1_mm":48.895,
+"x2_mm":89.587,
+"y2_mm":48.895,
+"width_mm":0.381
+},
+{
+"net":"GND",
+"layer":"Top Layer",
+"x1_mm":87.982,
+"y1_mm":49.065,
+"x2_mm":88.0142,
+"y2_mm":49.065,
+"width_mm":0.381
+},
+{
+"net":"12V",
+"layer":"Top Layer",
+"x1_mm":106.786,
+"y1_mm":39.45,
+"x2_mm":106.807,
+"y2_mm":39.429,
+"width_mm":0.381
+},
+{
+"net":"12V",
+"layer":"Top Layer",
+"x1_mm":90.176,
+"y1_mm":39.45,
+"x2_mm":93.478,
+"y2_mm":39.45,
+"width_mm":0.381
+},
+{
+"net":"12V",
+"layer":"Top Layer",
+"x1_mm":93.478,
+"y1_mm":39.45,
+"x2_mm":96.78,
+"y2_mm":39.45,
+"width_mm":0.381
+},
+{
+"net":"12V",
+"layer":"Top Layer",
+"x1_mm":96.78,
+"y1_mm":39.45,
+"x2_mm":100.082,
+"y2_mm":39.45,
+"width_mm":0.381
+},
+{
+"net":"12V",
+"layer":"Top Layer",
+"x1_mm":106.807,
+"y1_mm":39.429,
+"x2_mm":107.033,
+"y2_mm":39.203,
+"width_mm":0.381
+},
+{
+"net":"NetC161_2",
+"layer":"Top Layer",
+"x1_mm":120.083,
+"y1_mm":34.163,
+"x2_mm":120.083,
+"y2_mm":37.973,
+"width_mm":0.381
+},
+{
+"net":"NetC161_2",
+"layer":"Top Layer",
+"x1_mm":111.92769,
+"y1_mm":32.35469,
+"x2_mm":111.92769,
+"y2_mm":32.8935,
+"width_mm":0.381
+},
+{
+"net":"NetC161_2",
+"layer":"Top Layer",
+"x1_mm":109.83532,
+"y1_mm":30.26232,
+"x2_mm":111.92769,
+"y2_mm":32.35469,
+"width_mm":0.381
+},
+{
+"net":"NetC161_2",
+"layer":"Top Layer",
+"x1_mm":109.83532,
+"y1_mm":29.7235,
+"x2_mm":109.83532,
+"y2_mm":30.26232,
+"width_mm":0.381
+},
+{
+"net":"NetC161_2",
+"layer":"Top Layer",
+"x1_mm":109.57582,
+"y1_mm":29.464,
+"x2_mm":109.83532,
+"y2_mm":29.7235,
+"width_mm":0.381
+},
+{
+"net":"NetC161_2",
+"layer":"Top Layer",
+"x1_mm":109.037,
+"y1_mm":29.464,
+"x2_mm":109.57582,
+"y2_mm":29.464,
+"width_mm":0.381
+},
+{
+"net":"NetC161_2",
+"layer":"Top Layer",
+"x1_mm":113.23719,
+"y1_mm":34.203,
+"x2_mm":113.284,
+"y2_mm":34.203,
+"width_mm":0.381
+},
+{
+"net":"NetC161_2",
+"layer":"Top Layer",
+"x1_mm":111.92769,
+"y1_mm":32.8935,
+"x2_mm":113.23719,
+"y2_mm":34.203,
+"width_mm":0.381
+},
+{
+"net":"NetC161_2",
+"layer":"Top Layer",
+"x1_mm":113.284,
+"y1_mm":34.203,
+"x2_mm":120.043,
+"y2_mm":34.203,
+"width_mm":0.381
+},
+{
+"net":"NetC161_2",
+"layer":"Top Layer",
+"x1_mm":120.043,
+"y1_mm":34.203,
+"x2_mm":120.083,
+"y2_mm":34.163,
+"width_mm":0.381
+},
+{
+"net":"NetC158_2",
+"layer":"Top Layer",
+"x1_mm":94.996,
+"y1_mm":29.405,
+"x2_mm":98.425,
+"y2_mm":29.405,
+"width_mm":0.381
+},
+{
+"net":"NetC158_2",
+"layer":"Top Layer",
+"x1_mm":98.425,
+"y1_mm":27.051,
+"x2_mm":98.425,
+"y2_mm":29.405,
+"width_mm":0.381
+},
+{
+"net":"NetC158_2",
+"layer":"Top Layer",
+"x1_mm":98.425,
+"y1_mm":27.051,
+"x2_mm":99.822,
+"y2_mm":25.654,
+"width_mm":0.381
+},
+{
+"net":"NetC158_2",
+"layer":"Top Layer",
+"x1_mm":99.822,
+"y1_mm":25.654,
+"x2_mm":103.886,
+"y2_mm":25.654,
+"width_mm":0.381
+},
+{
+"net":"NetC147_2",
+"layer":"Top Layer",
+"x1_mm":83.568,
+"y1_mm":30.48,
+"x2_mm":83.568,
+"y2_mm":35.729,
+"width_mm":0.381
+},
+{
+"net":"NetC147_2",
+"layer":"Top Layer",
+"x1_mm":83.568,
+"y1_mm":35.729,
+"x2_mm":84.074,
+"y2_mm":36.235,
+"width_mm":0.381
+},
+{
+"net":"12V",
+"layer":"Top Layer",
+"x1_mm":89.71739,
+"y1_mm":39.45,
+"x2_mm":90.176,
+"y2_mm":39.45,
+"width_mm":0.381
+},
+{
+"net":"12V",
+"layer":"Top Layer",
+"x1_mm":89.14789,
+"y1_mm":40.0195,
+"x2_mm":89.71739,
+"y2_mm":39.45,
+"width_mm":0.381
+},
+{
+"net":"12V",
+"layer":"Top Layer",
+"x1_mm":89.14789,
+"y1_mm":40.0195,
+"x2_mm":89.14789,
+"y2_mm":40.47811,
+"width_mm":0.381
+},
+{
+"net":"12V",
+"layer":"Top Layer",
+"x1_mm":88.42231,
+"y1_mm":41.20368,
+"x2_mm":89.14789,
+"y2_mm":40.47811,
+"width_mm":0.381
+},
+{
+"net":"12V",
+"layer":"Top Layer",
+"x1_mm":84.10532,
+"y1_mm":41.20368,
+"x2_mm":88.42231,
+"y2_mm":41.20368,
+"width_mm":0.381
+},
+{
+"net":"12V",
+"layer":"Top Layer",
+"x1_mm":84.074,
+"y1_mm":41.235,
+"x2_mm":84.10532,
+"y2_mm":41.20368,
+"width_mm":0.381
+},
+{
+"net":"NetC149_2",
+"layer":"Top Layer",
+"x1_mm":136.21,
+"y1_mm":12.446,
+"x2_mm":136.37,
+"y2_mm":12.286,
+"width_mm":0.381
+},
+{
+"net":"NetC149_2",
+"layer":"Top Layer",
+"x1_mm":136.37,
+"y1_mm":10.287,
+"x2_mm":136.37,
+"y2_mm":12.286,
+"width_mm":0.381
+},
+{
+"net":"NetC149_2",
+"layer":"Top Layer",
+"x1_mm":136.144,
+"y1_mm":12.38,
+"x2_mm":136.21,
+"y2_mm":12.446,
+"width_mm":0.381
+},
+{
+"net":"NetC149_2",
+"layer":"Top Layer",
+"x1_mm":132.08,
+"y1_mm":12.38,
+"x2_mm":136.144,
+"y2_mm":12.38,
+"width_mm":0.381
+},
+{
+"net":"NetC149_2",
+"layer":"Top Layer",
+"x1_mm":132.08,
+"y1_mm":15.192,
+"x2_mm":132.114,
+"y2_mm":15.226,
+"width_mm":0.381
+},
+{
+"net":"NetC149_2",
+"layer":"Top Layer",
+"x1_mm":132.08,
+"y1_mm":12.38,
+"x2_mm":132.08,
+"y2_mm":15.192,
+"width_mm":0.381
+},
+{
+"net":"NetC148_2",
+"layer":"Top Layer",
+"x1_mm":126.405,
+"y1_mm":20.506,
+"x2_mm":127.085,
+"y2_mm":19.826,
+"width_mm":0.381
+},
+{
+"net":"NetC148_2",
+"layer":"Top Layer",
+"x1_mm":126.365,
+"y1_mm":20.506,
+"x2_mm":126.405,
+"y2_mm":20.506,
+"width_mm":0.381
+},
+{
+"net":"NetC148_2",
+"layer":"Top Layer",
+"x1_mm":132.08,
+"y1_mm":19.86,
+"x2_mm":132.114,
+"y2_mm":19.826,
+"width_mm":0.381
+},
+{
+"net":"NetC148_2",
+"layer":"Top Layer",
+"x1_mm":132.08,
+"y1_mm":19.86,
+"x2_mm":132.08,
+"y2_mm":22.418,
+"width_mm":0.381
+},
+{
+"net":"NetC148_2",
+"layer":"Top Layer",
+"x1_mm":127.085,
+"y1_mm":19.826,
+"x2_mm":132.114,
+"y2_mm":19.826,
+"width_mm":0.381
+},
+{
+"net":"12V",
+"layer":"Top Layer",
+"x1_mm":133.797,
+"y1_mm":24.13,
+"x2_mm":133.797,
+"y2_mm":36.068,
+"width_mm":0.381
+},
+{
+"net":"NetC135_2",
+"layer":"Top Layer",
+"x1_mm":140.778,
+"y1_mm":35.24,
+"x2_mm":140.843,
+"y2_mm":35.24,
+"width_mm":0.381
+},
+{
+"net":"NetC135_2",
+"layer":"Top Layer",
+"x1_mm":140.3985,
+"y1_mm":35.6195,
+"x2_mm":140.778,
+"y2_mm":35.24,
+"width_mm":0.381
+},
+{
+"net":"NetC135_2",
+"layer":"Top Layer",
+"x1_mm":140.3985,
+"y1_mm":35.6195,
+"x2_mm":140.3985,
+"y2_mm":35.6845,
+"width_mm":0.381
+},
+{
+"net":"NetC135_2",
+"layer":"Top Layer",
+"x1_mm":140.015,
+"y1_mm":36.068,
+"x2_mm":140.3985,
+"y2_mm":35.6845,
+"width_mm":0.381
+},
+{
+"net":"NetC135_2",
+"layer":"Top Layer",
+"x1_mm":143.718,
+"y1_mm":35.24,
+"x2_mm":143.798,
+"y2_mm":35.32,
+"width_mm":0.381
+},
+{
+"net":"NetC135_2",
+"layer":"Top Layer",
+"x1_mm":140.843,
+"y1_mm":35.24,
+"x2_mm":143.718,
+"y2_mm":35.24,
+"width_mm":0.381
+},
+{
+"net":"NetC135_2",
+"layer":"Top Layer",
+"x1_mm":135.697,
+"y1_mm":36.068,
+"x2_mm":140.015,
+"y2_mm":36.068,
+"width_mm":0.381
+},
+{
+"net":"+5VIN",
+"layer":"Top Layer",
+"x1_mm":143.495,
+"y1_mm":25.705,
+"x2_mm":143.764,
+"y2_mm":25.974,
+"width_mm":0.381
+},
+{
+"net":"+5VIN",
+"layer":"Top Layer",
+"x1_mm":140.843,
+"y1_mm":25.705,
+"x2_mm":143.495,
+"y2_mm":25.705,
+"width_mm":0.381
+},
+{
+"net":"NetC136_2",
+"layer":"Top Layer",
+"x1_mm":143.798,
+"y1_mm":27.908,
+"x2_mm":143.798,
+"y2_mm":30.72,
+"width_mm":0.381
+},
+{
+"net":"NetC136_2",
+"layer":"Top Layer",
+"x1_mm":143.764,
+"y1_mm":27.874,
+"x2_mm":143.798,
+"y2_mm":27.908,
+"width_mm":0.381
+},
+{
+"net":"NetC136_2",
+"layer":"Top Layer",
+"x1_mm":147.701,
+"y1_mm":27.874,
+"x2_mm":147.767,
+"y2_mm":27.94,
+"width_mm":0.381
+},
+{
+"net":"NetC136_2",
+"layer":"Top Layer",
+"x1_mm":143.764,
+"y1_mm":27.874,
+"x2_mm":147.701,
+"y2_mm":27.874,
+"width_mm":0.381
+},
+{
+"net":"NetC136_2",
+"layer":"Top Layer",
+"x1_mm":147.767,
+"y1_mm":26.195,
+"x2_mm":147.767,
+"y2_mm":27.94,
+"width_mm":0.381
+},
+{
+"net":"NetC136_2",
+"layer":"Top Layer",
+"x1_mm":147.767,
+"y1_mm":26.195,
+"x2_mm":147.927,
+"y2_mm":26.035,
+"width_mm":0.381
+},
+{
+"net":"+5VIN",
+"layer":"Top Layer",
+"x1_mm":144.2085,
+"y1_mm":25.5295,
+"x2_mm":144.2085,
+"y2_mm":25.5945,
+"width_mm":0.381
+},
+{
+"net":"+5VIN",
+"layer":"Top Layer",
+"x1_mm":143.829,
+"y1_mm":25.974,
+"x2_mm":144.2085,
+"y2_mm":25.5945,
+"width_mm":0.381
+},
+{
+"net":"+5VIN",
+"layer":"Top Layer",
+"x1_mm":143.764,
+"y1_mm":25.974,
+"x2_mm":143.829,
+"y2_mm":25.974,
+"width_mm":0.381
+},
+{
+"net":"+5V",
+"layer":"Top Layer",
+"x1_mm":119.634,
+"y1_mm":17.272,
+"x2_mm":121.539,
+"y2_mm":17.272,
+"width_mm":0.381
+},
+{
+"net":"+5V",
+"layer":"Top Layer",
+"x1_mm":124.714,
+"y1_mm":14.097,
+"x2_mm":128.651,
+"y2_mm":14.097,
+"width_mm":0.381
+},
+{
+"net":"+5V",
+"layer":"Top Layer",
+"x1_mm":128.651,
+"y1_mm":14.097,
+"x2_mm":129.397,
+"y2_mm":13.351,
+"width_mm":0.381
+},
+{
+"net":"+21V",
+"layer":"Top Layer",
+"x1_mm":61.07732,
+"y1_mm":80.38132,
+"x2_mm":61.214,
+"y2_mm":80.518,
+"width_mm":0.381
+},
+{
+"net":"+30V",
+"layer":"Top Layer",
+"x1_mm":60.66191,
+"y1_mm":69.215,
+"x2_mm":63.61732,
+"y2_mm":66.25959,
+"width_mm":0.381
+},
+{
+"net":"NetD13_2",
+"layer":"Top Layer",
+"x1_mm":71.793,
+"y1_mm":82.407,
+"x2_mm":73.622,
+"y2_mm":82.407,
+"width_mm":0.381
+},
+{
+"net":"NetD14_1",
+"layer":"Top Layer",
+"x1_mm":75.222,
+"y1_mm":82.407,
+"x2_mm":77.051,
+"y2_mm":82.407,
+"width_mm":0.381
+},
+{
+"net":"+30V",
+"layer":"Top Layer",
+"x1_mm":58.646,
+"y1_mm":51.534,
+"x2_mm":58.674,
+"y2_mm":51.562,
+"width_mm":0.381
+},
+{
+"net":"+30V",
+"layer":"Top Layer",
+"x1_mm":51.689,
+"y1_mm":51.534,
+"x2_mm":53.848,
+"y2_mm":51.534,
+"width_mm":0.381
+},
+{
+"net":"+30V",
+"layer":"Top Layer",
+"x1_mm":53.848,
+"y1_mm":51.534,
+"x2_mm":58.646,
+"y2_mm":51.534,
+"width_mm":0.381
+},
+{
+"net":"NetC169_1",
+"layer":"Top Layer",
+"x1_mm":50.927,
+"y1_mm":31.242,
+"x2_mm":54.17,
+"y2_mm":31.242,
+"width_mm":0.381
+},
+{
+"net":"NetC169_1",
+"layer":"Top Layer",
+"x1_mm":52.31701,
+"y1_mm":37.72599,
+"x2_mm":52.31701,
+"y2_mm":40.37632,
+"width_mm":0.381
+},
+{
+"net":"NetC169_1",
+"layer":"Top Layer",
+"x1_mm":52.31701,
+"y1_mm":37.72599,
+"x2_mm":54.61,
+"y2_mm":35.433,
+"width_mm":0.381
+},
+{
+"net":"NetC169_1",
+"layer":"Top Layer",
+"x1_mm":54.17,
+"y1_mm":31.242,
+"x2_mm":54.61,
+"y2_mm":31.682,
+"width_mm":0.381
+},
+{
+"net":"NetC165_2",
+"layer":"Top Layer",
+"x1_mm":54.356,
+"y1_mm":18.857,
+"x2_mm":54.356,
+"y2_mm":21.114,
+"width_mm":0.381
+},
+{
+"net":"NetC172_2",
+"layer":"Top Layer",
+"x1_mm":45.974,
+"y1_mm":31.71,
+"x2_mm":45.974,
+"y2_mm":38.735,
+"width_mm":0.381
+},
+{
+"net":"NetD8_1",
+"layer":"Top Layer",
+"x1_mm":50.038,
+"y1_mm":45.466,
+"x2_mm":50.038,
+"y2_mm":52.578,
+"width_mm":0.381
+},
+{
+"net":"NetD8_1",
+"layer":"Top Layer",
+"x1_mm":50.038,
+"y1_mm":52.578,
+"x2_mm":50.574,
+"y2_mm":53.114,
+"width_mm":0.381
+},
+{
+"net":"NetD8_1",
+"layer":"Top Layer",
+"x1_mm":50.574,
+"y1_mm":53.114,
+"x2_mm":51.689,
+"y2_mm":53.114,
+"width_mm":0.381
+},
+{
+"net":"NetR113_2",
+"layer":"Top Layer",
+"x1_mm":45.438,
+"y1_mm":20.955,
+"x2_mm":45.438,
+"y2_mm":22.606,
+"width_mm":0.381
+},
+{
+"net":"NetC172_2",
+"layer":"Top Layer",
+"x1_mm":45.887,
+"y1_mm":31.623,
+"x2_mm":47.018,
+"y2_mm":30.492,
+"width_mm":0.381
+},
+{
+"net":"NetC155_2",
+"layer":"Top Layer",
+"x1_mm":93.754,
+"y1_mm":53.058,
+"x2_mm":93.853,
+"y2_mm":52.959,
+"width_mm":0.381
+},
+{
+"net":"NetC155_2",
+"layer":"Top Layer",
+"x1_mm":93.853,
+"y1_mm":51.308,
+"x2_mm":93.853,
+"y2_mm":52.959,
+"width_mm":0.381
+},
+{
+"net":"NetR98_1",
+"layer":"Top Layer",
+"x1_mm":93.853,
+"y1_mm":44.351,
+"x2_mm":93.853,
+"y2_mm":46.2,
+"width_mm":0.381
+},
+{
+"net":"NetR98_1",
+"layer":"Top Layer",
+"x1_mm":89.587,
+"y1_mm":46.355,
+"x2_mm":93.853,
+"y2_mm":46.355,
+"width_mm":0.381
+},
+{
+"net":"12V",
+"layer":"Top Layer",
+"x1_mm":93.853,
+"y1_mm":39.825,
+"x2_mm":93.853,
+"y2_mm":42.771,
+"width_mm":0.381
+},
+{
+"net":"12V",
+"layer":"Top Layer",
+"x1_mm":93.478,
+"y1_mm":39.45,
+"x2_mm":93.853,
+"y2_mm":39.825,
+"width_mm":0.381
+},
+{
+"net":"NetC156_2",
+"layer":"Top Layer",
+"x1_mm":91.313,
+"y1_mm":47.625,
+"x2_mm":92.075,
+"y2_mm":48.387,
+"width_mm":0.381
+},
+{
+"net":"NetC156_2",
+"layer":"Top Layer",
+"x1_mm":92.075,
+"y1_mm":48.387,
+"x2_mm":92.075,
+"y2_mm":49.728,
+"width_mm":0.381
+},
+{
+"net":"GND",
+"layer":"Top Layer",
+"x1_mm":90.57185,
+"y1_mm":48.91585,
+"x2_mm":91.059,
+"y2_mm":49.403,
+"width_mm":0.381
+},
+{
+"net":"GND",
+"layer":"Top Layer",
+"x1_mm":89.60785,
+"y1_mm":48.91585,
+"x2_mm":90.57185,
+"y2_mm":48.91585,
+"width_mm":0.381
+},
+{
+"net":"GND",
+"layer":"Top Layer",
+"x1_mm":89.587,
+"y1_mm":48.895,
+"x2_mm":89.60785,
+"y2_mm":48.91585,
+"width_mm":0.381
+},
+{
+"net":"GND",
+"layer":"Top Layer",
+"x1_mm":91.059,
+"y1_mm":49.403,
+"x2_mm":91.059,
+"y2_mm":50.673,
+"width_mm":0.381
+},
+{
+"net":"GND",
+"layer":"Top Layer",
+"x1_mm":92.075,
+"y1_mm":51.24489,
+"x2_mm":92.075,
+"y2_mm":51.308,
+"width_mm":0.381
+},
+{
+"net":"GND",
+"layer":"Top Layer",
+"x1_mm":91.059,
+"y1_mm":50.673,
+"x2_mm":91.42139,
+"y2_mm":51.03539,
+"width_mm":0.381
+},
+{
+"net":"GND",
+"layer":"Top Layer",
+"x1_mm":91.42139,
+"y1_mm":51.03539,
+"x2_mm":91.8655,
+"y2_mm":51.03539,
+"width_mm":0.381
+},
+{
+"net":"GND",
+"layer":"Top Layer",
+"x1_mm":91.8655,
+"y1_mm":51.03539,
+"x2_mm":92.075,
+"y2_mm":51.24489,
+"width_mm":0.381
+},
+{
+"net":"GND",
+"layer":"Top Layer",
+"x1_mm":92.174,
+"y1_mm":51.407,
+"x2_mm":92.174,
+"y2_mm":53.058,
+"width_mm":0.381
+},
+{
+"net":"GND",
+"layer":"Top Layer",
+"x1_mm":92.075,
+"y1_mm":51.308,
+"x2_mm":92.174,
+"y2_mm":51.407,
+"width_mm":0.381
+},
+{
+"net":"+5V",
+"layer":"Top Layer",
+"x1_mm":132.5245,
+"y1_mm":10.0355,
+"x2_mm":135.089,
+"y2_mm":7.471,
+"width_mm":0.381
+},
+{
+"net":"12V",
+"layer":"Top Layer",
+"x1_mm":141.097,
+"y1_mm":24.003,
+"x2_mm":145.637,
+"y2_mm":19.463,
+"width_mm":0.381
+},
+{
+"net":"12V",
+"layer":"Top Layer",
+"x1_mm":132.395,
+"y1_mm":24.003,
+"x2_mm":141.097,
+"y2_mm":24.003,
+"width_mm":0.381
+},
+{
+"net":"12V",
+"layer":"Top Layer",
+"x1_mm":145.637,
+"y1_mm":9.493,
+"x2_mm":145.637,
+"y2_mm":19.463,
+"width_mm":0.381
+},
+{
+"net":"+200V",
+"layer":"Top Layer",
+"x1_mm":54.356,
+"y1_mm":10.668,
+"x2_mm":54.356,
+"y2_mm":16.957,
+"width_mm":0.254
+},
+{
+"net":"+200V",
+"layer":"Top Layer",
+"x1_mm":54.229,
+"y1_mm":10.541,
+"x2_mm":54.356,
+"y2_mm":10.668,
+"width_mm":0.254
+},
+{
+"net":"-5V",
+"layer":"Top Layer",
+"x1_mm":82.738,
+"y1_mm":10.922,
+"x2_mm":82.804,
+"y2_mm":10.988,
+"width_mm":0.254
+},
+{
+"net":"-5V",
+"layer":"Top Layer",
+"x1_mm":80.391,
+"y1_mm":10.922,
+"x2_mm":82.738,
+"y2_mm":10.922,
+"width_mm":0.254
+},
+{
+"net":"+5V",
+"layer":"Top Layer",
+"x1_mm":121.539,
+"y1_mm":17.272,
+"x2_mm":122.809,
+"y2_mm":16.002,
+"width_mm":0.381
+},
+{
+"net":"+5V",
+"layer":"Top Layer",
+"x1_mm":122.809,
+"y1_mm":16.002,
+"x2_mm":124.714,
+"y2_mm":14.097,
+"width_mm":0.381
+},
+{
+"net":"FLJC",
+"layer":"Top Layer",
+"x1_mm":147.637,
+"y1_mm":9.493,
+"x2_mm":147.701,
+"y2_mm":9.557,
+"width_mm":0.381
+},
+{
+"net":"3.3VFSALC",
+"layer":"Top Layer",
+"x1_mm":121.9555,
+"y1_mm":6.8225,
+"x2_mm":121.9555,
+"y2_mm":6.9025,
+"width_mm":0.381
+},
+{
+"net":"3.3VFSALC",
+"layer":"Top Layer",
+"x1_mm":121.746,
+"y1_mm":7.112,
+"x2_mm":121.9555,
+"y2_mm":6.9025,
+"width_mm":0.381
+},
+{
+"net":"3.3VFSALC",
+"layer":"Top Layer",
+"x1_mm":121.666,
+"y1_mm":7.112,
+"x2_mm":121.746,
+"y2_mm":7.112,
+"width_mm":0.381
+},
+{
+"net":"NetC147_2",
+"layer":"Top Layer",
+"x1_mm":83.568,
+"y1_mm":30.48,
+"x2_mm":86.995,
+"y2_mm":30.48,
+"width_mm":0.381
+},
+{
+"net":"12V",
+"layer":"Top Layer",
+"x1_mm":133.797,
+"y1_mm":36.068,
+"x2_mm":133.797,
+"y2_mm":36.133,
+"width_mm":0.381
+},
+{
+"net":"12V",
+"layer":"Top Layer",
+"x1_mm":133.4175,
+"y1_mm":36.5125,
+"x2_mm":133.797,
+"y2_mm":36.133,
+"width_mm":0.381
+},
+{
+"net":"12V",
+"layer":"Top Layer",
+"x1_mm":133.3525,
+"y1_mm":36.5125,
+"x2_mm":133.4175,
+"y2_mm":36.5125,
+"width_mm":0.381
+},
+{
+"net":"12V",
+"layer":"Top Layer",
+"x1_mm":107.033,
+"y1_mm":39.203,
+"x2_mm":113.284,
+"y2_mm":39.203,
+"width_mm":0.381
+},
+{
+"net":"12V",
+"layer":"Top Layer",
+"x1_mm":113.284,
+"y1_mm":39.203,
+"x2_mm":114.55311,
+"y2_mm":40.47211,
+"width_mm":0.381
+},
+{
+"net":"12V",
+"layer":"Top Layer",
+"x1_mm":114.55311,
+"y1_mm":40.47211,
+"x2_mm":129.39289,
+"y2_mm":40.47211,
+"width_mm":0.381
+},
+{
+"net":"12V",
+"layer":"Top Layer",
+"x1_mm":129.39289,
+"y1_mm":40.47211,
+"x2_mm":133.3525,
+"y2_mm":36.5125,
+"width_mm":0.381
+},
+{
+"net":"NetC158_2",
+"layer":"Top Layer",
+"x1_mm":107.529,
+"y1_mm":11.684,
+"x2_mm":107.529,
+"y2_mm":17.653,
+"width_mm":0.381
+},
+{
+"net":"NetC158_2",
+"layer":"Top Layer",
+"x1_mm":112.395,
+"y1_mm":20.828,
+"x2_mm":112.395,
+"y2_mm":25.654,
+"width_mm":0.381
+},
+{
+"net":"NetC158_2",
+"layer":"Top Layer",
+"x1_mm":109.037,
+"y1_mm":25.654,
+"x2_mm":112.395,
+"y2_mm":25.654,
+"width_mm":0.381
+},
+{
+"net":"NetC158_2",
+"layer":"Top Layer",
+"x1_mm":112.395,
+"y1_mm":25.654,
+"x2_mm":118.237,
+"y2_mm":25.654,
+"width_mm":0.381
+},
+{
+"net":"NetC158_2",
+"layer":"Top Layer",
+"x1_mm":109.319,
+"y1_mm":17.752,
+"x2_mm":112.395,
+"y2_mm":20.828,
+"width_mm":0.381
+},
+{
+"net":"NetC158_2",
+"layer":"Top Layer",
+"x1_mm":104.775,
+"y1_mm":17.752,
+"x2_mm":109.319,
+"y2_mm":17.752,
+"width_mm":0.381
+},
+{
+"net":"NetC158_2",
+"layer":"Top Layer",
+"x1_mm":103.124,
+"y1_mm":17.752,
+"x2_mm":104.775,
+"y2_mm":17.752,
+"width_mm":0.381
+},
+{
+"net":"NetC165_2",
+"layer":"Top Layer",
+"x1_mm":49.718,
+"y1_mm":18.857,
+"x2_mm":54.356,
+"y2_mm":18.857,
+"width_mm":0.381
+},
+{
+"net":"NetR110_2",
+"layer":"Top Layer",
+"x1_mm":49.911,
+"y1_mm":60.861,
+"x2_mm":49.911,
+"y2_mm":61.722,
+"width_mm":0.381
+},
+{
+"net":"NetR110_2",
+"layer":"Top Layer",
+"x1_mm":49.911,
+"y1_mm":61.722,
+"x2_mm":49.911,
+"y2_mm":62.583,
+"width_mm":0.381
+},
+{
+"net":"GND",
+"layer":"Top Layer",
+"x1_mm":62.794,
+"y1_mm":80.518,
+"x2_mm":64.516,
+"y2_mm":80.518,
+"width_mm":0.381
+},
+{
+"net":"NetC147_2",
+"layer":"Top Layer",
+"x1_mm":87.912,
+"y1_mm":53.086,
+"x2_mm":87.912,
+"y2_mm":54.00582,
+"width_mm":0.381
+},
+{
+"net":"NetC147_2",
+"layer":"Top Layer",
+"x1_mm":87.68882,
+"y1_mm":54.229,
+"x2_mm":87.912,
+"y2_mm":54.00582,
+"width_mm":0.381
+},
+{
+"net":"NetC147_2",
+"layer":"Top Layer",
+"x1_mm":85.471,
+"y1_mm":54.229,
+"x2_mm":87.68882,
+"y2_mm":54.229,
+"width_mm":0.381
+},
+{
+"net":"NetC147_2",
+"layer":"Top Layer",
+"x1_mm":83.947,
+"y1_mm":52.705,
+"x2_mm":85.471,
+"y2_mm":54.229,
+"width_mm":0.381
+},
+{
+"net":"3.3VFSALC",
+"layer":"Top Layer",
+"x1_mm":145.57562,
+"y1_mm":6.63762,
+"x2_mm":145.57562,
+"y2_mm":7.40962,
+"width_mm":0.381
+},
+{
+"net":"3.3VFSALC",
+"layer":"Top Layer",
+"x1_mm":145.57562,
+"y1_mm":7.40962,
+"x2_mm":145.637,
+"y2_mm":7.471,
+"width_mm":0.381
+},
+{
+"net":"3.3VFSALC",
+"layer":"Top Layer",
+"x1_mm":121.9555,
+"y1_mm":6.8225,
+"x2_mm":122.682,
+"y2_mm":6.096,
+"width_mm":0.381
+},
+{
+"net":"3.3VFSALC",
+"layer":"Top Layer",
+"x1_mm":122.682,
+"y1_mm":6.096,
+"x2_mm":145.034,
+"y2_mm":6.096,
+"width_mm":0.381
+},
+{
+"net":"3.3VFSALC",
+"layer":"Top Layer",
+"x1_mm":145.034,
+"y1_mm":6.096,
+"x2_mm":145.57562,
+"y2_mm":6.63762,
+"width_mm":0.381
+},
+{
+"net":"NetD13_1",
+"layer":"Top Layer",
+"x1_mm":66.096,
+"y1_mm":80.518,
+"x2_mm":66.207,
+"y2_mm":80.629,
+"width_mm":0.381
+},
+{
+"net":"NetR126_2",
+"layer":"Top Layer",
+"x1_mm":81.976,
+"y1_mm":74.869,
+"x2_mm":81.976,
+"y2_mm":76.851,
+"width_mm":0.508
+},
+{
+"net":"NetR126_2",
+"layer":"Top Layer",
+"x1_mm":81.976,
+"y1_mm":74.869,
+"x2_mm":82.042,
+"y2_mm":74.803,
+"width_mm":0.381
+},
+{
+"net":"NetR124_1",
+"layer":"Top Layer",
+"x1_mm":81.026,
+"y1_mm":78.851,
+"x2_mm":81.085,
+"y2_mm":78.91,
+"width_mm":0.381
+},
+{
+"net":"NetR127_2",
+"layer":"Top Layer",
+"x1_mm":76.388,
+"y1_mm":76.008,
+"x2_mm":76.388,
+"y2_mm":76.073,
+"width_mm":0.381
+},
+{
+"net":"NetR127_2",
+"layer":"Top Layer",
+"x1_mm":76.388,
+"y1_mm":76.008,
+"x2_mm":76.7675,
+"y2_mm":75.6285,
+"width_mm":0.381
+},
+{
+"net":"NetD13_1",
+"layer":"Top Layer",
+"x1_mm":66.096,
+"y1_mm":80.518,
+"x2_mm":66.15732,
+"y2_mm":80.518,
+"width_mm":0.381
+},
+{
+"net":"NetD13_1",
+"layer":"Top Layer",
+"x1_mm":66.15732,
+"y1_mm":80.518,
+"x2_mm":70.193,
+"y2_mm":80.518,
+"width_mm":1
+},
+{
+"net":"NetD13_1",
+"layer":"Top Layer",
+"x1_mm":70.193,
+"y1_mm":79.144,
+"x2_mm":70.193,
+"y2_mm":80.518,
+"width_mm":1
+},
+{
+"net":"NetR127_1",
+"layer":"Top Layer",
+"x1_mm":74.25,
+"y1_mm":76.311,
+"x2_mm":74.488,
+"y2_mm":76.073,
+"width_mm":0.381
+},
+{
+"net":"NetR126_2",
+"layer":"Top Layer",
+"x1_mm":82.042,
+"y1_mm":72.997,
+"x2_mm":82.042,
+"y2_mm":74.803,
+"width_mm":0.508
+},
+{
+"net":"NetR126_2",
+"layer":"Top Layer",
+"x1_mm":81.943,
+"y1_mm":72.898,
+"x2_mm":82.042,
+"y2_mm":72.997,
+"width_mm":0.381
+},
+{
+"net":"NetR127_2",
+"layer":"Top Layer",
+"x1_mm":76.388,
+"y1_mm":76.073,
+"x2_mm":80.142,
+"y2_mm":76.073,
+"width_mm":0.381
+},
+{
+"net":"NetR127_2",
+"layer":"Top Layer",
+"x1_mm":80.142,
+"y1_mm":74.803,
+"x2_mm":80.142,
+"y2_mm":76.073,
+"width_mm":0.381
+},
+{
+"net":"NetR127_2",
+"layer":"Top Layer",
+"x1_mm":80.142,
+"y1_mm":76.073,
+"x2_mm":80.142,
+"y2_mm":76.637,
+"width_mm":0.381
+},
+{
+"net":"+30V",
+"layer":"Top Layer",
+"x1_mm":80.363,
+"y1_mm":70.358,
+"x2_mm":80.363,
+"y2_mm":72.898,
+"width_mm":0.508
+},
+{
+"net":"NetR124_1",
+"layer":"Top Layer",
+"x1_mm":81.01,
+"y1_mm":78.867,
+"x2_mm":81.026,
+"y2_mm":78.851,
+"width_mm":0.381
+},
+{
+"net":"NetR124_1",
+"layer":"Top Layer",
+"x1_mm":77.91,
+"y1_mm":78.867,
+"x2_mm":81.01,
+"y2_mm":78.867,
+"width_mm":0.508
+},
+{
+"net":"+21V",
+"layer":"Top Layer",
+"x1_mm":53.594,
+"y1_mm":71.814,
+"x2_mm":53.6595,
+"y2_mm":71.814,
+"width_mm":0.381
+},
+{
+"net":"+21V",
+"layer":"Top Layer",
+"x1_mm":54.229,
+"y1_mm":72.3835,
+"x2_mm":54.229,
+"y2_mm":77.597,
+"width_mm":0.504
+},
+{
+"net":"+21V",
+"layer":"Top Layer",
+"x1_mm":53.6595,
+"y1_mm":71.814,
+"x2_mm":54.229,
+"y2_mm":72.3835,
+"width_mm":0.381
+},
+{
+"net":"+21V",
+"layer":"Top Layer",
+"x1_mm":60.57932,
+"y1_mm":77.597,
+"x2_mm":61.07732,
+"y2_mm":77.099,
+"width_mm":0.504
+},
+{
+"net":"+30V",
+"layer":"Top Layer",
+"x1_mm":55.812,
+"y1_mm":65.405,
+"x2_mm":60.53491,
+"y2_mm":65.405,
+"width_mm":0.381
+},
+{
+"net":"FS",
+"layer":"Top Layer",
+"x1_mm":71.4375,
+"y1_mm":74.6085,
+"x2_mm":71.4375,
+"y2_mm":74.6735,
+"width_mm":0.381
+},
+{
+"net":"FS",
+"layer":"Top Layer",
+"x1_mm":71.4375,
+"y1_mm":74.6085,
+"x2_mm":71.817,
+"y2_mm":74.229,
+"width_mm":0.381
+},
+{
+"net":"FS",
+"layer":"Top Layer",
+"x1_mm":71.817,
+"y1_mm":74.229,
+"x2_mm":71.882,
+"y2_mm":74.229,
+"width_mm":0.381
+},
+{
+"net":"FS",
+"layer":"Top Layer",
+"x1_mm":68.453,
+"y1_mm":76.454,
+"x2_mm":69.657,
+"y2_mm":76.454,
+"width_mm":0.381
+},
+{
+"net":"FS",
+"layer":"Top Layer",
+"x1_mm":69.657,
+"y1_mm":76.454,
+"x2_mm":71.4375,
+"y2_mm":74.6735,
+"width_mm":0.381
+},
+{
+"net":"NetR127_1",
+"layer":"Top Layer",
+"x1_mm":74.62732,
+"y1_mm":75.08968,
+"x2_mm":74.62732,
+"y2_mm":75.93368,
+"width_mm":0.381
+},
+{
+"net":"NetR127_1",
+"layer":"Top Layer",
+"x1_mm":74.488,
+"y1_mm":76.073,
+"x2_mm":74.62732,
+"y2_mm":75.93368,
+"width_mm":0.381
+},
+{
+"net":"NetR222_1",
+"layer":"Top Layer",
+"x1_mm":71.882,
+"y1_mm":72.329,
+"x2_mm":71.959,
+"y2_mm":72.406,
+"width_mm":0.381
+},
+{
+"net":"NetR222_1",
+"layer":"Top Layer",
+"x1_mm":71.959,
+"y1_mm":72.406,
+"x2_mm":74.361,
+"y2_mm":72.406,
+"width_mm":0.381
+},
+{
+"net":"GND",
+"layer":"Top Layer",
+"x1_mm":76.3705,
+"y1_mm":72.517,
+"x2_mm":77.724,
+"y2_mm":72.517,
+"width_mm":0.381
+},
+{
+"net":"GND",
+"layer":"Top Layer",
+"x1_mm":76.261,
+"y1_mm":72.406,
+"x2_mm":76.261,
+"y2_mm":72.4075,
+"width_mm":0.381
+},
+{
+"net":"GND",
+"layer":"Top Layer",
+"x1_mm":76.261,
+"y1_mm":72.4075,
+"x2_mm":76.3705,
+"y2_mm":72.517,
+"width_mm":0.381
+},
+{
+"net":"+21V",
+"layer":"Top Layer",
+"x1_mm":61.07732,
+"y1_mm":76.71499,
+"x2_mm":61.07732,
+"y2_mm":77.099,
+"width_mm":0.381
+},
+{
+"net":"+21V",
+"layer":"Top Layer",
+"x1_mm":61.07732,
+"y1_mm":77.099,
+"x2_mm":61.07732,
+"y2_mm":80.38132,
+"width_mm":1
+},
+{
+"net":"+21V",
+"layer":"Top Layer",
+"x1_mm":47.879,
+"y1_mm":77.597,
+"x2_mm":54.229,
+"y2_mm":77.597,
+"width_mm":0.504
+},
+{
+"net":"+21V",
+"layer":"Top Layer",
+"x1_mm":54.229,
+"y1_mm":77.597,
+"x2_mm":60.57932,
+"y2_mm":77.597,
+"width_mm":1
+},
+{
+"net":"NetR127_1",
+"layer":"Top Layer",
+"x1_mm":74.62732,
+"y1_mm":75.08968,
+"x2_mm":75.311,
+"y2_mm":74.406,
+"width_mm":0.381
+},
+{
+"net":"NetR127_1",
+"layer":"Top Layer",
+"x1_mm":75.311,
+"y1_mm":74.406,
+"x2_mm":75.3745,
+"y2_mm":74.3425,
+"width_mm":0.381
+},
+{
+"net":"+5VIN",
+"layer":"Top Layer",
+"x1_mm":144.2085,
+"y1_mm":25.5295,
+"x2_mm":149.225,
+"y2_mm":20.513,
+"width_mm":0.381
+},
+{
+"net":"+5VIN",
+"layer":"Top Layer",
+"x1_mm":149.225,
+"y1_mm":9.059,
+"x2_mm":149.225,
+"y2_mm":20.513,
+"width_mm":0.381
+},
+{
+"net":"FLJC",
+"layer":"Top Layer",
+"x1_mm":147.637,
+"y1_mm":9.493,
+"x2_mm":147.637,
+"y2_mm":13.399,
+"width_mm":0.381
+},
+{
+"net":"194out",
+"layer":"Top Layer",
+"x1_mm":147.574,
+"y1_mm":14.986,
+"x2_mm":147.574,
+"y2_mm":17.399,
+"width_mm":0.381
+},
+{
+"net":"+30V",
+"layer":"Top Layer",
+"x1_mm":82.044,
+"y1_mm":62.23,
+"x2_mm":82.6135,
+"y2_mm":61.6605,
+"width_mm":0.381
+},
+{
+"net":"194out",
+"layer":"Top Layer",
+"x1_mm":90.17,
+"y1_mm":53.213,
+"x2_mm":90.17,
+"y2_mm":53.312,
+"width_mm":0.381
+},
+{
+"net":"194out",
+"layer":"Top Layer",
+"x1_mm":87.884,
+"y1_mm":55.518,
+"x2_mm":87.884,
+"y2_mm":55.598,
+"width_mm":0.381
+},
+{
+"net":"194out",
+"layer":"Top Layer",
+"x1_mm":88.1735,
+"y1_mm":55.3085,
+"x2_mm":90.17,
+"y2_mm":53.312,
+"width_mm":0.381
+},
+{
+"net":"194out",
+"layer":"Top Layer",
+"x1_mm":88.0935,
+"y1_mm":55.3085,
+"x2_mm":88.1735,
+"y2_mm":55.3085,
+"width_mm":0.381
+},
+{
+"net":"194out",
+"layer":"Top Layer",
+"x1_mm":87.884,
+"y1_mm":55.518,
+"x2_mm":88.0935,
+"y2_mm":55.3085,
+"width_mm":0.381
+},
+{
+"net":"194out",
+"layer":"Top Layer",
+"x1_mm":86.233,
+"y1_mm":55.598,
+"x2_mm":87.884,
+"y2_mm":55.598,
+"width_mm":0.381
+},
+{
+"net":"194out",
+"layer":"Top Layer",
+"x1_mm":86.134,
+"y1_mm":55.499,
+"x2_mm":86.233,
+"y2_mm":55.598,
+"width_mm":0.381
+},
+{
+"net":"194out",
+"layer":"Top Layer",
+"x1_mm":84.328,
+"y1_mm":55.499,
+"x2_mm":86.134,
+"y2_mm":55.499,
+"width_mm":0.381
+},
+{
+"net":"NetC173_1",
+"layer":"Top Layer",
+"x1_mm":84.5875,
+"y1_mm":57.6585,
+"x2_mm":87.374,
+"y2_mm":60.445,
+"width_mm":0.381
+},
+{
+"net":"NetC173_1",
+"layer":"Top Layer",
+"x1_mm":84.5875,
+"y1_mm":57.4085,
+"x2_mm":84.5875,
+"y2_mm":57.6585,
+"width_mm":0.381
+},
+{
+"net":"NetC173_1",
+"layer":"Top Layer",
+"x1_mm":84.578,
+"y1_mm":57.399,
+"x2_mm":84.5875,
+"y2_mm":57.4085,
+"width_mm":0.381
+},
+{
+"net":"NetC173_1",
+"layer":"Top Layer",
+"x1_mm":84.328,
+"y1_mm":57.399,
+"x2_mm":84.578,
+"y2_mm":57.399,
+"width_mm":0.381
+},
+{
+"net":"NetC173_1",
+"layer":"Top Layer",
+"x1_mm":87.374,
+"y1_mm":60.445,
+"x2_mm":87.374,
+"y2_mm":62.23,
+"width_mm":0.381
+},
+{
+"net":"+30V",
+"layer":"Top Layer",
+"x1_mm":81.578,
+"y1_mm":61.764,
+"x2_mm":82.044,
+"y2_mm":62.23,
+"width_mm":0.381
+},
+{
+"net":"+30V",
+"layer":"Top Layer",
+"x1_mm":81.578,
+"y1_mm":57.399,
+"x2_mm":81.578,
+"y2_mm":61.764,
+"width_mm":0.381
+},
+{
+"net":"+5V",
+"layer":"Top Layer",
+"x1_mm":76.454,
+"y1_mm":55.598,
+"x2_mm":78.232,
+"y2_mm":55.598,
+"width_mm":0.254
+},
+{
+"net":"+5V",
+"layer":"Top Layer",
+"x1_mm":78.232,
+"y1_mm":55.598,
+"x2_mm":78.331,
+"y2_mm":55.499,
+"width_mm":0.254
+},
+{
+"net":"GND",
+"layer":"Top Layer",
+"x1_mm":86.233,
+"y1_mm":57.178,
+"x2_mm":87.884,
+"y2_mm":57.178,
+"width_mm":0.381
+},
+{
+"net":"GND",
+"layer":"Top Layer",
+"x1_mm":85.504,
+"y1_mm":56.449,
+"x2_mm":85.9435,
+"y2_mm":56.8885,
+"width_mm":0.381
+},
+{
+"net":"GND",
+"layer":"Top Layer",
+"x1_mm":84.328,
+"y1_mm":56.449,
+"x2_mm":85.504,
+"y2_mm":56.449,
+"width_mm":0.381
+},
+{
+"net":"GND",
+"layer":"Top Layer",
+"x1_mm":86.233,
+"y1_mm":57.098,
+"x2_mm":86.233,
+"y2_mm":57.178,
+"width_mm":0.381
+},
+{
+"net":"GND",
+"layer":"Top Layer",
+"x1_mm":86.0235,
+"y1_mm":56.8885,
+"x2_mm":86.233,
+"y2_mm":57.098,
+"width_mm":0.381
+},
+{
+"net":"GND",
+"layer":"Top Layer",
+"x1_mm":85.9435,
+"y1_mm":56.8885,
+"x2_mm":86.0235,
+"y2_mm":56.8885,
+"width_mm":0.381
+},
+{
+"net":"GND",
+"layer":"Top Layer",
+"x1_mm":83.373,
+"y1_mm":56.449,
+"x2_mm":84.328,
+"y2_mm":56.449,
+"width_mm":0.381
+},
+{
+"net":"GND",
+"layer":"Top Layer",
+"x1_mm":82.931,
+"y1_mm":56.007,
+"x2_mm":83.373,
+"y2_mm":56.449,
+"width_mm":0.381
+},
+{
+"net":"GND",
+"layer":"Top Layer",
+"x1_mm":82.175,
+"y1_mm":53.7335,
+"x2_mm":82.931,
+"y2_mm":54.4895,
+"width_mm":0.381
+},
+{
+"net":"GND",
+"layer":"Top Layer",
+"x1_mm":81.6055,
+"y1_mm":53.124,
+"x2_mm":82.175,
+"y2_mm":53.6935,
+"width_mm":0.381
+},
+{
+"net":"GND",
+"layer":"Top Layer",
+"x1_mm":82.931,
+"y1_mm":54.4895,
+"x2_mm":82.931,
+"y2_mm":56.007,
+"width_mm":0.381
+},
+{
+"net":"GND",
+"layer":"Top Layer",
+"x1_mm":82.175,
+"y1_mm":53.6935,
+"x2_mm":82.175,
+"y2_mm":53.7335,
+"width_mm":0.381
+},
+{
+"net":"GND",
+"layer":"Top Layer",
+"x1_mm":78.2635,
+"y1_mm":53.124,
+"x2_mm":81.5655,
+"y2_mm":53.124,
+"width_mm":0.381
+},
+{
+"net":"GND",
+"layer":"Top Layer",
+"x1_mm":81.5655,
+"y1_mm":53.124,
+"x2_mm":81.6055,
+"y2_mm":53.124,
+"width_mm":0.381
+},
+{
+"net":"NetC169_1",
+"layer":"Top Layer",
+"x1_mm":54.61,
+"y1_mm":31.682,
+"x2_mm":54.61,
+"y2_mm":35.433,
+"width_mm":0.381
+},
+{
+"net":"NetC172_2",
+"layer":"Top Layer",
+"x1_mm":47.018,
+"y1_mm":22.606,
+"x2_mm":47.018,
+"y2_mm":30.492,
+"width_mm":0.381
+},
+{
+"net":"NetR113_2",
+"layer":"Top Layer",
+"x1_mm":45.1295,
+"y1_mm":22.8155,
+"x2_mm":45.1295,
+"y2_mm":24.7205,
+"width_mm":0.381
+},
+{
+"net":"NetR113_2",
+"layer":"Top Layer",
+"x1_mm":45.085,
+"y1_mm":24.765,
+"x2_mm":45.1295,
+"y2_mm":24.7205,
+"width_mm":0.381
+},
+{
+"net":"NetR111_2",
+"layer":"Top Layer",
+"x1_mm":47.752,
+"y1_mm":64.163,
+"x2_mm":49.911,
+"y2_mm":64.163,
+"width_mm":0.381
+},
+{
+"net":"NetR111_2",
+"layer":"Top Layer",
+"x1_mm":46.101,
+"y1_mm":62.512,
+"x2_mm":47.752,
+"y2_mm":64.163,
+"width_mm":0.381
+},
+{
+"net":"NetR110_2",
+"layer":"Top Layer",
+"x1_mm":47.752,
+"y1_mm":61.722,
+"x2_mm":49.911,
+"y2_mm":61.722,
+"width_mm":0.381
+},
+{
+"net":"NetR110_2",
+"layer":"Top Layer",
+"x1_mm":46.101,
+"y1_mm":60.071,
+"x2_mm":47.752,
+"y2_mm":61.722,
+"width_mm":0.381
+},
+{
+"net":"NetR110_1",
+"layer":"Top Layer",
+"x1_mm":47.724,
+"y1_mm":59.281,
+"x2_mm":49.911,
+"y2_mm":59.281,
+"width_mm":0.381
+},
+{
+"net":"NetR110_1",
+"layer":"Top Layer",
+"x1_mm":46.101,
+"y1_mm":57.658,
+"x2_mm":47.724,
+"y2_mm":59.281,
+"width_mm":0.381
+},
+{
+"net":"+5V",
+"layer":"Top Layer",
+"x1_mm":78.331,
+"y1_mm":55.499,
+"x2_mm":81.578,
+"y2_mm":55.499,
+"width_mm":0.254
+},
+{
+"net":"+5V",
+"layer":"Top Layer",
+"x1_mm":135.089,
+"y1_mm":7.471,
+"x2_mm":143.637,
+"y2_mm":7.471,
+"width_mm":0.381
+},
+{
+"net":"+5VIN",
+"layer":"Top Layer",
+"x1_mm":147.637,
+"y1_mm":7.471,
+"x2_mm":149.225,
+"y2_mm":9.059,
+"width_mm":0.381
+},
+{
+"net":"NetR124_2",
+"layer":"Top Layer",
+"x1_mm":72.131,
+"y1_mm":79.121,
+"x2_mm":74.236,
+"y2_mm":79.121,
+"width_mm":0.381
+},
+{
+"net":"NetR124_2",
+"layer":"Top Layer",
+"x1_mm":74.236,
+"y1_mm":79.121,
+"x2_mm":74.49,
+"y2_mm":78.867,
+"width_mm":0.381
+},
+{
+"net":"NetD13_1",
+"layer":"Top Layer",
+"x1_mm":66.15732,
+"y1_mm":76.71499,
+"x2_mm":66.15732,
+"y2_mm":80.518,
+"width_mm":1
+},
+{
+"net":"NetD13_1",
+"layer":"Top Layer",
+"x1_mm":70.193,
+"y1_mm":80.518,
+"x2_mm":70.193,
+"y2_mm":82.169,
+"width_mm":1
+},
+{
+"net":"12V",
+"layer":"Top Layer",
+"x1_mm":100.082,
+"y1_mm":39.45,
+"x2_mm":106.786,
+"y2_mm":39.45,
+"width_mm":0.381
+},
+{
+"net":"GND",
+"layer":"Top Layer",
+"x1_mm":47.018,
+"y1_mm":18.768,
+"x2_mm":47.117,
+"y2_mm":18.669,
+"width_mm":0.381
+},
+{
+"net":"GND",
+"layer":"Top Layer",
+"x1_mm":47.018,
+"y1_mm":18.768,
+"x2_mm":47.018,
+"y2_mm":20.955,
+"width_mm":0.381
+},
+{
+"net":"NetD9_2",
+"layer":"Top Layer",
+"x1_mm":48.26,
+"y1_mm":52.108,
+"x2_mm":48.26,
+"y2_mm":53.683,
+"width_mm":0.254
+},
+{
+"net":"NetD8_2",
+"layer":"Top Layer",
+"x1_mm":48.26,
+"y1_mm":49.187,
+"x2_mm":48.26,
+"y2_mm":50.508,
+"width_mm":0.254
+},
+{
+"net":"NetD8_1",
+"layer":"Top Layer",
+"x1_mm":48.90468,
+"y1_mm":45.45632,
+"x2_mm":52.31701,
+"y2_mm":45.45632,
+"width_mm":0.381
+},
+{
+"net":"NetD8_1",
+"layer":"Top Layer",
+"x1_mm":48.26,
+"y1_mm":46.101,
+"x2_mm":48.90468,
+"y2_mm":45.45632,
+"width_mm":0.381
+},
+{
+"net":"NetD8_1",
+"layer":"Top Layer",
+"x1_mm":48.26,
+"y1_mm":46.101,
+"x2_mm":48.26,
+"y2_mm":47.587,
+"width_mm":0.381
+},
+{
+"net":"NetD8_1",
+"layer":"Top Layer",
+"x1_mm":51.689,
+"y1_mm":53.114,
+"x2_mm":51.689,
+"y2_mm":54.864,
+"width_mm":0.381
+},
+{
+"net":"",
+"layer":"Mechanical 2",
+"x1_mm":86.668,
+"y1_mm":30.48,
+"x2_mm":87.068,
+"y2_mm":30.48,
+"width_mm":0.013
+},
+{
+"net":"",
+"layer":"Mechanical 2",
+"x1_mm":86.868,
+"y1_mm":30.28,
+"x2_mm":86.868,
+"y2_mm":30.68,
+"width_mm":0.013
+},
+{
+"net":"",
+"layer":"Mechanical 2",
+"x1_mm":93.853,
+"y1_mm":73.46,
+"x2_mm":93.853,
+"y2_mm":73.86,
+"width_mm":0.013
+},
+{
+"net":"",
+"layer":"Mechanical 2",
+"x1_mm":93.653,
+"y1_mm":73.66,
+"x2_mm":94.053,
+"y2_mm":73.66,
+"width_mm":0.013
+},
+{
+"net":"",
+"layer":"Mechanical 2",
+"x1_mm":87.684,
+"y1_mm":74.041,
+"x2_mm":88.084,
+"y2_mm":74.041,
+"width_mm":0.013
+},
+{
+"net":"",
+"layer":"Mechanical 2",
+"x1_mm":87.884,
+"y1_mm":73.841,
+"x2_mm":87.884,
+"y2_mm":74.241,
+"width_mm":0.013
+},
+{
 "net":"NetR111_2",
 "layer":"Mid-Layer 1",
 "x1_mm":12.827,
@@ -10202,60 +10256,6 @@
 "x2_mm":45.974,
 "y2_mm":40.513,
 "width_mm":0.381
-},
-{
-"net":"",
-"layer":"Mechanical 2",
-"x1_mm":86.668,
-"y1_mm":30.48,
-"x2_mm":87.068,
-"y2_mm":30.48,
-"width_mm":0.013
-},
-{
-"net":"",
-"layer":"Mechanical 2",
-"x1_mm":86.868,
-"y1_mm":30.28,
-"x2_mm":86.868,
-"y2_mm":30.68,
-"width_mm":0.013
-},
-{
-"net":"",
-"layer":"Mechanical 2",
-"x1_mm":93.853,
-"y1_mm":73.46,
-"x2_mm":93.853,
-"y2_mm":73.86,
-"width_mm":0.013
-},
-{
-"net":"",
-"layer":"Mechanical 2",
-"x1_mm":93.653,
-"y1_mm":73.66,
-"x2_mm":94.053,
-"y2_mm":73.66,
-"width_mm":0.013
-},
-{
-"net":"",
-"layer":"Mechanical 2",
-"x1_mm":87.684,
-"y1_mm":74.041,
-"x2_mm":88.084,
-"y2_mm":74.041,
-"width_mm":0.013
-},
-{
-"net":"",
-"layer":"Mechanical 2",
-"x1_mm":87.884,
-"y1_mm":73.841,
-"x2_mm":87.884,
-"y2_mm":74.241,
-"width_mm":0.013
 },
 {
 "net":"FS",

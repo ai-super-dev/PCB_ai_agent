@@ -1686,6 +1686,7 @@ Chat with me to:
         button_frame.grid(row=1, column=0, sticky="ew", padx=16, pady=(0, 14))
         button_frame.grid_columnconfigure(0, weight=1)
         button_frame.grid_columnconfigure(1, weight=1)
+        button_frame.grid_columnconfigure(2, weight=1)
         
         # Add New Rule button
         add_btn = ctk.CTkButton(
@@ -1699,7 +1700,7 @@ Chat with me to:
             text_color="#ffffff",
             command=self._handle_add_new_rule
         )
-        add_btn.grid(row=0, column=0, padx=(0, 8), sticky="ew")
+        add_btn.grid(row=0, column=0, padx=(0, 4), sticky="ew")
         
         # Update Existing Rule button
         update_btn = ctk.CTkButton(
@@ -1713,7 +1714,21 @@ Chat with me to:
             text_color="#ffffff",
             command=self._handle_update_existing_rule
         )
-        update_btn.grid(row=0, column=1, padx=(8, 0), sticky="ew")
+        update_btn.grid(row=0, column=1, padx=4, sticky="ew")
+        
+        # Delete Rule button
+        delete_btn = ctk.CTkButton(
+            button_frame,
+            text="🗑️ Delete Rule",
+            font=ctk.CTkFont(size=13, weight="bold"),
+            height=36,
+            corner_radius=8,
+            fg_color="#dc2626",
+            hover_color="#b91c1c",
+            text_color="#ffffff",
+            command=self._handle_delete_rule
+        )
+        delete_btn.grid(row=0, column=2, padx=(4, 0), sticky="ew")
         
         # Scroll to bottom
         self.chat_frame.update()
@@ -1753,6 +1768,23 @@ Chat with me to:
         self.waiting_for_rule_input = True
         self.rule_action_type = "update"
     
+    def _handle_delete_rule(self):
+        """Handle Delete Rule button click"""
+        self.add_message(
+            "Please specify which rule you want to delete.\n\n"
+            "**Examples:**\n"
+            "• 'Delete Clearance+5V+12V rule'\n"
+            "• 'Remove PlaneClearance rule'\n"
+            "• 'Delete Width rule'\n\n"
+            "Type the rule name you want to delete in the chat box below:",
+            is_user=False
+        )
+        # Focus on input
+        self.input_entry.focus()
+        # Set flag to indicate we're waiting for rule input
+        self.waiting_for_rule_input = True
+        self.rule_action_type = "delete"
+    
     def _process_rule_request(self, user_input: str, action_type: str):
         """Process rule creation or update request"""
         self.set_status("Processing rule request...", "warning")
@@ -1774,10 +1806,18 @@ Chat with me to:
                 # Parse the rule request
                 rule_data = self._parse_rule_request(user_input, action_type)
                 
+                # DEBUG: Log parsed rule data
+                print(f"DEBUG: _process_rule_request - action_type={action_type}, rule_data={rule_data}")
+                
                 if not rule_data:
                     # Could not parse - use agent to help
                     if self.agent:
-                        action_text = "add a new" if action_type == "add" else "update an existing"
+                        action_texts = {
+                            "add": "add a new",
+                            "update": "update an existing",
+                            "delete": "delete an existing"
+                        }
+                        action_text = action_texts.get(action_type, "modify a")
                         prompt = f"User wants to {action_text} design rule. Request: {user_input}\n\n"
                         prompt += "Please help parse this rule request and provide clear instructions."
                         
@@ -1809,27 +1849,58 @@ Chat with me to:
                         rule_data["rule_name"],
                         rule_data["parameters"]
                     )
-                else:
+                elif action_type == "update":
                     result = client.update_rule(
                         rule_data["rule_name"],
                         rule_data["parameters"]
                     )
+                elif action_type == "delete":
+                    # DEBUG: Log the rule name being sent
+                    rule_name_to_send = rule_data["rule_name"]
+                    
+                    # CRITICAL: Final cleanup - ensure "rule" word and punctuation are not in the name
+                    rule_name_to_send = re.sub(r'\s+rule[.,\s]*$', '', rule_name_to_send, flags=re.IGNORECASE).strip()
+                    rule_name_to_send = rule_name_to_send.rstrip('.,;:!?')
+                    
+                    print(f"DEBUG: About to call delete_rule with rule_name: [{rule_name_to_send}]")
+                    print(f"DEBUG: Rule name length: {len(rule_name_to_send)}")
+                    print(f"DEBUG: Rule name ends with 'rule': {rule_name_to_send.lower().endswith('rule')}")
+                    print(f"DEBUG: Rule name ends with punctuation: {rule_name_to_send[-1] if rule_name_to_send else 'N/A'} in '.,;:!?'")
+                    
+                    result = client.delete_rule(rule_name_to_send)
+                else:
+                    self._safe_after(0, lambda: self.add_message(
+                        f"❌ Unknown action type: {action_type}",
+                        is_user=False
+                    ))
+                    self._safe_after(0, lambda: self.set_loading(False))
+                    return
                 
                 if result.get("success"):
                     # Rule applied successfully - show Altium's actual response
                     altium_msg = result.get("message", "OK")
-                    self._safe_after(0, lambda: self.add_message(
-                        f"✅ Rule {action_type}ed successfully!\n\n"
-                        f"**Rule:** {rule_data.get('rule_name', 'Unknown')}\n"
-                        f"**Type:** {rule_data.get('rule_type', 'Unknown')}\n"
-                        f"**Parameters:** {rule_data.get('parameters', {})}\n"
-                        f"**Altium Response:** {altium_msg}\n\n"
-                        "Refreshing rules list...",
-                        is_user=False
-                    ))
+                    action_past = {
+                        "add": "added",
+                        "update": "updated",
+                        "delete": "deleted"
+                    }.get(action_type, f"{action_type}ed")
                     
-                    # Server auto-saves and auto-exports, just refresh the UI
-                    self._safe_after(0, lambda: self._refresh_rules_after_update())
+                    msg = f"✅ Rule {action_past} successfully!\n\n"
+                    msg += f"**Rule:** {rule_data.get('rule_name', 'Unknown')}\n"
+                    if action_type != "delete":
+                        msg += f"**Type:** {rule_data.get('rule_type', 'Unknown')}\n"
+                        msg += f"**Parameters:** {rule_data.get('parameters', {})}\n"
+                    msg += f"**Altium Response:** {altium_msg}\n\n"
+                    if action_type != "delete":
+                        msg += "Exporting updated PCB info and refreshing rules list..."
+                    else:
+                        msg += "Refreshing rules list..."
+                    
+                    self._safe_after(0, lambda m=msg: self.add_message(m, is_user=False))
+                    
+                    # Explicitly call export_pcb_info to ensure the rule change is exported
+                    # Then refresh the UI
+                    self._safe_after(0, lambda: self._export_and_refresh_after_rule_update())
                 else:
                     error_msg = result.get("error", "Unknown error")
                     self._safe_after(0, lambda: self.add_message(
@@ -1884,9 +1955,117 @@ Chat with me to:
         user_input_lower = user_input.lower().strip()
         
         # ============================================================
-        # UPDATE RULES (check first, before add patterns)
+        # DELETE RULES (check first, before update/add patterns)
+        # ============================================================
+        if action_type == "delete":
+            # Pattern to match: "delete Clearance+5V+12V rule" or "remove PlaneClearance"
+            original_input = user_input.strip()
+            
+            # Remove the action word (delete/remove/drop) and "rule" word if present
+            # This is more robust than regex for edge cases
+            temp = re.sub(r'^(?:delete|remove|drop)\s+', '', original_input, flags=re.IGNORECASE).strip()
+            
+            # Remove "rule" word (with optional punctuation after it like . or ,)
+            # Match: "rule", "rule.", "rule,", "rule " etc.
+            rule_name = re.sub(r'\s+rule[.,\s]*$', '', temp, flags=re.IGNORECASE).strip()
+            
+            # Also strip any trailing punctuation that might remain
+            rule_name = rule_name.rstrip('.,;:!?')
+            
+            # DEBUG: Log before normalization
+            print(f"DEBUG: Delete - original_input: [{original_input}]")
+            print(f"DEBUG: Delete - after removing action word: [{temp}]")
+            print(f"DEBUG: Delete - after removing 'rule' and punctuation: [{rule_name}]")
+            
+            # Validate we got something
+            if not rule_name:
+                print(f"DEBUG: Delete - empty rule name after parsing")
+                return None
+            
+            # Normalize rule name to match Altium's format (same as update)
+            # Handle case-insensitive matching for "Clearance"
+            rule_name_lower = rule_name.lower()
+            if rule_name_lower.startswith("clearance") and "+" in rule_name:
+                # Always use "Clearance" with capital C (Altium format)
+                prefix = "Clearance"
+                
+                # Find where "clearance" ends (case-insensitive)
+                clearance_len = len("clearance")
+                rest = rule_name[clearance_len:]
+                
+                # Normalize: add underscores before + signs
+                if "_" not in rest or not re.search(r'_\+\w+_\+\w+', rest):
+                    # Replace "Clearance+" with "Clearance_+"
+                    if rest.startswith("+"):
+                        rest = "_" + rest
+                    # Replace remaining "+" with "_+"
+                    rest = re.sub(r'(?<!_)\+', r'_+', rest)
+                
+                rule_name = prefix + rest
+            
+            # DEBUG: Log after normalization
+            print(f"DEBUG: Delete - final normalized rule_name: [{rule_name}]")
+            
+            return {
+                "rule_type": "unknown",  # Not needed for delete
+                "rule_name": rule_name,
+                "parameters": {}  # Not needed for delete
+            }
+        
+        # ============================================================
+        # UPDATE RULES (check before add patterns)
         # ============================================================
         if action_type == "update":
+            # Pattern to match: "update Clearance+5V+12V rule to 0.127mm"
+            # Rule name can contain: letters, numbers, +, -, _, and spaces
+            # We need to capture until we see "rule" or "to/as/with/="
+            
+            # First, try to find the rule name in original case (preserve case)
+            original_input = user_input
+            # Match: "update/change/modify/set" + rule name (with special chars) + "rule" + "to/as/with/=" + value
+            rule_name_match = re.search(
+                r'(?:update|change|modify|set)\s+([^\s]+(?:\s+[^\s]+)*?)\s+(?:rule\s+)?(?:to|as|with|=)\s*(\d+\.?\d*)\s*mm',
+                original_input,
+                re.IGNORECASE
+            )
+            
+            if rule_name_match:
+                rule_name = rule_name_match.group(1).strip()
+                value = float(rule_name_match.group(2))
+                
+                # Normalize rule name to match Altium's format
+                # Rules created with net names use format: "Clearance_+5V_+12V" (with underscores)
+                # But user might type: "Clearance+5V+12V" (with plus signs)
+                # Convert: "Clearance+5V+12V" -> "Clearance_+5V_+12V"
+                if rule_name.startswith("Clearance") and "+" in rule_name:
+                    # Check if it already has underscores (correct format)
+                    if "_" not in rule_name or not re.search(r'Clearance_\+\w+_\+\w+', rule_name):
+                        # Need to normalize: "Clearance+5V+12V" -> "Clearance_+5V_+12V"
+                        # Replace "Clearance+" with "Clearance_+", then replace remaining "+" with "_+"
+                        rule_name = rule_name.replace("Clearance+", "Clearance_+", 1)
+                        # Replace any remaining "+" that aren't already "_+" with "_+"
+                        rule_name = re.sub(r'(?<!_)\+', r'_+', rule_name)
+                
+                # Determine parameter name based on rule name or input context
+                rule_name_lower = rule_name.lower()
+                user_input_lower = user_input.lower()
+                
+                if "clearance" in rule_name_lower or "clear" in rule_name_lower or "clearance" in user_input_lower:
+                    param_name = "clearance_mm"
+                elif "width" in rule_name_lower or "width" in user_input_lower:
+                    param_name = "preferred_width_mm"
+                elif "via" in rule_name_lower or "hole" in rule_name_lower or "via" in user_input_lower or "hole" in user_input_lower:
+                    param_name = "min_hole_mm"
+                else:
+                    param_name = "clearance_mm"  # Default
+                
+                return {
+                    "rule_type": "clearance",
+                    "rule_name": rule_name,
+                    "parameters": {param_name: value}
+                }
+            
+            # Fallback: simpler pattern for basic rule names (no special chars)
             update_match = re.search(
                 r'(?:update|change|modify|set)\s+(\w+)\s+(?:rule\s+)?(?:to|as|with|=)\s*(\d+\.?\d*)\s*mm',
                 user_input_lower
@@ -2030,6 +2209,62 @@ Chat with me to:
             }
         
         return None
+    
+    def _export_and_refresh_after_rule_update(self):
+        """Refresh rules display after rule update.
+        
+        The Altium server auto-exports after rule creation/update in silent mode.
+        We just need to wait for the export to complete and then refresh the UI.
+        No need to call export_pcb_info again (that would show a dialog and timeout).
+        """
+        try:
+            import time
+            
+            # Wait for Altium's auto-export to complete
+            # The create_rule command already triggers ExportPCBInfo in silent mode
+            # We just need to wait for the file to be written
+            self._safe_after(0, lambda: self.add_message(
+                "Waiting for Altium export to complete...",
+                is_user=False
+            ))
+            
+            # Wait longer to ensure the export file is fully written
+            # Altium needs time to: save PCB, refresh board, export JSON
+            # Also wait for file to be fully flushed to disk
+            import os
+            from pathlib import Path
+            
+            pcb_info_file = Path("altium_pcb_info.json")
+            if pcb_info_file.exists():
+                # Wait until file modification time is recent (within last 5 seconds)
+                initial_mtime = pcb_info_file.stat().st_mtime
+                for _ in range(10):  # Wait up to 5 seconds
+                    time.sleep(0.5)
+                    current_mtime = pcb_info_file.stat().st_mtime
+                    if current_mtime > initial_mtime:
+                        # File was updated, wait a bit more for it to be fully written
+                        time.sleep(1.0)
+                        break
+                else:
+                    # File wasn't updated, wait anyway
+                    time.sleep(2.0)
+            else:
+                # File doesn't exist yet, wait longer
+                time.sleep(5.0)
+            
+            # Refresh rules display from the auto-exported file
+            self._view_design_rules()
+            
+        except Exception as e:
+            import traceback
+            print(f"Error in _export_and_refresh_after_rule_update: {e}")
+            print(traceback.format_exc())
+            # Fallback: just try to refresh anyway
+            try:
+                time.sleep(2.0)
+                self._view_design_rules()
+            except:
+                pass
     
     def _refresh_rules_after_update(self):
         """Refresh rules display after rule update.

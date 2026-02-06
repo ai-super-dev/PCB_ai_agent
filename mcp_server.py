@@ -452,27 +452,28 @@ class AltiumMCPServer:
             base_path = Path(".")
             altium_export_files = []
             
-            # Check for altium_pcb_info.json first (most common)
+            # Collect ALL possible export files from all locations
+            # Check for altium_pcb_info.json in root
             if (base_path / "altium_pcb_info.json").exists():
                 altium_export_files.append(base_path / "altium_pcb_info.json")
             
-            # Check for timestamped export files (altium_export_*.json)
-            altium_export_files.extend(sorted(
-                base_path.glob("altium_export_*.json"),
-                key=lambda p: p.stat().st_mtime,
-                reverse=True
-            ))
+            # Check for timestamped export files in root (altium_export_*.json)
+            altium_export_files.extend(base_path.glob("altium_export_*.json"))
             
             # Also check in project directory
             project_path = Path("PCB_Project")
             if project_path.exists():
                 if (project_path / "altium_pcb_info.json").exists():
-                    altium_export_files.insert(0, project_path / "altium_pcb_info.json")
-                altium_export_files.extend(sorted(
-                    project_path.glob("altium_export_*.json"),
-                    key=lambda p: p.stat().st_mtime,
-                    reverse=True
-                ))
+                    altium_export_files.append(project_path / "altium_pcb_info.json")
+                altium_export_files.extend(project_path.glob("altium_export_*.json"))
+            
+            # CRITICAL: Sort ALL files by modification time (most recent first)
+            # This ensures we always use the newest file, regardless of location
+            altium_export_files = sorted(
+                altium_export_files,
+                key=lambda p: p.stat().st_mtime if p.exists() else 0,
+                reverse=True
+            )
             
             # Try to read from most recent export file
             export_file_used = None

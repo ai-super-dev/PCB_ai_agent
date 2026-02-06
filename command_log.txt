@@ -32,3 +32,71 @@ Content: {"action": "create_rule", "rule_type": "clearance", "rule_name": "Clear
 Length: 173
 Content: {"action": "create_rule", "rule_type": "clearance", "rule_name": "Clearance_+5V_+21V", "param_clearance_mm": 0.508, "param_scope_first": "+5V", "param_scope_second": "+21V"}
 
+=== 2/6/2026 11:26:09 PM ===
+Length: 173
+Content: {"action": "create_rule", "rule_type": "clearance", "rule_name": "Clearance_+5V_+21V", "param_clearance_mm": 0.508, "param_scope_first": "+5V", "param_scope_second": "+21V"}
+
+=== 2/6/2026 11:26:16 PM ===
+Length: 29
+Content: {"action": "export_pcb_info"}
+
+=== 2/6/2026 11:32:29 PM ===
+Length: 173
+Content: {"action": "create_rule", "rule_type": "clearance", "rule_name": "Clearance_+5V_+21V", "param_clearance_mm": 0.508, "param_scope_first": "+5V", "param_scope_second": "+21V"}
+
+=== 2/6/2026 11:38:15 PM ===
+Length: 18
+Content: {"action": "ping"}
+
+=== 2/6/2026 11:38:16 PM ===
+Length: 21
+Content: {"action": "run_drc"}
+
+=== 2/6/2026 11:56:52 PM ===
+Length: 173
+Content: {"action": "create_rule", "rule_type": "clearance", "rule_name": "Clearance_+5V_+12V", "param_clearance_mm": 0.254, "param_scope_first": "+5V", "param_scope_second": "+12V"}
+
+=== 2/6/2026 11:57:58 PM ===
+Length: 145
+Content: {"action": "update_rule", "rule_name": "Clearance_0.127mm", "param_clearance_mm": 0.127, "param_scope_first": "All", "param_scope_second": "All"}
+
+=== 2/7/2026 12:02:53 AM ===
+Length: 87
+Content: {"action": "update_rule", "rule_name": "Clearance+5V+12V", "param_clearance_mm": 0.508}
+
+=== 2/7/2026 12:05:44 AM ===
+Length: 89
+Content: {"action": "update_rule", "rule_name": "Clearance_+5V_+12V", "param_clearance_mm": 0.508}
+
+=== 2/7/2026 12:11:15 AM ===
+Length: 66
+Content: {"action": "delete_rule", "rule_name": "Clearance_+5V_+12V rule."}
+
+=== 2/7/2026 12:14:08 AM ===
+Length: 66
+Content: {"action": "delete_rule", "rule_name": "Clearance_+5V_+12V rule."}
+
+=== 2/7/2026 12:22:39 AM ===
+Length: 58
+Content: {"action": "delete_rule", "rule_name": "Clearnace+5V+12V"}
+
+=== 2/7/2026 12:23:20 AM ===
+Length: 89
+Content: {"action": "update_rule", "rule_name": "Clearance_+5V_+12V", "param_clearance_mm": 0.254}
+
+=== 2/7/2026 12:28:22 AM ===
+Length: 66
+Content: {"action": "delete_rule", "rule_name": "Clearance_+5V_+12V rule."}
+
+=== 2/7/2026 12:36:28 AM ===
+Length: 58
+Content: {"action": "delete_rule", "rule_name": "Clearnace+5V+12V"}
+
+=== 2/7/2026 12:52:18 AM ===
+Length: 66
+Content: {"action": "delete_rule", "rule_name": "Clearance_+5V_+12V rule."}
+
+=== 2/7/2026 12:56:11 AM ===
+Length: 60
+Content: {"action": "delete_rule", "rule_name": "Clearance_+5V_+12V"}
+

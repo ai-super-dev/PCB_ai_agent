@@ -1,17 +1,16 @@
-=== CreateRule Debug 2/6/2026 11:09:22 PM ===
+=== CreateRule Debug 2/6/2026 11:56:52 PM ===
 RuleType: clearance
-RuleName: Clearance_+5V_+21V
+RuleName: Clearance_+5V_+12V
 OK: Board found - E:\Altium_Project\PCB_ai_agent\PCB_Project\Y904A23-GF-DYPCB-V1.0.PcbDoc
-WARNING: Rule with name already exists - will delete and recreate
-OK: Existing rule deleted
+OK: No duplicate rule name
 Creating clearance rule...
 OK: PCBRuleFactory created rule object
-OK: Name set to Clearance_+5V_+21V
-OK: ClearanceMM = 0.508
+OK: Name set to Clearance_+5V_+12V
+OK: ClearanceMM = 0.254
 OK: Gap set
 OK: Enabled set
 Scope1 raw: [+5V]
-Scope2 raw: [+21V]
+Scope2 raw: [+12V]
 OK: Scope1Expression set
 OK: Scope2Expression set
 OK: AddPCBObject + PostProcess done
