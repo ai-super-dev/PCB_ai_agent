@@ -12294,6 +12294,16 @@
 }],
 "rules":[
 {
+"name":"Clearance_+5V_+21V",
+"enabled":true,
+"priority":1,
+"scope_first":"InNet('+5V')",
+"scope_second":"InNet('+21V')",
+"type":"clearance",
+"category":"Electrical",
+"clearance_mm":0.0
+},
+{
 "name":"UnpouredPolygon",
 "enabled":true,
 "priority":1,
@@ -12626,7 +12636,7 @@
 {
 "name":"Clearance",
 "enabled":true,
-"priority":3,
+"priority":4,
 "scope_first":"All",
 "scope_second":"All",
 "type":"clearance",
@@ -12636,7 +12646,7 @@
 {
 "name":"KZBZHUANYONG",
 "enabled":true,
-"priority":2,
+"priority":3,
 "scope_first":"InNamedPolygon('KZ')",
 "scope_second":"All",
 "type":"clearance",
@@ -12646,7 +12656,7 @@
 {
 "name":"LBBZHUANYONG",
 "enabled":true,
-"priority":1,
+"priority":2,
 "scope_first":"InNamedPolygon('LB')",
 "scope_second":"All",
 "type":"clearance",
@@ -12668,7 +12678,7 @@
 "net_count":55,
 "track_count":1038,
 "via_count":176,
-"rule_count":37,
+"rule_count":38,
 "layer_count":6
 }
 }

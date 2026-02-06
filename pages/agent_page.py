@@ -4,6 +4,7 @@ Main interaction page for EagilinsED
 """
 import customtkinter as ctk
 import tkinter
+from typing import Optional, Dict, Any
 from mcp_client import AltiumMCPClient
 from llm_client import LLMClient
 from agent_orchestrator import AgentOrchestrator
@@ -51,18 +52,19 @@ class ChatMessage(ctk.CTkFrame):
         
         # Message bubble
         bubble_color = self.colors["user_bg"] if is_user else self.colors["assistant_bg"]
-        bubble = ctk.CTkFrame(
+        self.bubble = ctk.CTkFrame(
             container,
             fg_color=bubble_color,
             corner_radius=16,
             border_width=0 if is_user else 1,
             border_color=self.colors["border"]
         )
-        bubble.grid(row=0, column=0, padx=(60 if is_user else 0, 0 if is_user else 60))
+        self.bubble.grid(row=0, column=0, padx=(60 if is_user else 0, 0 if is_user else 60))
+        self.bubble.grid_columnconfigure(0, weight=1)
         
         # Message text
         self.msg_label = ctk.CTkLabel(
-            bubble,
+            self.bubble,
             text=message,
             font=ctk.CTkFont(size=13),
             text_color=self.colors["text"],
@@ -222,6 +224,10 @@ class AgentPage(ctk.CTkFrame):
             self.llm_client = None
             self.agent = None
             print(f"LLM client error: {e}")
+        
+        # Rule management flags
+        self.waiting_for_rule_input = False
+        self.rule_action_type = None  # "add" or "update"
         
         self.setup_ui()
         self.add_welcome_message()
@@ -1081,15 +1087,25 @@ Chat with me to:
         if not text or self.is_loading:
             return
         
-        if not self.agent:
-            self.add_message("LLM not available. Check OpenAI API key.", is_user=False)
-            return
-        
         # Clear input
         self.input_entry.delete(0, "end")
         
         # Add user message
         self.add_message(text, is_user=True)
+        
+        # Check if we're waiting for rule input
+        if self.waiting_for_rule_input:
+            self.waiting_for_rule_input = False
+            action_type = self.rule_action_type
+            self.rule_action_type = None
+            
+            # Process rule creation/update
+            self._process_rule_request(text, action_type)
+            return
+        
+        if not self.agent:
+            self.add_message("LLM not available. Check OpenAI API key.", is_user=False)
+            return
         
         # Update status
         self.set_status("Processing...", "warning")
@@ -1592,9 +1608,10 @@ Chat with me to:
                                     msg += "\n"
                             
                             msg += "\n**Note:** These are the actual rules from your Altium PCB file.\n"
-                            msg += "You can update rules via chat, e.g., 'Make clearance between +5V and +21V nets 0.508mm'"
                             
                             self._safe_after(0, lambda m=msg: self.add_message(m, is_user=False))
+                            # Add buttons for rule management
+                            self._safe_after(0, lambda: self.add_rule_management_buttons())
                             self._safe_after(0, lambda: self.set_status("Rules Loaded", "success"))
                     elif not data.get("success"):
                         # Check if it's an error about missing export file
@@ -1653,6 +1670,389 @@ Chat with me to:
                 self._safe_after(0, lambda: self.set_status("Error", "error"))
         
         threading.Thread(target=load_rules, daemon=True).start()
+    
+    def add_rule_management_buttons(self):
+        """Add buttons for rule management after displaying rules"""
+        # Create a message frame with buttons
+        msg_frame = ChatMessage(self.chat_frame, "", is_user=False, colors=self.colors)
+        msg_frame.grid(row=len(self.messages), column=0, sticky="ew", padx=20, pady=8)
+        self.messages.append(msg_frame)
+        
+        # Get the bubble frame from the message (stored as self.bubble)
+        bubble = msg_frame.bubble
+        
+        # Create button container
+        button_frame = ctk.CTkFrame(bubble, fg_color="transparent")
+        button_frame.grid(row=1, column=0, sticky="ew", padx=16, pady=(0, 14))
+        button_frame.grid_columnconfigure(0, weight=1)
+        button_frame.grid_columnconfigure(1, weight=1)
+        
+        # Add New Rule button
+        add_btn = ctk.CTkButton(
+            button_frame,
+            text="➕ Add New Rule",
+            font=ctk.CTkFont(size=13, weight="bold"),
+            height=36,
+            corner_radius=8,
+            fg_color=self.colors["primary"],
+            hover_color=self.colors["primary_hover"],
+            text_color="#ffffff",
+            command=self._handle_add_new_rule
+        )
+        add_btn.grid(row=0, column=0, padx=(0, 8), sticky="ew")
+        
+        # Update Existing Rule button
+        update_btn = ctk.CTkButton(
+            button_frame,
+            text="✏️ Update Existing Rule",
+            font=ctk.CTkFont(size=13, weight="bold"),
+            height=36,
+            corner_radius=8,
+            fg_color=self.colors["accent"],
+            hover_color="#0891b2",
+            text_color="#ffffff",
+            command=self._handle_update_existing_rule
+        )
+        update_btn.grid(row=0, column=1, padx=(8, 0), sticky="ew")
+        
+        # Scroll to bottom
+        self.chat_frame.update()
+        self.chat_frame._parent_canvas.yview_moveto(1.0)
+    
+    def _handle_add_new_rule(self):
+        """Handle Add New Rule button click"""
+        self.add_message(
+            "Please input what rule do you want to add in detail.\n\n"
+            "**Examples:**\n"
+            "• Add a clearance rule: 'Add clearance rule between +5V and +21V nets with 0.508mm clearance'\n"
+            "• Add a width rule: 'Add width rule for power nets with min 0.5mm, preferred 0.8mm, max 1.0mm'\n"
+            "• Add a via rule: 'Add via rule with min hole 0.3mm, max hole 0.5mm, min diameter 0.6mm'\n\n"
+            "Type your rule requirements in the chat box below:",
+            is_user=False
+        )
+        # Focus on input
+        self.input_entry.focus()
+        # Set flag to indicate we're waiting for rule input
+        self.waiting_for_rule_input = True
+        self.rule_action_type = "add"
+    
+    def _handle_update_existing_rule(self):
+        """Handle Update Existing Rule button click"""
+        self.add_message(
+            "Please specify which rule you want to update and the new values.\n\n"
+            "**Examples:**\n"
+            "• 'Update PlaneClearance rule to 0.6mm'\n"
+            "• 'Change Width rule preferred width to 1.0mm'\n"
+            "• 'Update RoutingVias max hole size to 0.8mm'\n\n"
+            "Type your rule update requirements in the chat box below:",
+            is_user=False
+        )
+        # Focus on input
+        self.input_entry.focus()
+        # Set flag to indicate we're waiting for rule input
+        self.waiting_for_rule_input = True
+        self.rule_action_type = "update"
+    
+    def _process_rule_request(self, user_input: str, action_type: str):
+        """Process rule creation or update request"""
+        self.set_status("Processing rule request...", "warning")
+        self.set_loading(True)
+        
+        def process():
+            try:
+                from tools.altium_script_client import AltiumScriptClient
+                import re
+                
+                # Create client - DO NOT ping before create_rule!
+                # Sending ping immediately before create_rule causes a race condition:
+                # The ping result file may not be fully deleted on Windows before
+                # create_rule's _send_command checks for it, causing create_rule to
+                # read the stale "pong" result and falsely report success.
+                # If Altium isn't running, create_rule will timeout with a clear error.
+                client = AltiumScriptClient()
+                
+                # Parse the rule request
+                rule_data = self._parse_rule_request(user_input, action_type)
+                
+                if not rule_data:
+                    # Could not parse - use agent to help
+                    if self.agent:
+                        action_text = "add a new" if action_type == "add" else "update an existing"
+                        prompt = f"User wants to {action_text} design rule. Request: {user_input}\n\n"
+                        prompt += "Please help parse this rule request and provide clear instructions."
+                        
+                        response, status, _ = self.agent.process_query(prompt)
+                        self._safe_after(0, lambda r=response: self.add_message(
+                            f"**Could not automatically parse your rule request.**\n\n"
+                            f"{r}\n\n"
+                            f"**Please try again with a clearer format, for example:**\n"
+                            f"• 'Add clearance rule between +5V and +21V nets with 0.508mm clearance'\n"
+                            f"• 'Update PlaneClearance rule to 0.6mm'",
+                            is_user=False
+                        ))
+                    else:
+                        self._safe_after(0, lambda: self.add_message(
+                            "❌ Could not parse rule request.\n\n"
+                            "**Please use a clear format, for example:**\n"
+                            "• 'Add clearance rule between +5V and +21V nets with 0.508mm clearance'\n"
+                            "• 'Update PlaneClearance rule to 0.6mm'",
+                            is_user=False
+                        ))
+                    self._safe_after(0, lambda: self.set_loading(False))
+                    self._safe_after(0, lambda: self.set_status("Parse Error", "error"))
+                    return
+                
+                # Apply the rule to Altium
+                if action_type == "add":
+                    result = client.create_rule(
+                        rule_data["rule_type"],
+                        rule_data["rule_name"],
+                        rule_data["parameters"]
+                    )
+                else:
+                    result = client.update_rule(
+                        rule_data["rule_name"],
+                        rule_data["parameters"]
+                    )
+                
+                if result.get("success"):
+                    # Rule applied successfully - show Altium's actual response
+                    altium_msg = result.get("message", "OK")
+                    self._safe_after(0, lambda: self.add_message(
+                        f"✅ Rule {action_type}ed successfully!\n\n"
+                        f"**Rule:** {rule_data.get('rule_name', 'Unknown')}\n"
+                        f"**Type:** {rule_data.get('rule_type', 'Unknown')}\n"
+                        f"**Parameters:** {rule_data.get('parameters', {})}\n"
+                        f"**Altium Response:** {altium_msg}\n\n"
+                        "Refreshing rules list...",
+                        is_user=False
+                    ))
+                    
+                    # Server auto-saves and auto-exports, just refresh the UI
+                    self._safe_after(0, lambda: self._refresh_rules_after_update())
+                else:
+                    error_msg = result.get("error", "Unknown error")
+                    self._safe_after(0, lambda: self.add_message(
+                        f"❌ Error {action_type}ing rule: {error_msg}\n\n"
+                        "**Make sure:**\n"
+                        "1. Altium Designer is open with your PCB\n"
+                        "2. Script server is running (StartServer) in Altium\n"
+                        "3. Rule parameters are valid and unique (for new rules)\n"
+                        "4. File paths match between Python and Altium",
+                        is_user=False
+                    ))
+                    self._safe_after(0, lambda: self.set_status("Error", "error"))
+                
+                self._safe_after(0, lambda: self.set_loading(False))
+                
+            except Exception as e:
+                import traceback
+                error_msg = f"Error processing rule request: {str(e)}"
+                print(traceback.format_exc())
+                self._safe_after(0, lambda: self.add_message(
+                    f"❌ {error_msg}\n\n"
+                    "**Troubleshooting:**\n"
+                    "1. Check if Altium Script Server is running\n"
+                    "2. Make sure PCB is open in Altium\n"
+                    "3. Try a simpler rule request format",
+                    is_user=False
+                ))
+                self._safe_after(0, lambda: self.set_loading(False))
+                self._safe_after(0, lambda: self.set_status("Error", "error"))
+        
+        threading.Thread(target=process, daemon=True).start()
+    
+    def _parse_rule_request(self, user_input: str, action_type: str) -> Optional[Dict[str, Any]]:
+        """Parse rule request from natural language.
+        
+        Uses a simple two-step approach:
+        1. Extract the mm value from the input
+        2. Extract net names (if present) using a separate regex
+        
+        This avoids complex combined regexes that break on word ordering.
+        
+        Supports:
+        - "Add clearance rule between +5V and +21V nets with 0.508mm clearance"
+        - "Add clearance rule 0.508mm"
+        - "Add clearance 0.508mm between +5V and GND"
+        - "Add width rule min 0.5mm, preferred 0.8mm, max 1.0mm"
+        - "Add via rule min hole 0.3mm"
+        - "Update PlaneClearance rule to 0.6mm"
+        """
+        import re
+        
+        user_input_lower = user_input.lower().strip()
+        
+        # ============================================================
+        # UPDATE RULES (check first, before add patterns)
+        # ============================================================
+        if action_type == "update":
+            update_match = re.search(
+                r'(?:update|change|modify|set)\s+(\w+)\s+(?:rule\s+)?(?:to|as|with|=)\s*(\d+\.?\d*)\s*mm',
+                user_input_lower
+            )
+            if update_match:
+                rule_name = update_match.group(1)
+                rule_name = rule_name[0].upper() + rule_name[1:] if rule_name else "Clearance"
+                value = float(update_match.group(2))
+                
+                if "clearance" in rule_name.lower():
+                    param_name = "clearance_mm"
+                elif "width" in rule_name.lower():
+                    param_name = "preferred_width_mm"
+                elif "via" in rule_name.lower() or "hole" in rule_name.lower():
+                    param_name = "min_hole_mm"
+                else:
+                    param_name = "clearance_mm"
+                
+                return {
+                    "rule_type": "clearance",
+                    "rule_name": rule_name,
+                    "parameters": {param_name: value}
+                }
+        
+        # ============================================================
+        # CLEARANCE RULES - Simple two-step approach
+        # ============================================================
+        if 'clearance' in user_input_lower or 'clear' in user_input_lower:
+            # Step 1: Extract the mm value (required)
+            value_match = re.search(r'(\d+\.?\d*)\s*mm', user_input_lower)
+            if not value_match:
+                return None
+            clearance_mm = float(value_match.group(1))
+            
+            # Step 2: Extract net names (optional) - look for "X and Y" pattern
+            nets_match = re.search(
+                r'(?:between\s+)?([+\-]?\w+[\w.]*)\s+(?:and|&)\s+([+\-]?\w+[\w.]*)',
+                user_input_lower
+            )
+            
+            net1, net2 = "All", "All"
+            if nets_match:
+                candidate1 = nets_match.group(1).upper()
+                candidate2 = nets_match.group(2).upper()
+                # Filter out keywords that aren't net names
+                keywords = {'MIN', 'MAX', 'MINIMUM', 'MAXIMUM', 'PREFERRED', 'PREF',
+                           'RULE', 'CLEARANCE', 'CLEAR', 'ADD', 'UPDATE', 'WITH',
+                           'BETWEEN', 'NETS', 'NET', 'THE', 'FOR', 'SET'}
+                if candidate1 not in keywords and candidate2 not in keywords:
+                    net1 = candidate1
+                    net2 = candidate2
+            
+            if net1 == "All" and net2 == "All":
+                rule_name = f"Clearance_{clearance_mm}mm"
+            else:
+                rule_name = f"Clearance_{net1}_{net2}"
+            
+            return {
+                "rule_type": "clearance",
+                "rule_name": rule_name,
+                "parameters": {
+                    "clearance_mm": clearance_mm,
+                    "scope_first": net1,
+                    "scope_second": net2
+                }
+            }
+        
+        # ============================================================
+        # WIDTH RULES
+        # ============================================================
+        if 'width' in user_input_lower or 'trace' in user_input_lower:
+            # Extract min/preferred/max values
+            min_match = re.search(r'min(?:imum)?\s+(\d+\.?\d*)\s*mm', user_input_lower)
+            pref_match = re.search(r'(?:preferred?|pref)\s+(\d+\.?\d*)\s*mm', user_input_lower)
+            max_match = re.search(r'max(?:imum)?\s+(\d+\.?\d*)\s*mm', user_input_lower)
+            
+            # Fallback: just find any mm value
+            any_val = re.search(r'(\d+\.?\d*)\s*mm', user_input_lower)
+            
+            if min_match or pref_match or max_match or any_val:
+                min_w = float(min_match.group(1)) if min_match else (float(any_val.group(1)) if any_val else 0.254)
+                pref_w = float(pref_match.group(1)) if pref_match else min_w
+                max_w = float(max_match.group(1)) if max_match else pref_w * 2
+                
+                # Try to extract scope/net class
+                scope_match = re.search(r'for\s+(\w+)\s+nets?', user_input_lower)
+                scope = scope_match.group(1) if scope_match else "All"
+                
+                rule_name = f"Width_{scope}" if scope != "All" else "Width_Rule"
+                return {
+                    "rule_type": "width",
+                    "rule_name": rule_name,
+                    "parameters": {
+                        "min_width_mm": min_w,
+                        "preferred_width_mm": pref_w,
+                        "max_width_mm": max_w,
+                        "scope": scope
+                    }
+                }
+        
+        # ============================================================
+        # VIA RULES
+        # ============================================================
+        if 'via' in user_input_lower:
+            min_hole_match = re.search(r'min\s+hole\s+(\d+\.?\d*)\s*mm', user_input_lower)
+            max_hole_match = re.search(r'max\s+hole\s+(\d+\.?\d*)\s*mm', user_input_lower)
+            min_dia_match = re.search(r'min\s+diameter\s+(\d+\.?\d*)\s*mm', user_input_lower)
+            
+            any_val = re.search(r'(\d+\.?\d*)\s*mm', user_input_lower)
+            
+            if min_hole_match or max_hole_match or min_dia_match or any_val:
+                min_hole = float(min_hole_match.group(1)) if min_hole_match else (float(any_val.group(1)) if any_val else 0.3)
+                max_hole = float(max_hole_match.group(1)) if max_hole_match else min_hole * 2
+                min_dia = float(min_dia_match.group(1)) if min_dia_match else min_hole * 2
+                
+                return {
+                    "rule_type": "via",
+                    "rule_name": "RoutingVias_Custom",
+                    "parameters": {
+                        "min_hole_mm": min_hole,
+                        "max_hole_mm": max_hole,
+                        "min_diameter_mm": min_dia
+                    }
+                }
+        
+        # ============================================================
+        # FALLBACK: Extract ANY number with mm and guess rule type
+        # ============================================================
+        mm_match = re.search(r'(\d+\.?\d*)\s*mm', user_input_lower)
+        if mm_match:
+            value_mm = float(mm_match.group(1))
+            # Default to clearance rule
+            return {
+                "rule_type": "clearance",
+                "rule_name": f"Clearance_{value_mm}mm",
+                "parameters": {
+                    "clearance_mm": value_mm,
+                    "scope_first": "All",
+                    "scope_second": "All"
+                }
+            }
+        
+        return None
+    
+    def _refresh_rules_after_update(self):
+        """Refresh rules display after rule update.
+        
+        NOTE: The Altium server now auto-saves and auto-exports after
+        rule creation/update, so we just need to reload the local JSON.
+        No need to ping or re-export (that would block the server).
+        """
+        try:
+            import time
+            # Brief wait for the exported JSON file to be fully written
+            time.sleep(1.0)
+            
+            # Refresh rules display from the already-exported file
+            self._view_design_rules()
+            
+        except Exception as e:
+            self.add_message(
+                f"Rule applied but could not refresh automatically.\n"
+                f"Please click 'View Design Rules' to see the updated rules.\n\n"
+                f"Error: {str(e)}",
+                is_user=False
+            )
     
     def _show_confirmation_modal(self, message: str):
         """Show confirmation modal dialog"""
