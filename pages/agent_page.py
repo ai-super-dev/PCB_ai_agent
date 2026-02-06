@@ -50,29 +50,29 @@ class ChatMessage(ctk.CTkFrame):
         container = ctk.CTkFrame(self, fg_color="transparent")
         container.grid(row=0, column=0, sticky="e" if is_user else "w")
         
-        # Message bubble
+        # Message bubble with improved styling
         bubble_color = self.colors["user_bg"] if is_user else self.colors["assistant_bg"]
         self.bubble = ctk.CTkFrame(
             container,
             fg_color=bubble_color,
-            corner_radius=16,
+            corner_radius=18,
             border_width=0 if is_user else 1,
             border_color=self.colors["border"]
         )
-        self.bubble.grid(row=0, column=0, padx=(60 if is_user else 0, 0 if is_user else 60))
+        self.bubble.grid(row=0, column=0, padx=(60 if is_user else 0, 0 if is_user else 60), pady=4)
         self.bubble.grid_columnconfigure(0, weight=1)
         
-        # Message text
+        # Message text with better typography
         self.msg_label = ctk.CTkLabel(
             self.bubble,
             text=message,
-            font=ctk.CTkFont(size=13),
+            font=ctk.CTkFont(size=14, family="Segoe UI"),
             text_color=self.colors["text"],
             anchor="w",
             justify="left",
-            wraplength=WINDOW_WIDTH - 160
+            wraplength=WINDOW_WIDTH - 180
         )
-        self.msg_label.grid(row=0, column=0, sticky="w", padx=16, pady=14)
+        self.msg_label.grid(row=0, column=0, sticky="w", padx=18, pady=16)
     
     def append_text(self, text: str):
         """Append text for streaming"""
@@ -336,7 +336,14 @@ class AgentPage(ctk.CTkFrame):
         self.chat_frame.grid_columnconfigure(0, weight=1)
         
         # === Input Area ===
-        input_container = ctk.CTkFrame(self, fg_color=self.colors["bg_card"], height=80)
+        input_container = ctk.CTkFrame(
+            self, 
+            fg_color=self.colors["bg_card"], 
+            height=90,
+            corner_radius=0,
+            border_width=1,
+            border_color=self.colors["border"]
+        )
         input_container.grid(row=2, column=0, sticky="ew")
         input_container.grid_columnconfigure(0, weight=1)
         input_container.grid_propagate(False)
@@ -1673,62 +1680,81 @@ Chat with me to:
     
     def add_rule_management_buttons(self):
         """Add buttons for rule management after displaying rules"""
-        # Create a message frame with buttons
-        msg_frame = ChatMessage(self.chat_frame, "", is_user=False, colors=self.colors)
-        msg_frame.grid(row=len(self.messages), column=0, sticky="ew", padx=20, pady=8)
-        self.messages.append(msg_frame)
+        # Create a modern card-style container for buttons
+        card_frame = ctk.CTkFrame(
+            self.chat_frame,
+            fg_color=self.colors["bg_card"],
+            corner_radius=12,
+            border_width=1,
+            border_color=self.colors["border"]
+        )
+        card_frame.grid(row=len(self.messages), column=0, sticky="ew", padx=20, pady=12)
+        card_frame.grid_columnconfigure(0, weight=1)
+        self.messages.append(card_frame)
         
-        # Get the bubble frame from the message (stored as self.bubble)
-        bubble = msg_frame.bubble
+        # Title section
+        title_frame = ctk.CTkFrame(card_frame, fg_color="transparent")
+        title_frame.grid(row=0, column=0, sticky="ew", padx=20, pady=(16, 8))
         
-        # Create button container
-        button_frame = ctk.CTkFrame(bubble, fg_color="transparent")
-        button_frame.grid(row=1, column=0, sticky="ew", padx=16, pady=(0, 14))
+        title_label = ctk.CTkLabel(
+            title_frame,
+            text="Rule Management",
+            font=ctk.CTkFont(size=14, weight="bold"),
+            text_color=self.colors["text"]
+        )
+        title_label.pack(side="left")
+        
+        # Button container with better spacing
+        button_frame = ctk.CTkFrame(card_frame, fg_color="transparent")
+        button_frame.grid(row=1, column=0, sticky="ew", padx=20, pady=(0, 16))
         button_frame.grid_columnconfigure(0, weight=1)
         button_frame.grid_columnconfigure(1, weight=1)
         button_frame.grid_columnconfigure(2, weight=1)
         
-        # Add New Rule button
+        # Add New Rule button - improved styling with icon and short text
         add_btn = ctk.CTkButton(
             button_frame,
-            text="➕ Add New Rule",
+            text="➕ Add",
             font=ctk.CTkFont(size=13, weight="bold"),
-            height=36,
-            corner_radius=8,
+            height=42,
+            corner_radius=10,
             fg_color=self.colors["primary"],
             hover_color=self.colors["primary_hover"],
             text_color="#ffffff",
-            command=self._handle_add_new_rule
+            command=self._handle_add_new_rule,
+            border_width=0
         )
-        add_btn.grid(row=0, column=0, padx=(0, 4), sticky="ew")
+        add_btn.grid(row=0, column=0, padx=(0, 6), sticky="ew")
         
-        # Update Existing Rule button
+        # Update Existing Rule button - improved styling with icon and short text
         update_btn = ctk.CTkButton(
             button_frame,
-            text="✏️ Update Existing Rule",
+            text="✏️ Update",
             font=ctk.CTkFont(size=13, weight="bold"),
-            height=36,
-            corner_radius=8,
+            height=42,
+            corner_radius=10,
             fg_color=self.colors["accent"],
             hover_color="#0891b2",
             text_color="#ffffff",
-            command=self._handle_update_existing_rule
+            command=self._handle_update_existing_rule,
+            border_width=0
         )
-        update_btn.grid(row=0, column=1, padx=4, sticky="ew")
+        update_btn.grid(row=0, column=1, padx=3, sticky="ew")
         
-        # Delete Rule button
+        # Delete Rule button - improved styling with icon and short text
         delete_btn = ctk.CTkButton(
             button_frame,
-            text="🗑️ Delete Rule",
+            text="🗑️ Delete",
             font=ctk.CTkFont(size=13, weight="bold"),
-            height=36,
-            corner_radius=8,
+            height=42,
+            corner_radius=10,
             fg_color="#dc2626",
             hover_color="#b91c1c",
             text_color="#ffffff",
-            command=self._handle_delete_rule
+            command=self._handle_delete_rule,
+            border_width=0
         )
-        delete_btn.grid(row=0, column=2, padx=(4, 0), sticky="ew")
+        delete_btn.grid(row=0, column=2, padx=(6, 0), sticky="ew")
         
         # Scroll to bottom
         self.chat_frame.update()
@@ -1903,15 +1929,27 @@ Chat with me to:
                     self._safe_after(0, lambda: self._export_and_refresh_after_rule_update())
                 else:
                     error_msg = result.get("error", "Unknown error")
-                    self._safe_after(0, lambda: self.add_message(
-                        f"❌ Error {action_type}ing rule: {error_msg}\n\n"
-                        "**Make sure:**\n"
-                        "1. Altium Designer is open with your PCB\n"
-                        "2. Script server is running (StartServer) in Altium\n"
-                        "3. Rule parameters are valid and unique (for new rules)\n"
-                        "4. File paths match between Python and Altium",
-                        is_user=False
-                    ))
+                    
+                    # Check if it's a "rule not found" error (for delete or update)
+                    if action_type in ["delete", "update"] and ("not found" in error_msg.lower() or "rule not found" in error_msg.lower()):
+                        # Simple message for rule not found
+                        self._safe_after(0, lambda: self.add_message(
+                            f"❌ There is no rule like that. Please check the rule list again.",
+                            is_user=False
+                        ))
+                        # Show rule management buttons again
+                        self._safe_after(0, lambda: self.add_rule_management_buttons())
+                    else:
+                        # For other errors, show detailed troubleshooting
+                        self._safe_after(0, lambda: self.add_message(
+                            f"❌ Error {action_type}ing rule: {error_msg}\n\n"
+                            "**Make sure:**\n"
+                            "1. Altium Designer is open with your PCB\n"
+                            "2. Script server is running (StartServer) in Altium\n"
+                            "3. Rule parameters are valid and unique (for new rules)\n"
+                            "4. File paths match between Python and Altium",
+                            is_user=False
+                        ))
                     self._safe_after(0, lambda: self.set_status("Error", "error"))
                 
                 self._safe_after(0, lambda: self.set_loading(False))
