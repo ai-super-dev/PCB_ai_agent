@@ -794,8 +794,10 @@ class AgentPage(ctk.CTkFrame):
                     # Wait a moment for file to be written
                     time.sleep(0.5)
                     
-                    # Load the exported file
-                    pcb_info_file = Path("altium_pcb_info.json")
+                    # Load the exported file (check PCB_Project folder first)
+                    pcb_info_file = Path("PCB_Project") / "altium_pcb_info.json"
+                    if not pcb_info_file.exists():
+                        pcb_info_file = Path("altium_pcb_info.json")
                     if pcb_info_file.exists():
                         self._safe_after(0, lambda: self.add_message(
                             "PCB data exported successfully!\n"
@@ -895,8 +897,10 @@ class AgentPage(ctk.CTkFrame):
                         self._safe_after(0, lambda: self.set_status("Loaded", "success"))
                         return
                 
-                # FALLBACK: Check for auto-exported file from StartServer
-                pcb_info_file = Path("altium_pcb_info.json")
+                # FALLBACK: Check for auto-exported file from StartServer (check PCB_Project folder first)
+                pcb_info_file = Path("PCB_Project") / "altium_pcb_info.json"
+                if not pcb_info_file.exists():
+                    pcb_info_file = Path("altium_pcb_info.json")
                 
                 # Also check for timestamped export files
                 if not pcb_info_file.exists():
@@ -2272,7 +2276,10 @@ Chat with me to:
             import os
             from pathlib import Path
             
-            pcb_info_file = Path("altium_pcb_info.json")
+            # Check PCB_Project folder first, then root
+            pcb_info_file = Path("PCB_Project") / "altium_pcb_info.json"
+            if not pcb_info_file.exists():
+                pcb_info_file = Path("altium_pcb_info.json")
             if pcb_info_file.exists():
                 # Wait until file modification time is recent (within last 5 seconds)
                 initial_mtime = pcb_info_file.stat().st_mtime

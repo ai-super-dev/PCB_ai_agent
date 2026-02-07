@@ -37,3 +37,11 @@ wheels/
 .DS_Store
 Thumbs.db
 
+
+# Altium Project files and folders
+PCB_Project/History/
+PCB_Project/Project Outputs for PCB_Project/
+PCB_Project/altium_pcb_info.json
+PCB_Project/altium_result.json
+PCB_Project/command_log.txt
+PCB_Project/rule_debug.txt

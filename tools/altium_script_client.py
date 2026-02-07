@@ -37,7 +37,7 @@ class AltiumScriptClient:
         self.base_path = self.base_path.resolve()
         
         self.command_file = self.base_path / "altium_command.json"
-        self.result_file = self.base_path / "altium_result.json"
+        self.result_file = self.base_path / "PCB_Project" / "altium_result.json"
         self.timeout = 10  # seconds
         
         # Debug: Print detected path (can be removed in production)

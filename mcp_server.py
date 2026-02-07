@@ -177,7 +177,10 @@ class AltiumMCPServer:
             # Default paths - check for Altium export first
             if pcb_info_path is None:
                 # Try altium_pcb_info.json first (from command server export)
-                altium_export = base_path / "altium_pcb_info.json"
+                # Check PCB_Project folder first, then root
+                altium_export = base_path / "PCB_Project" / "altium_pcb_info.json"
+                if not altium_export.exists():
+                    altium_export = base_path / "altium_pcb_info.json"
                 if altium_export.exists():
                     pcb_info_path = altium_export
                 else:
@@ -403,7 +406,10 @@ class AltiumMCPServer:
         
         # If no rules in export, try to get from Altium export file
         try:
-            altium_export = Path("altium_pcb_info.json")
+            # Check PCB_Project folder first, then root
+            altium_export = Path("PCB_Project") / "altium_pcb_info.json"
+            if not altium_export.exists():
+                altium_export = Path("altium_pcb_info.json")
             if altium_export.exists():
                 with open(altium_export, 'r', encoding='utf-8') as f:
                     export_data = json.load(f)
@@ -453,19 +459,19 @@ class AltiumMCPServer:
             altium_export_files = []
             
             # Collect ALL possible export files from all locations
-            # Check for altium_pcb_info.json in root
-            if (base_path / "altium_pcb_info.json").exists():
-                altium_export_files.append(base_path / "altium_pcb_info.json")
-            
-            # Check for timestamped export files in root (altium_export_*.json)
-            altium_export_files.extend(base_path.glob("altium_export_*.json"))
-            
-            # Also check in project directory
+            # PRIORITY: Check PCB_Project folder first (where files are now stored)
             project_path = Path("PCB_Project")
             if project_path.exists():
                 if (project_path / "altium_pcb_info.json").exists():
                     altium_export_files.append(project_path / "altium_pcb_info.json")
                 altium_export_files.extend(project_path.glob("altium_export_*.json"))
+            
+            # Also check root directory (for backward compatibility)
+            if (base_path / "altium_pcb_info.json").exists():
+                altium_export_files.append(base_path / "altium_pcb_info.json")
+            
+            # Check for timestamped export files in root (altium_export_*.json)
+            altium_export_files.extend(base_path.glob("altium_export_*.json"))
             
             # CRITICAL: Sort ALL files by modification time (most recent first)
             # This ensures we always use the newest file, regardless of location

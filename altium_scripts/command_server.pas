@@ -101,14 +101,14 @@ End;
 Function GetResultFile : String;
 Begin
     If BasePath = '' Then BasePath := GetBasePath;
-    Result := BasePath + 'altium_result.json';
+    Result := BasePath + 'PCB_Project\altium_result.json';
 End;
 
 {..............................................................................}
 Function GetPCBInfoFile : String;
 Begin
     If BasePath = '' Then BasePath := GetBasePath;
-    Result := BasePath + 'altium_pcb_info.json';
+    Result := BasePath + 'PCB_Project\altium_pcb_info.json';
 End;
 
 {..............................................................................}
@@ -477,7 +477,7 @@ Begin
         Exit;
     End;
     
-    FinalPath := BasePath + 'altium_pcb_info.json';
+    FinalPath := BasePath + 'PCB_Project\altium_pcb_info.json';
     
     // Use temp file to avoid locking issues
     TempFilePath := 'C:\Windows\Temp\altium_export_' + FormatDateTime('yyyymmddhhnnss', Now) + '.json';
@@ -921,7 +921,7 @@ Begin
     Begin
         DebugLog.Add('FAIL: Board is Nil (both GetCurrentPCBBoard and GlobalBoard are Nil)');
         DebugLog.Add('Hint: Make sure PCB was open when StartServer was called');
-        DebugLog.SaveToFile(BasePath + 'rule_debug.txt');
+        DebugLog.SaveToFile(BasePath + 'PCB_Project\rule_debug.txt');
         DebugLog.Free;
         Exit;
     End;
@@ -963,7 +963,7 @@ Begin
             DebugLog.Add('OK: Existing rule deleted');
         Except
             DebugLog.Add('EXCEPTION: Failed to delete existing rule');
-            DebugLog.SaveToFile(BasePath + 'rule_debug.txt');
+            DebugLog.SaveToFile(BasePath + 'PCB_Project\rule_debug.txt');
             DebugLog.Free;
             Exit;
         End;
@@ -986,7 +986,7 @@ Begin
             ClearanceRule := PCBServer.PCBRuleFactory(eRule_Clearance);
         Except
             DebugLog.Add('EXCEPTION: PCBRuleFactory(eRule_Clearance) threw error');
-            DebugLog.SaveToFile(BasePath + 'rule_debug.txt');
+            DebugLog.SaveToFile(BasePath + 'PCB_Project\rule_debug.txt');
             DebugLog.Free;
             Exit;
         End;
@@ -994,7 +994,7 @@ Begin
         If ClearanceRule = Nil Then
         Begin
             DebugLog.Add('FAIL: PCBRuleFactory returned Nil');
-            DebugLog.SaveToFile(BasePath + 'rule_debug.txt');
+            DebugLog.SaveToFile(BasePath + 'PCB_Project\rule_debug.txt');
             DebugLog.Free;
             Exit;
         End;
@@ -1262,7 +1262,7 @@ Begin
     // Save debug log
     Try
         DebugLog.Add('Final Result: ' + BoolToStr(Result, True));
-        DebugLog.SaveToFile(BasePath + 'rule_debug.txt');
+        DebugLog.SaveToFile(BasePath + 'PCB_Project\rule_debug.txt');
     Except
     End;
     DebugLog.Free;
@@ -1464,13 +1464,13 @@ Begin
     Try
         SL := TStringList.Create;
         Try
-            If FileExists(BasePath + 'command_log.txt') Then
-                SL.LoadFromFile(BasePath + 'command_log.txt');
+            If FileExists(BasePath + 'PCB_Project\command_log.txt') Then
+                SL.LoadFromFile(BasePath + 'PCB_Project\command_log.txt');
             SL.Add('=== ' + DateTimeToStr(Now) + ' ===');
             SL.Add('Length: ' + IntToStr(Length(Cmd)));
             SL.Add('Content: ' + Cmd);
             SL.Add('');
-            SL.SaveToFile(BasePath + 'command_log.txt');
+            SL.SaveToFile(BasePath + 'PCB_Project\command_log.txt');
         Except
         End;
         SL.Free;
