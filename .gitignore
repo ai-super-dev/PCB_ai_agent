@@ -45,3 +45,5 @@ PCB_Project/altium_pcb_info.json
 PCB_Project/altium_result.json
 PCB_Project/command_log.txt
 PCB_Project/rule_debug.txt
+
+artifacts/
