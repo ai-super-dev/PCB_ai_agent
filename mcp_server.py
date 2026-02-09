@@ -1243,15 +1243,15 @@ class AltiumMCPServer:
                     }
                 ]
             
-            # Prepare PCB data for DRC engine (need full data, not samples)
-            pcb_data = {
-                "tracks": raw_data.get('tracks', []),
-                "vias": raw_data.get('vias', []),
-                "pads": raw_data.get('pads', []),
-                "nets": raw_data.get('nets', []),
-                "components": raw_data.get('components', []),
-                "polygons": raw_data.get('polygons', [])
-            }
+                # Prepare PCB data for DRC engine (need full data, not samples)
+                pcb_data = {
+                    "tracks": raw_data.get('tracks', []),
+                    "vias": raw_data.get('vias', []),
+                    "pads": raw_data.get('pads', []),
+                    "nets": raw_data.get('nets', []),
+                    "components": raw_data.get('components', []),
+                    "polygons": raw_data.get('polygons', [])  # Now includes polygon/pour data
+                }
             
             # Run Python DRC engine
             from runtime.drc.python_drc_engine import PythonDRCEngine

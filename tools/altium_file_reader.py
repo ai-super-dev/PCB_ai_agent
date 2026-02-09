@@ -195,6 +195,51 @@ class AltiumFileReader:
         except Exception as e:
             print(f"Error parsing rules: {e}")
         
+        # Parse Polygons6/Data for polygon/pour data
+        try:
+            if ole.exists('Polygons6/Data'):
+                data = ole.openstream('Polygons6/Data').read()
+                polygons = self._parse_polygon_records(data)
+                result["polygons"] = polygons
+                result["statistics"]["polygon_count"] = len(polygons)
+        except Exception as e:
+            print(f"Error parsing polygons: {e}")
+            result["polygons"] = []
+        
+        # Parse Regions6/Data for region data (alternative polygon format)
+        try:
+            if ole.exists('Regions6/Data'):
+                data = ole.openstream('Regions6/Data').read()
+                regions = self._parse_region_records(data)
+                if "polygons" not in result or not result["polygons"]:
+                    result["polygons"] = []
+                result["polygons"].extend(regions)
+                result["statistics"]["polygon_count"] = len(result.get("polygons", []))
+        except Exception as e:
+            print(f"Error parsing regions: {e}")
+        
+        # Extract silk screen data from components (if available)
+        try:
+            # Try to get silk screen info from component footprints
+            for comp in result.get("components", []):
+                if isinstance(comp, dict):
+                    # Estimate silk screen bounds from component location and size
+                    comp_loc = comp.get("location", {})
+                    if comp_loc:
+                        # Create estimated silk screen rectangle
+                        # This is a simplified approach - full implementation would need footprint library data
+                        comp["silk_screen"] = {
+                            "bounds": {
+                                "x_min": comp_loc.get("x_mm", 0) - 2.5,
+                                "x_max": comp_loc.get("x_mm", 0) + 2.5,
+                                "y_min": comp_loc.get("y_mm", 0) - 2.5,
+                                "y_max": comp_loc.get("y_mm", 0) + 2.5
+                            },
+                            "layer": comp.get("layer", "Top")
+                        }
+        except Exception as e:
+            print(f"Error extracting silk screen data: {e}")
+        
         # Get file metadata
         result["metadata"] = {
             "streams": len(streams),
@@ -797,6 +842,86 @@ class AltiumFileReader:
             traceback.print_exc()
             
         return rules
+    
+    def _parse_polygon_records(self, data: bytes) -> List[Dict[str, Any]]:
+        """Parse polygon/pour data from binary stream"""
+        polygons = []
+        try:
+            text = data.decode('latin-1', errors='ignore')
+            
+            # Altium polygons are stored with NAME, NET, LAYER, etc.
+            # Split by record markers or look for polygon patterns
+            if '|NAME=' in text or '|NET=' in text:
+                # Text format - split by NAME markers
+                parts = text.split('|NAME=')
+                for part in parts[1:]:  # Skip first empty part
+                    pairs = self._parse_key_value_pairs('|NAME=' + part[:5000])  # Limit to avoid next record
+                    
+                    polygon_name = pairs.get('NAME', '')
+                    if not polygon_name:
+                        continue
+                    
+                    # Extract polygon info
+                    polygon = {
+                        "name": polygon_name,
+                        "net": pairs.get('NET', ''),
+                        "layer": pairs.get('LAYER', ''),
+                        "vertices": [],  # Will be populated if coordinate data available
+                        "modified": pairs.get('MODIFIED', 'FALSE') == 'TRUE' or pairs.get('ISMODIFIED', 'FALSE') == 'TRUE',
+                        "shelved": pairs.get('SHELVED', 'FALSE') == 'TRUE' or pairs.get('ISSHELVED', 'FALSE') == 'TRUE',
+                        "pour_style": pairs.get('POURSTYLE', '') or pairs.get('STYLE', ''),
+                        "is_pour": pairs.get('ISCOPPER', 'FALSE') == 'TRUE' or 'POUR' in polygon_name.upper() or pairs.get('KIND', '').upper() == 'COPPER'
+                    }
+                    
+                    polygons.append(polygon)
+            else:
+                # Binary format - estimate count
+                count = self._count_records(data)
+                for i in range(count):
+                    polygons.append({
+                        "name": f"polygon-{i+1}",
+                        "net": "",
+                        "layer": "",
+                        "vertices": [],
+                        "modified": False,
+                        "shelved": False,
+                        "is_pour": True
+                    })
+                
+        except Exception as e:
+            print(f"Error in _parse_polygon_records: {e}")
+        
+        return polygons
+    
+    def _parse_region_records(self, data: bytes) -> List[Dict[str, Any]]:
+        """Parse region data (alternative polygon format)"""
+        regions = []
+        try:
+            text = data.decode('latin-1', errors='ignore')
+            if '|NAME=' in text or '|NET=' in text:
+                parts = text.split('|NAME=')
+                for part in parts[1:]:
+                    pairs = self._parse_key_value_pairs('|NAME=' + part[:5000])
+                    
+                    region_name = pairs.get('NAME', '')
+                    if not region_name:
+                        continue
+                    
+                    region = {
+                        "name": region_name,
+                        "net": pairs.get('NET', ''),
+                        "layer": pairs.get('LAYER', ''),
+                        "vertices": [],
+                        "modified": False,
+                        "shelved": False,
+                        "is_pour": True  # Regions are typically copper pours
+                    }
+                    
+                    regions.append(region)
+        except Exception as e:
+            print(f"Error in _parse_region_records: {e}")
+        
+        return regions
     
     def _count_records(self, data: bytes) -> int:
         """Count records in Altium binary data."""

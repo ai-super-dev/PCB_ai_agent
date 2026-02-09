@@ -1320,33 +1320,44 @@ Chat with me to:
                         python_checked_rules = data.get("python_checked_rules", [])
                         total_rules = data.get("total_rules", 0)
                         rules_checked_count = data.get("rules_checked_count", 0)
-                        from datetime import datetime
-                        check_time = datetime.now().strftime("%m/%d/%Y %I:%M:%S %p")
+                        # Main title with larger header
+                        msg = "# 📊 Design Rule Check Report\n\n"
                         
-                        msg = "## 📊 Design Rule Check Report\n\n"
+                        # Filename with emphasis
+                        msg += f"**PCB File:** `{filename}`\n\n"
+                        msg += "---\n\n"
                         
-                        # Header info (Altium style)
-                        msg += f"**Date:** {check_time.split()[0]}\n"
-                        msg += f"**Time:** {check_time.split()[1] + ' ' + check_time.split()[2]}\n"
-                        msg += f"**Filename:** {filename}\n\n"
+                        # Summary section with visual emphasis
+                        msg += "## 📈 Summary\n\n"
                         
-                        # Summary section (matching Altium format)
-                        msg += "### Summary\n\n"
-                        msg += f"**Warnings:** {summary.get('warnings', 0)}\n"
-                        msg += f"**Rule Violations:** {summary.get('rule_violations', 0)}\n\n"
+                        warnings_count = summary.get('warnings', 0)
+                        violations_count = summary.get('rule_violations', 0)
+                        
+                        # Use larger, bolder text for key metrics
+                        if violations_count == 0 and warnings_count == 0:
+                            msg += "### ✅ **All Checks Passed!**\n\n"
+                            msg += "**Warnings:** `0`  |  **Rule Violations:** `0`\n\n"
+                        else:
+                            if violations_count > 0:
+                                msg += f"### 🔴 **Rule Violations:** `{violations_count}`\n\n"
+                            if warnings_count > 0:
+                                msg += f"### ⚠️ **Warnings:** `{warnings_count}`\n\n"
+                        
+                        msg += "---\n\n"
                         
                         # Warnings section
+                        msg += "## ⚠️ Warnings\n\n"
                         if warnings:
-                            msg += "### Warnings\n\n"
-                            msg += f"**Total:** {len(warnings)} warnings\n\n"
+                            msg += f"**Total:** **{len(warnings)}** warning(s)\n\n"
                         else:
-                            msg += "### Warnings\n\n"
-                            msg += "**Total:** 0 warnings\n\n"
+                            msg += "**Total:** **0** warnings\n\n"
                         
-                        # Rule Violations section (matching Altium format - show ALL rules)
-                        msg += "### Rule Violations\n\n"
-                        msg += "| Rule Violations | Count |\n"
-                        msg += "|-----------------|-------|\n"
+                        msg += "---\n\n"
+                        
+                        # Rule Violations section with better table formatting
+                        msg += "## 📋 Rule Violations\n\n"
+                        msg += "| **Rule Violations** | **Count** |\n"
+                        msg += "|:-------------------|----------:|\n"
                         
                         if all_rules:
                             # Show all rules checked, even with 0 violations
@@ -1362,16 +1373,22 @@ Chat with me to:
                             # No rules found - show placeholder
                             msg += "| No rules checked | 0 |\n"
                         
-                        msg += f"\n**Total:** {summary.get('rule_violations', 0)} violations\n\n"
+                        msg += f"\n**Total Violations:** **{summary.get('rule_violations', 0)}**\n\n"
                         
-                        # Add explanation about Python DRC checking
                         msg += "---\n\n"
-                        msg += "### 📝 Python DRC Engine Information\n\n"
-                        msg += f"**Total Design Rules Found:** {total_rules}\n"
-                        msg += f"**Rules Checked by Python DRC:** {rules_checked_count}\n\n"
+                        
+                        # Python DRC Engine Information with better formatting
+                        msg += "## 🔧 Python DRC Engine Information\n\n"
+                        
+                        # Summary stats in a clean box format
+                        msg += "| **Metric** | **Value** |\n"
+                        msg += "|:-----------|----------:|\n"
+                        msg += f"| Total Design Rules Found | **{total_rules}** |\n"
+                        msg += f"| Rules Checked by Python DRC | **{rules_checked_count}** |\n\n"
                         
                         if python_checked_rules:
-                            msg += "**Rules Currently Checked by Python DRC Engine:**\n\n"
+                            msg += "### 📋 Rules Currently Checked\n\n"
+                            
                             # Group by rule type
                             by_type = {}
                             for rule in python_checked_rules:
@@ -1380,81 +1397,120 @@ Chat with me to:
                                     by_type[rule_type] = []
                                 by_type[rule_type].append(rule.get("formatted_name", rule.get("rule_name")))
                             
-                            # Show by category
+                            # Show by category with better formatting
                             type_labels = {
-                                'clearance': 'Clearance Constraints',
-                                'width': 'Width Constraints',
-                                'via': 'Via/Hole Size Constraints',
-                                'hole_size': 'Hole Size Constraints',
-                                'short_circuit': 'Short-Circuit Constraints',
-                                'unrouted_net': 'Un-Routed Net Constraints',
-                                'hole_to_hole_clearance': 'Hole To Hole Clearance',
-                                'solder_mask_sliver': 'Minimum Solder Mask Sliver',
-                                'silk_to_solder_mask': 'Silk To Solder Mask',
-                                'silk_to_silk': 'Silk to Silk',
-                                'height': 'Height Constraints',
-                                'modified_polygon': 'Modified Polygon',
-                                'net_antennae': 'Net Antennae'
+                                'clearance': '🔲 Clearance Constraints',
+                                'width': '📏 Width Constraints',
+                                'via': '🔘 Via/Hole Size Constraints',
+                                'hole_size': '🕳️ Hole Size Constraints',
+                                'short_circuit': '⚡ Short-Circuit Constraints',
+                                'unrouted_net': '🔌 Un-Routed Net Constraints',
+                                'hole_to_hole_clearance': '📐 Hole To Hole Clearance',
+                                'solder_mask_sliver': '🛡️ Minimum Solder Mask Sliver',
+                                'silk_to_solder_mask': '🎨 Silk To Solder Mask',
+                                'silk_to_silk': '🖨️ Silk to Silk',
+                                'height': '📏 Height Constraints',
+                                'modified_polygon': '🔷 Modified Polygon',
+                                'net_antennae': '📡 Net Antennae',
+                                'diff_pairs_routing': '⚖️ Differential Pair Routing',
+                                'routing_topology': '🌐 Routing Topology',
+                                'routing_via_style': '🔧 Via Style Constraints',
+                                'routing_corners': '📐 Routing Corners',
+                                'routing_layers': '📚 Routing Layers',
+                                'routing_priority': '⭐ Routing Priority',
+                                'plane_connect': '🔌 Power Plane Connect'
                             }
                             
+                            # Create a cleaner table format for rules
+                            msg += "| **Category** | **Count** | **Rules** |\n"
+                            msg += "|:-------------|----------:|:----------|\n"
+                            
                             for rule_type, rules_list in sorted(by_type.items()):
-                                label = type_labels.get(rule_type, rule_type.replace('_', ' ').title())
-                                msg += f"• **{label}:** {len(rules_list)} rule(s)\n"
-                                for rule_name in rules_list[:3]:  # Show first 3
-                                    msg += f"  - {rule_name}\n"
-                                if len(rules_list) > 3:
-                                    msg += f"  - ... and {len(rules_list) - 3} more\n"
-                                msg += "\n"
+                                label = type_labels.get(rule_type, f"📌 {rule_type.replace('_', ' ').title()}")
+                                count = len(rules_list)
+                                
+                                # Format rule names (show first 2, then count)
+                                if count <= 2:
+                                    rules_display = " • ".join([f"`{r}`" for r in rules_list])
+                                else:
+                                    rules_display = f"`{rules_list[0]}` • `{rules_list[1]}` • *+{count-2} more*"
+                                
+                                msg += f"| {label} | **{count}** | {rules_display} |\n"
+                            
+                            msg += "\n"
                         else:
-                            msg += "**Note:** No rules were found in the PCB file. Using default rules for checking.\n\n"
+                            msg += "> ⚠️ **Note:** No rules were found in the PCB file. Using default rules for checking.\n\n"
                         
-                        msg += "**Python DRC Engine Capabilities:**\n"
-                        msg += "The Python DRC engine performs real geometric and manufacturing validation checks including:\n"
-                        msg += "• Clearance violations (pad-to-pad, via-to-pad, etc.)\n"
-                        msg += "• Track width constraints (min/max)\n"
-                        msg += "• Via and hole size constraints\n"
-                        msg += "• Short-circuit detection\n"
-                        msg += "• Unrouted net detection\n"
-                        msg += "• Hole-to-hole clearance\n"
-                        msg += "• Solder mask sliver detection\n"
-                        msg += "• Silk screen clearance checks\n"
-                        msg += "• Component height constraints\n"
-                        msg += "• Modified polygon checks\n"
-                        msg += "• Net antennae detection\n\n"
+                        msg += "---\n\n"
+                        msg += "### ✅ **Engine Capabilities**\n\n"
+                        msg += "The Python DRC engine performs comprehensive validation including:\n\n"
+                        
+                        # Use a cleaner two-column format for capabilities
+                        capabilities = [
+                            ("🔍 Clearance violations", "Pad-to-pad, via-to-pad spacing"),
+                            ("📏 Track width constraints", "Min/max width validation"),
+                            ("🔘 Via & hole size", "Diameter and drill size checks"),
+                            ("⚡ Short-circuit detection", "Overlap detection between nets"),
+                            ("🔌 Unrouted net detection", "With polygon connectivity support"),
+                            ("📐 Hole-to-hole clearance", "Edge-to-edge distance validation"),
+                            ("🛡️ Solder mask sliver", "Mask gap detection"),
+                            ("🎨 Silk screen clearance", "Silk-to-silk and silk-to-mask"),
+                            ("📏 Component height", "Height constraint validation"),
+                            ("🔷 Modified polygon", "Polygon modification checks"),
+                            ("📡 Net antennae", "Stub trace detection"),
+                            ("⚖️ Differential pairs", "Width and gap validation"),
+                            ("🌐 Routing topology", "Topology pattern validation"),
+                            ("🔧 Via style", "Via dimension constraints"),
+                            ("📐 Routing corners", "Corner angle validation"),
+                            ("📚 Routing layers", "Layer restriction checks"),
+                            ("⭐ Routing priority", "Priority-based validation"),
+                            ("🔌 Power plane connect", "Plane connection style")
+                        ]
+                        
+                        # Display in a clean two-column table
+                        msg += "| **Feature** | **Description** |\n"
+                        msg += "|:------------|:-----------------|\n"
+                        for feature, desc in capabilities:
+                            msg += f"| {feature} | {desc} |\n"
+                        
+                        msg += "\n"
                         
                         if total_rules > rules_checked_count:
-                            msg += f"⚠️ **Note:** {total_rules - rules_checked_count} rule(s) found in PCB are not yet implemented in Python DRC engine.\n"
-                            msg += "These rules are shown in the table above but may not be fully validated.\n\n"
+                            msg += "---\n\n"
+                            msg += f"> ⚠️ **Note:** **{total_rules - rules_checked_count}** rule(s) found in PCB are not yet fully implemented.\n"
+                            msg += "> These rules appear in the table above but may have limited validation.\n\n"
                         
                         if summary.get("passed", False):
                             msg += "✅ **All checks passed!** No violations or warnings detected.\n\n"
                             self._safe_after(0, lambda m=msg: self.add_message(m, is_user=False))
                             self._safe_after(0, lambda: self.set_status("Passed", "success"))
                             return
-                            
-                            # Show detailed violations (first 10)
-                            if violations:
-                                msg += "### Detailed Violations\n\n"
-                                for i, v in enumerate(violations[:10], 1):
-                                    rule_type = v.get("type", "unknown").replace("_", " ").title()
-                                    message = v.get("message", "")
-                                    location = v.get("location", {})
-                                    
-                                    msg += f"**{i}. {rule_type}**\n"
-                                    if location.get("x_mm") and location.get("y_mm"):
-                                        msg += f"   Location: ({location['x_mm']:.2f}, {location['y_mm']:.2f}) mm\n"
-                                    if location.get("layer"):
-                                        msg += f"   Layer: {location['layer']}\n"
-                                    if v.get("component_name"):
-                                        msg += f"   Component: {v['component_name']}\n"
-                                    if v.get("net_name"):
-                                        msg += f"   Net: {v['net_name']}\n"
-                                    if v.get("actual_value") is not None and v.get("required_value") is not None:
-                                        msg += f"   Actual: {v['actual_value']} mm, Required: {v['required_value']} mm\n"
-                                    msg += f"   {message}\n\n"
+                        
+                        # Show detailed violations (first 10)
+                        if violations:
+                            msg += "---\n\n"
+                            msg += "## 🔍 Detailed Violations\n\n"
+                            for i, v in enumerate(violations[:10], 1):
+                                rule_type = v.get("type", "unknown").replace("_", " ").title()
+                                message = v.get("message", "")
+                                location = v.get("location", {})
                                 
-                                if len(violations) > 10:
-                                    msg += f"\n... and {len(violations) - 10} more violations.\n\n"
+                                msg += f"### **{i}. {rule_type}**\n"
+                                if location.get("x_mm") is not None and location.get("y_mm") is not None:
+                                    msg += f"- **Location:** `({location['x_mm']:.2f}, {location['y_mm']:.2f}) mm`\n"
+                                if location.get("layer"):
+                                    msg += f"- **Layer:** `{location['layer']}`\n"
+                                if v.get("component_name"):
+                                    msg += f"- **Component:** `{v['component_name']}`\n"
+                                if v.get("net_name"):
+                                    msg += f"- **Net:** `{v['net_name']}`\n"
+                                if v.get("actual_value") is not None and v.get("required_value") is not None:
+                                    msg += f"- **Actual:** `{v['actual_value']} mm` | **Required:** `{v['required_value']} mm`\n"
+                                msg += f"\n*{message}*\n\n"
+                            
+                            if len(violations) > 10:
+                                msg += f"---\n\n"
+                                msg += f"*... and **{len(violations) - 10}** more violation(s).*\n\n"
                         
                         # Get suggestions if violations exist
                         if violations:
