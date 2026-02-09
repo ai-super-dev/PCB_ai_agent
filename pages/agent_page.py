@@ -2345,9 +2345,34 @@ Chat with me to:
                 pref_w = float(pref_match.group(1)) if pref_match else min_w
                 max_w = float(max_match.group(1)) if max_match else pref_w * 2
                 
-                # Try to extract scope/net class
-                scope_match = re.search(r'for\s+(\w+)\s+nets?', user_input_lower)
-                scope = scope_match.group(1) if scope_match else "All"
+                # Try to extract scope/net class - support net names with + and - signs
+                scope_match = re.search(r'for\s+([+\-]?\w+[\w.]*)\s+(?:power\s+)?nets?', user_input_lower)
+                if not scope_match:
+                    # Try alternative patterns: "on X net" or "X net width"
+                    scope_match = re.search(r'(?:on|to)\s+([+\-]?\w+[\w.]*)\s+nets?', user_input_lower)
+                if not scope_match:
+                    # Try pattern without "net" word: "for +5V" or "for VCC"
+                    scope_match = re.search(r'for\s+([+\-]?\w+[\w.]*)', user_input_lower)
+                
+                scope = scope_match.group(1).upper() if scope_match else "All"
+                
+                # Map common power net names to actual net names
+                # The Altium script will format these as InNet('VCC') etc.
+                power_net_map = {
+                    'power': 'VCC',  # Default power net name
+                    'vcc': 'VCC',
+                    'vdd': 'VDD',
+                    'ground': 'GND',
+                    'gnd': 'GND',
+                    'vss': 'VSS'
+                }
+                
+                # Normalize scope name - but preserve original if it starts with + or -
+                scope_lower = scope.lower()
+                if scope_lower in power_net_map:
+                    scope = power_net_map[scope_lower]
+                # If scope already starts with + or -, keep it as-is (it's likely a net name like +5V)
+                # Otherwise, check if it needs mapping
                 
                 rule_name = f"Width_{scope}" if scope != "All" else "Width_Rule"
                 return {
@@ -2357,7 +2382,7 @@ Chat with me to:
                         "min_width_mm": min_w,
                         "preferred_width_mm": pref_w,
                         "max_width_mm": max_w,
-                        "scope": scope
+                        "scope": scope  # Will be formatted as InNet('VCC') in Altium script
                     }
                 }
         
@@ -2368,21 +2393,38 @@ Chat with me to:
             min_hole_match = re.search(r'min\s+hole\s+(\d+\.?\d*)\s*mm', user_input_lower)
             max_hole_match = re.search(r'max\s+hole\s+(\d+\.?\d*)\s*mm', user_input_lower)
             min_dia_match = re.search(r'min\s+diameter\s+(\d+\.?\d*)\s*mm', user_input_lower)
+            max_dia_match = re.search(r'max\s+diameter\s+(\d+\.?\d*)\s*mm', user_input_lower)
             
             any_val = re.search(r'(\d+\.?\d*)\s*mm', user_input_lower)
             
-            if min_hole_match or max_hole_match or min_dia_match or any_val:
+            if min_hole_match or max_hole_match or min_dia_match or max_dia_match or any_val:
                 min_hole = float(min_hole_match.group(1)) if min_hole_match else (float(any_val.group(1)) if any_val else 0.3)
-                max_hole = float(max_hole_match.group(1)) if max_hole_match else min_hole * 2
+                max_hole = float(max_hole_match.group(1)) if max_hole_match else min_hole * 1.5
                 min_dia = float(min_dia_match.group(1)) if min_dia_match else min_hole * 2
+                max_dia = float(max_dia_match.group(1)) if max_dia_match else min_dia * 1.5
+                
+                # Try to extract scope/net class - support net names with + and - signs
+                scope_match = re.search(r'for\s+([+\-]?\w+[\w.]*)\s+nets?', user_input_lower)
+                if not scope_match:
+                    # Try alternative patterns: "on X net" or "X net via"
+                    scope_match = re.search(r'(?:on|to)\s+([+\-]?\w+[\w.]*)\s+nets?', user_input_lower)
+                if not scope_match:
+                    # Try pattern without "net" word: "for +5V" or "for VCC"
+                    scope_match = re.search(r'for\s+([+\-]?\w+[\w.]*)', user_input_lower)
+                
+                scope = scope_match.group(1).upper() if scope_match else "All"
+                
+                rule_name = f"RoutingVias_{scope}" if scope != "All" else "RoutingVias_Custom"
                 
                 return {
                     "rule_type": "via",
-                    "rule_name": "RoutingVias_Custom",
+                    "rule_name": rule_name,
                     "parameters": {
                         "min_hole_mm": min_hole,
                         "max_hole_mm": max_hole,
-                        "min_diameter_mm": min_dia
+                        "min_diameter_mm": min_dia,
+                        "max_diameter_mm": max_dia,
+                        "scope": scope
                     }
                 }
         
