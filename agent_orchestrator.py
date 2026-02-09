@@ -2127,91 +2127,93 @@ Would you like me to explain the placement strategy or make any adjustments?
         return response
     
     def _check_altium_drc_result(self) -> str:
-        """Read DRC results from Altium's HTML report, parse, and generate AI summary"""
-        from tools.drc_report_parser import parse_drc_report
+        """Run Python DRC check and generate AI summary"""
+        import requests
         
-        # Parse the DRC report
-        report_data = parse_drc_report()
-        
-        if "error" in report_data:
-            return f"## DRC Results\n\n❌ **{report_data['error']}**\n\n" + \
-                   "**To run DRC manually in Altium Designer:**\n\n" + \
-                   "1. In Altium Designer: **Tools → Design Rule Check...**\n" + \
-                   "2. Click **'Run Design Rule Check'** button\n" + \
-                   "3. Wait for DRC to complete (may take a few seconds)\n" + \
-                   "4. The report will be saved automatically\n" + \
-                   "5. Then ask me again: **`check DRC result`**\n\n" + \
-                   "**Or use the menu:**\n" + \
-                   "• Click **⋮** → **Run DRC** (then follow steps above)\n\n" + \
-                   "Once DRC completes, I'll automatically analyze the results!"
-        
-        summary = report_data.get("summary", {})
-        violations = report_data.get("total_violations", 0)
-        warnings = report_data.get("total_warnings", 0)
-        violations_by_type = report_data.get("violations_by_type", {})
-        detailed_violations = report_data.get("detailed_violations", [])
-        
-        # Build response with AI analysis
-        response = "## 📊 DRC Analysis Report (AI-Powered)\n\n"
-        response += "💡 **This is more than just a DRC report!** I analyze violations and provide actionable recommendations.\n\n"
-        
-        # Overall status
-        if violations == 0 and warnings == 0:
-            response += "✅ **Design is Clean!** No violations or warnings detected.\n\n"
-            response += "Your PCB design passes all design rule checks. You can proceed with:\n"
-            response += "• Final routing\n"
-            response += "• Manufacturing preparation\n"
-            response += "• Design review\n\n"
-            return response
-        
-        # Show counts
-        if violations > 0:
-            response += f"🔴 **{violations} Rule Violation(s)** detected\n"
-        if warnings > 0:
-            response += f"⚠️ **{warnings} Warning(s)** detected\n"
-        response += "\n"
-        
-        # Violations by type
-        if violations_by_type:
-            response += "### Violation Breakdown\n\n"
-            for vtype, count in sorted(violations_by_type.items(), key=lambda x: x[1], reverse=True):
-                response += f"• **{vtype}**: {count}\n"
+        try:
+            # Run Python DRC via MCP server
+            response = requests.get("http://localhost:8765/drc/run", timeout=30)
+            
+            if response.status_code != 200:
+                return f"## DRC Results\n\n❌ **Failed to run DRC: {response.text}**\n\n" + \
+                       "Make sure the MCP server is running and a PCB is loaded."
+            
+            report_data = response.json()
+            
+            if "error" in report_data:
+                return f"## DRC Results\n\n❌ **{report_data['error']}**\n\n" + \
+                       "Make sure a PCB file is loaded first."
+            
+            summary = report_data.get("summary", {})
+            violations = report_data.get("total_violations", 0)
+            warnings = report_data.get("total_warnings", 0)
+            violations_by_type = report_data.get("violations_by_type", {})
+            detailed_violations = report_data.get("detailed_violations", [])
+            
+            # Build response with AI analysis
+            response = "## 📊 DRC Analysis Report (AI-Powered)\n\n"
+            response += "💡 **This is more than just a DRC report!** I analyze violations and provide actionable recommendations.\n\n"
+            
+            # Overall status
+            if violations == 0 and warnings == 0:
+                response += "✅ **Design is Clean!** No violations or warnings detected.\n\n"
+                response += "Your PCB design passes all design rule checks. You can proceed with:\n"
+                response += "• Final routing\n"
+                response += "• Manufacturing preparation\n"
+                response += "• Design review\n\n"
+                return response
+            
+            # Show counts
+            if violations > 0:
+                response += f"🔴 **{violations} Rule Violation(s)** detected\n"
+            if warnings > 0:
+                response += f"⚠️ **{warnings} Warning(s)** detected\n"
             response += "\n"
-        
-        # Show key violations (first 5)
-        if detailed_violations:
-            response += "### Key Violations\n\n"
-            for i, viol in enumerate(detailed_violations[:5], 1):
-                comp = viol.get("component", "")
-                net = viol.get("net", "")
-                rule_type = viol.get("type", "unknown")
-                message = viol.get("message", "")[:100]
-                
-                response += f"**{i}. {rule_type.upper().replace('_', ' ')}**"
-                if comp:
-                    response += f" - Component: {comp}"
-                if net:
-                    response += f" - Net: {net}"
+            
+            # Violations by type
+            if violations_by_type:
+                response += "### Violation Breakdown\n\n"
+                for vtype, count in sorted(violations_by_type.items(), key=lambda x: x[1], reverse=True):
+                    response += f"• **{vtype}**: {count}\n"
                 response += "\n"
-                if message:
-                    response += f"   {message}\n"
-                response += "\n"
-        
-        # AI-generated recommendations
-        response += "---\n"
-        response += "### 💡 AI-Powered Recommendations\n\n"
-        response += "**Why use the agent instead of just reading Altium's report?**\n"
-        response += "• **Intelligent Analysis** - I understand the context and impact of each violation\n"
-        response += "• **Prioritized Actions** - Focus on high-impact fixes first\n"
-        response += "• **Specific Solutions** - Not just 'there's a violation', but 'move C135 to fix it'\n"
-        response += "• **Natural Language** - Ask me questions about any violation\n"
-        response += "• **Fix Execution** - I can help fix violations via chat commands\n\n"
-        
-        # Generate AI summary
-        ai_summary = self._generate_drc_ai_summary(report_data)
-        response += ai_summary
-        
-        return response
+            
+            # Show key violations (first 5)
+            if detailed_violations:
+                response += "### Key Violations\n\n"
+                for i, viol in enumerate(detailed_violations[:5], 1):
+                    comp = viol.get("component", "")
+                    net = viol.get("net", "")
+                    rule_type = viol.get("type", "unknown")
+                    message = viol.get("message", "")[:100]
+                    
+                    response += f"**{i}. {rule_type.upper().replace('_', ' ')}**"
+                    if comp:
+                        response += f" - Component: {comp}"
+                    if net:
+                        response += f" - Net: {net}"
+                    response += "\n"
+                    if message:
+                        response += f"   {message}\n"
+                    response += "\n"
+            
+            # AI-generated recommendations
+            response += "---\n"
+            response += "### 💡 AI-Powered Recommendations\n\n"
+            response += "**Why use the agent instead of just reading Altium's report?**\n"
+            response += "• **Intelligent Analysis** - I understand the context and impact of each violation\n"
+            response += "• **Prioritized Actions** - Focus on high-impact fixes first\n"
+            response += "• **Specific Solutions** - Not just 'there's a violation', but 'move C135 to fix it'\n"
+            response += "• **Natural Language** - Ask me questions about any violation\n"
+            response += "• **Fix Execution** - I can help fix violations via chat commands\n\n"
+            
+            # Generate AI summary
+            ai_summary = self._generate_drc_ai_summary(report_data)
+            response += ai_summary
+            
+            return response
+        except Exception as e:
+            return f"## DRC Results\n\n❌ **Error running DRC: {str(e)}**\n\n" + \
+                   "Make sure the MCP server is running (python mcp_server.py)"
     
     def _generate_drc_ai_summary(self, report_data: Dict[str, Any]) -> str:
         """Generate AI-powered summary and recommendations from DRC report"""

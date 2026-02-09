@@ -685,8 +685,13 @@ class AgentPage(ctk.CTkFrame):
                                         # Get AI analysis of DRC report
                                         try:
                                             # Update parser to use the found file
-                                            from tools.drc_report_parser import parse_drc_report
-                                            report_data = parse_drc_report(str(latest_file))
+                                            # Use Python DRC instead of HTML parsing
+                                            import requests
+                                            drc_result = requests.get("http://localhost:8765/drc/run", timeout=30)
+                                            if drc_result.status_code == 200:
+                                                report_data = drc_result.json()
+                                            else:
+                                                report_data = {"error": "Failed to run DRC"}
                                             
                                             if "error" not in report_data:
                                                 drc_summary = self.agent._check_altium_drc_result()
@@ -1213,37 +1218,21 @@ Chat with me to:
         self.chat_frame._parent_canvas.yview_moveto(1.0)
     
     def _add_drc_helper_button(self):
-        """Add button to open DRC report in browser"""
-        import os
-        import webbrowser
-        from pathlib import Path
-        import glob
-        
-        # Find Altium DRC report in Project Outputs folder
-        project_outputs = Path("PCB_Project/Project Outputs for PCB_Project")
-        report_path = None
-        
-        if project_outputs.exists():
-            # Find the latest DRC HTML report
-            html_files = list(project_outputs.glob("Design Rule Check*.html"))
-            if html_files:
-                # Get the most recent one
-                report_path = max(html_files, key=lambda p: p.stat().st_mtime)
-        
+        """Add button to run Python DRC check"""
         # Create button container
         btn_container = ctk.CTkFrame(self.chat_frame, fg_color="transparent")
         btn_container.grid(row=len(self.messages) + 100, column=0, sticky="w", pady=10, padx=10)
         
-        # Open DRC Report button
+        # Run DRC Check button (replaces old HTML report viewer)
         report_btn = ctk.CTkButton(
             btn_container,
-            text="📄 View DRC Report in Browser",
+            text="🔍 Run DRC Check",
             width=220,
             height=40,
             fg_color=self.colors["primary"],
             hover_color=self.colors["primary_hover"],
             font=ctk.CTkFont(size=13, weight="bold"),
-            command=lambda: self._open_drc_report(str(report_path) if report_path else None)
+            command=self._open_drc_report
         )
         report_btn.pack(side="left", padx=5)
         
@@ -1252,31 +1241,9 @@ Chat with me to:
         self.chat_frame._parent_canvas.yview_moveto(1.0)
     
     def _open_drc_report(self, path: str = None):
-        """Open DRC report in default browser"""
-        import webbrowser
-        import os
-        from pathlib import Path
-        
-        # Always search for the latest report
-        project_outputs = Path("PCB_Project/Project Outputs for PCB_Project").absolute()
-        report_path = None
-        
-        if project_outputs.exists():
-            html_files = list(project_outputs.glob("Design Rule Check*.html"))
-            if html_files:
-                report_path = max(html_files, key=lambda p: p.stat().st_mtime)
-        
-        if report_path and report_path.exists():
-            # Use os.startfile on Windows for reliable file opening
-            try:
-                os.startfile(str(report_path))
-            except:
-                # Fallback to webbrowser
-                file_url = "file:///" + str(report_path).replace("\\", "/")
-                webbrowser.open(file_url)
-        else:
-            # Show message if report doesn't exist
-            self.add_message("DRC report not found. Run DRC in Altium Designer first (Tools → Design Rule Check).", is_user=False)
+        """Run Python DRC check (replaces old HTML report viewer)"""
+        # This method now triggers a Python DRC check instead of opening HTML
+        self._get_drc_suggestions()
     
     def _auto_generate_drc_rules(self):
         """Automatically generate DRC rules from PCB design"""
@@ -1329,61 +1296,189 @@ Chat with me to:
         threading.Thread(target=generate_rules, daemon=True).start()
     
     def _get_drc_suggestions(self):
-        """Get automatic suggestions based on DRC violations"""
-        self.add_message("Getting DRC suggestions...", is_user=False)
-        self.set_status("Analyzing...", "warning")
+        """Run Python DRC check and display results"""
+        self.add_message("Running DRC check...", is_user=False)
+        self.set_status("Checking...", "warning")
         
-        def get_suggestions():
+        def run_drc():
             try:
-                result = self.mcp_client.session.get("http://localhost:8765/drc/suggestions")
+                # First, run DRC check
+                result = self.mcp_client.session.get("http://localhost:8765/drc/run")
                 
                 if result.status_code == 200:
                     data = result.json()
                     if data.get("success"):
-                        suggestions = data.get("suggestions", [])
+                        # Display DRC results in Altium-style format
                         summary = data.get("summary", {})
+                        violations = data.get("violations", [])
+                        warnings = data.get("warnings", [])
+                        violations_by_rule = data.get("violations_by_rule", {})
                         
-                        if suggestions:
-                            msg = f"📋 **DRC Suggestions** ({len(suggestions)} total)\n\n"
-                            
-                            # Group by priority
-                            by_priority = {}
-                            for s in suggestions:
-                                priority = s.get("priority", "medium")
-                                if priority not in by_priority:
-                                    by_priority[priority] = []
-                                by_priority[priority].append(s)
-                            
-                            # Show critical and high priority first
-                            for priority in ["critical", "high", "medium", "low"]:
-                                if priority in by_priority:
-                                    priority_label = priority.upper()
-                                    msg += f"**{priority_label} Priority:**\n"
-                                    for s in by_priority[priority][:5]:  # Show first 5 of each
-                                        msg += f"• {s.get('message', 'No message')}\n"
-                                        if s.get("action"):
-                                            msg += f"  → Action: {s.get('action')}\n"
-                                        if s.get("fixes"):
-                                            msg += f"  → Fixes: {', '.join(s.get('fixes', []))}\n"
-                                        msg += "\n"
-                            
-                            if len(suggestions) > 10:
-                                msg += f"\n... and {len(suggestions) - 10} more suggestions. "
-                                msg += "Run DRC and check suggestions again for details.\n"
-                            
-                            self._safe_after(0, lambda m=msg: self.add_message(m, is_user=False))
-                            self._safe_after(0, lambda: self.set_status("Suggestions Ready", "success"))
+                        # Get additional data
+                        all_rules = data.get("all_rules_checked", [])
+                        filename = data.get("filename", "Unknown")
+                        python_checked_rules = data.get("python_checked_rules", [])
+                        total_rules = data.get("total_rules", 0)
+                        rules_checked_count = data.get("rules_checked_count", 0)
+                        from datetime import datetime
+                        check_time = datetime.now().strftime("%m/%d/%Y %I:%M:%S %p")
+                        
+                        msg = "## 📊 Design Rule Check Report\n\n"
+                        
+                        # Header info (Altium style)
+                        msg += f"**Date:** {check_time.split()[0]}\n"
+                        msg += f"**Time:** {check_time.split()[1] + ' ' + check_time.split()[2]}\n"
+                        msg += f"**Filename:** {filename}\n\n"
+                        
+                        # Summary section (matching Altium format)
+                        msg += "### Summary\n\n"
+                        msg += f"**Warnings:** {summary.get('warnings', 0)}\n"
+                        msg += f"**Rule Violations:** {summary.get('rule_violations', 0)}\n\n"
+                        
+                        # Warnings section
+                        if warnings:
+                            msg += "### Warnings\n\n"
+                            msg += f"**Total:** {len(warnings)} warnings\n\n"
                         else:
-                            self._safe_after(0, lambda: self.add_message(
-                                "✅ No DRC violations found! Your design passes all checks.",
-                                is_user=False
-                            ))
-                            self._safe_after(0, lambda: self.set_status("No Issues", "success"))
+                            msg += "### Warnings\n\n"
+                            msg += "**Total:** 0 warnings\n\n"
+                        
+                        # Rule Violations section (matching Altium format - show ALL rules)
+                        msg += "### Rule Violations\n\n"
+                        msg += "| Rule Violations | Count |\n"
+                        msg += "|-----------------|-------|\n"
+                        
+                        if all_rules:
+                            # Show all rules checked, even with 0 violations
+                            for rule_info in all_rules:
+                                formatted_name = rule_info.get("formatted_name", rule_info.get("rule_name", "Unknown"))
+                                count = rule_info.get("count", 0)
+                                msg += f"| {formatted_name} | {count} |\n"
+                        elif violations_by_rule:
+                            # Fallback: show only rules with violations
+                            for rule_name, count in sorted(violations_by_rule.items()):
+                                msg += f"| {rule_name} | {count} |\n"
+                        else:
+                            # No rules found - show placeholder
+                            msg += "| No rules checked | 0 |\n"
+                        
+                        msg += f"\n**Total:** {summary.get('rule_violations', 0)} violations\n\n"
+                        
+                        # Add explanation about Python DRC checking
+                        msg += "---\n\n"
+                        msg += "### 📝 Python DRC Engine Information\n\n"
+                        msg += f"**Total Design Rules Found:** {total_rules}\n"
+                        msg += f"**Rules Checked by Python DRC:** {rules_checked_count}\n\n"
+                        
+                        if python_checked_rules:
+                            msg += "**Rules Currently Checked by Python DRC Engine:**\n\n"
+                            # Group by rule type
+                            by_type = {}
+                            for rule in python_checked_rules:
+                                rule_type = rule.get("rule_type", "other")
+                                if rule_type not in by_type:
+                                    by_type[rule_type] = []
+                                by_type[rule_type].append(rule.get("formatted_name", rule.get("rule_name")))
+                            
+                            # Show by category
+                            type_labels = {
+                                'clearance': 'Clearance Constraints',
+                                'width': 'Width Constraints',
+                                'via': 'Via/Hole Size Constraints',
+                                'hole_size': 'Hole Size Constraints',
+                                'short_circuit': 'Short-Circuit Constraints',
+                                'unrouted_net': 'Un-Routed Net Constraints',
+                                'hole_to_hole_clearance': 'Hole To Hole Clearance',
+                                'solder_mask_sliver': 'Minimum Solder Mask Sliver',
+                                'silk_to_solder_mask': 'Silk To Solder Mask',
+                                'silk_to_silk': 'Silk to Silk',
+                                'height': 'Height Constraints',
+                                'modified_polygon': 'Modified Polygon',
+                                'net_antennae': 'Net Antennae'
+                            }
+                            
+                            for rule_type, rules_list in sorted(by_type.items()):
+                                label = type_labels.get(rule_type, rule_type.replace('_', ' ').title())
+                                msg += f"• **{label}:** {len(rules_list)} rule(s)\n"
+                                for rule_name in rules_list[:3]:  # Show first 3
+                                    msg += f"  - {rule_name}\n"
+                                if len(rules_list) > 3:
+                                    msg += f"  - ... and {len(rules_list) - 3} more\n"
+                                msg += "\n"
+                        else:
+                            msg += "**Note:** No rules were found in the PCB file. Using default rules for checking.\n\n"
+                        
+                        msg += "**Python DRC Engine Capabilities:**\n"
+                        msg += "The Python DRC engine performs real geometric and manufacturing validation checks including:\n"
+                        msg += "• Clearance violations (pad-to-pad, via-to-pad, etc.)\n"
+                        msg += "• Track width constraints (min/max)\n"
+                        msg += "• Via and hole size constraints\n"
+                        msg += "• Short-circuit detection\n"
+                        msg += "• Unrouted net detection\n"
+                        msg += "• Hole-to-hole clearance\n"
+                        msg += "• Solder mask sliver detection\n"
+                        msg += "• Silk screen clearance checks\n"
+                        msg += "• Component height constraints\n"
+                        msg += "• Modified polygon checks\n"
+                        msg += "• Net antennae detection\n\n"
+                        
+                        if total_rules > rules_checked_count:
+                            msg += f"⚠️ **Note:** {total_rules - rules_checked_count} rule(s) found in PCB are not yet implemented in Python DRC engine.\n"
+                            msg += "These rules are shown in the table above but may not be fully validated.\n\n"
+                        
+                        if summary.get("passed", False):
+                            msg += "✅ **All checks passed!** No violations or warnings detected.\n\n"
+                            self._safe_after(0, lambda m=msg: self.add_message(m, is_user=False))
+                            self._safe_after(0, lambda: self.set_status("Passed", "success"))
+                            return
+                            
+                            # Show detailed violations (first 10)
+                            if violations:
+                                msg += "### Detailed Violations\n\n"
+                                for i, v in enumerate(violations[:10], 1):
+                                    rule_type = v.get("type", "unknown").replace("_", " ").title()
+                                    message = v.get("message", "")
+                                    location = v.get("location", {})
+                                    
+                                    msg += f"**{i}. {rule_type}**\n"
+                                    if location.get("x_mm") and location.get("y_mm"):
+                                        msg += f"   Location: ({location['x_mm']:.2f}, {location['y_mm']:.2f}) mm\n"
+                                    if location.get("layer"):
+                                        msg += f"   Layer: {location['layer']}\n"
+                                    if v.get("component_name"):
+                                        msg += f"   Component: {v['component_name']}\n"
+                                    if v.get("net_name"):
+                                        msg += f"   Net: {v['net_name']}\n"
+                                    if v.get("actual_value") is not None and v.get("required_value") is not None:
+                                        msg += f"   Actual: {v['actual_value']} mm, Required: {v['required_value']} mm\n"
+                                    msg += f"   {message}\n\n"
+                                
+                                if len(violations) > 10:
+                                    msg += f"\n... and {len(violations) - 10} more violations.\n\n"
+                        
+                        # Get suggestions if violations exist
+                        if violations:
+                            try:
+                                suggestions_result = self.mcp_client.session.get("http://localhost:8765/drc/suggestions")
+                                if suggestions_result.status_code == 200:
+                                    suggestions_data = suggestions_result.json()
+                                    if suggestions_data.get("success"):
+                                        suggestions = suggestions_data.get("suggestions", [])
+                                        if suggestions:
+                                            msg += "### 💡 Suggestions\n\n"
+                                            for s in suggestions[:5]:
+                                                msg += f"• {s.get('message', 'No message')}\n"
+                                            if len(suggestions) > 5:
+                                                msg += f"\n... and {len(suggestions) - 5} more suggestions.\n"
+                            except:
+                                pass  # Suggestions are optional
+                        
+                        self._safe_after(0, lambda m=msg: self.add_message(m, is_user=False))
+                        self._safe_after(0, lambda: self.set_status("DRC Complete", "success" if summary.get("passed") else "warning"))
                     else:
                         error_msg = data.get("error", "Unknown error")
                         self._safe_after(0, lambda: self.add_message(
-                            f"❌ Error getting suggestions: {error_msg}\n\n"
-                            "Make sure you've run DRC first.",
+                            f"❌ DRC check failed: {error_msg}",
                             is_user=False
                         ))
                         self._safe_after(0, lambda: self.set_status("Error", "error"))
@@ -1394,13 +1489,15 @@ Chat with me to:
                     ))
                     self._safe_after(0, lambda: self.set_status("Connection Error", "error"))
             except Exception as e:
+                import traceback
+                traceback.print_exc()
                 self._safe_after(0, lambda: self.add_message(
                     f"❌ Error: {str(e)}",
                     is_user=False
                 ))
                 self._safe_after(0, lambda: self.set_status("Error", "error"))
         
-        threading.Thread(target=get_suggestions, daemon=True).start()
+        threading.Thread(target=run_drc, daemon=True).start()
     
     def _update_drc_suggestions(self):
         """Check for updates to DRC suggestions"""
