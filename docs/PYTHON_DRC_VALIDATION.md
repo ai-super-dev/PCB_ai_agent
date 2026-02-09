@@ -628,13 +628,6 @@ warnings = result["warnings"]
 - ✅ Same report format
 - ✅ Same severity levels (error/warning)
 
-### Differences
-
-- ⚠️ Cannot detect polygon/pour connections
-- ⚠️ Cannot check silk screen geometry
-- ⚠️ Some advanced rules not implemented
-- ⚠️ May have false positives for unrouted nets (due to polygon connections)
-
 ### Accuracy
 
 For rules that are fully implemented:
