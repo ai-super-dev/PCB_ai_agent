@@ -1317,15 +1317,15 @@ Begin
             MaxHole := StrToFloatDef(ParseValue(Cmd, 'param_max_hole_mm'), 0.5);
             MinDia := StrToFloatDef(ParseValue(Cmd, 'param_min_diameter_mm'), 0.6);
             MaxDia := StrToFloatDef(ParseValue(Cmd, 'param_max_diameter_mm'), 1.0);
-            DebugLog.Add('OK: MinHole=' + FloatToStr(MinHole) + ' MaxHole=' + FloatToStr(MaxHole) + ' MinDia=' + FloatToStr(MinDia) + ' MaxDia=' + FloatToStr(MaxDia));
+            DebugLog.Add('OK: Parsed via parameters - MinHole=' + FloatToStr(MinHole) + ' MaxHole=' + FloatToStr(MaxHole) + ' MinDia=' + FloatToStr(MinDia) + ' MaxDia=' + FloatToStr(MaxDia));
             
             // ViaRule.MinHoleSize := MMsToCoord(MinHole); // Property not accessible via API
             // ViaRule.MaxHoleSize := MMsToCoord(MaxHole); // Property not accessible via API
             // ViaRule.MinWidth := MMsToCoord(MinDia); // Property not accessible via API
             // ViaRule.MaxWidth := MMsToCoord(MaxDia); // Property not accessible via API
-            DebugLog.Add('OK: Via values set');
+            DebugLog.Add('WARNING: Via size properties cannot be set via API - values parsed but not applied');
         Except
-            DebugLog.Add('EXCEPTION: Setting via values failed');
+            DebugLog.Add('EXCEPTION: Parsing via values failed');
         End;
         
         Try
@@ -1473,15 +1473,15 @@ Begin
             MaxHole := StrToFloatDef(ParseValue(Cmd, 'param_max_hole_mm'), 0.5);
             MinDia := StrToFloatDef(ParseValue(Cmd, 'param_min_diameter_mm'), 0.6);
             MaxDia := StrToFloatDef(ParseValue(Cmd, 'param_max_diameter_mm'), 1.0);
-            DebugLog.Add('OK: MinHole=' + FloatToStr(MinHole) + ' MaxHole=' + FloatToStr(MaxHole) + ' MinDia=' + FloatToStr(MinDia) + ' MaxDia=' + FloatToStr(MaxDia));
+            DebugLog.Add('OK: Parsed via parameters - MinHole=' + FloatToStr(MinHole) + ' MaxHole=' + FloatToStr(MaxHole) + ' MinDia=' + FloatToStr(MinDia) + ' MaxDia=' + FloatToStr(MaxDia));
             
             // ViaRule.MinHoleSize := MMsToCoord(MinHole); // Property not accessible via API
             // ViaRule.MaxHoleSize := MMsToCoord(MaxHole); // Property not accessible via API
             // ViaRule.MinWidth := MMsToCoord(MinDia); // Property not accessible via API
             // ViaRule.MaxWidth := MMsToCoord(MaxDia); // Property not accessible via API
-            DebugLog.Add('OK: Via values set');
+            DebugLog.Add('WARNING: Via size properties cannot be set via API - values parsed but not applied');
         Except
-            DebugLog.Add('EXCEPTION: Setting via values failed');
+            DebugLog.Add('EXCEPTION: Parsing via values failed');
         End;
         
         Try

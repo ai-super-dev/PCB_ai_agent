@@ -2151,8 +2151,8 @@ Would you like me to explain the placement strategy or make any adjustments?
             detailed_violations = report_data.get("detailed_violations", [])
             
             # Build response with AI analysis
-            response = "## 📊 DRC Analysis Report (AI-Powered)\n\n"
-            response += "💡 **This is more than just a DRC report!** I analyze violations and provide actionable recommendations.\n\n"
+            response = "## 📊 DRC Analysis Report\n\n"
+            response += "ℹ️ **Note:** DRC violations computed by Python DRC engine.\n\n"
             
             # Overall status
             if violations == 0 and warnings == 0:
@@ -2198,13 +2198,13 @@ Would you like me to explain the placement strategy or make any adjustments?
             
             # AI-generated recommendations
             response += "---\n"
-            response += "### 💡 AI-Powered Recommendations\n\n"
-            response += "**Why use the agent instead of just reading Altium's report?**\n"
-            response += "• **Intelligent Analysis** - I understand the context and impact of each violation\n"
-            response += "• **Prioritized Actions** - Focus on high-impact fixes first\n"
-            response += "• **Specific Solutions** - Not just 'there's a violation', but 'move C135 to fix it'\n"
-            response += "• **Natural Language** - Ask me questions about any violation\n"
-            response += "• **Fix Execution** - I can help fix violations via chat commands\n\n"
+            response += "### 💡 Recommendations\n\n"
+            response += "I can help you:\n"
+            response += "• **Analyze violations** - Understand the context and impact of each violation\n"
+            response += "• **Prioritize fixes** - Focus on high-impact fixes first\n"
+            response += "• **Provide solutions** - Suggest specific fixes for violations\n"
+            response += "• **Answer questions** - Ask me about any violation in natural language\n"
+            response += "• **Execute fixes** - Help fix violations via chat commands\n\n"
             
             # Generate AI summary
             ai_summary = self._generate_drc_ai_summary(report_data)

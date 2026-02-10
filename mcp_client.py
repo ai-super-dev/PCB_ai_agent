@@ -592,13 +592,15 @@ class AltiumMCPClient:
         except Exception as e:
             return {"error": str(e)}
     
-    def load_from_altium_export(self, pcb_info_path: str = None, drc_report_path: str = None) -> Optional[Dict[str, Any]]:
+    def load_from_altium_export(self, pcb_info_path: str = None) -> Optional[Dict[str, Any]]:
         """
         Load PCB data from Altium-exported JSON files
         
+        Note: DRC violations are computed by the Python DRC engine via run_drc(),
+        not loaded from pre-existing files.
+        
         Args:
             pcb_info_path: Path to altium_pcb_info.json (optional, auto-detects)
-            drc_report_path: Path to DRC report (optional)
             
         Returns:
             dict with loading result
@@ -607,8 +609,6 @@ class AltiumMCPClient:
             payload = {}
             if pcb_info_path:
                 payload["pcb_info_path"] = pcb_info_path
-            if drc_report_path:
-                payload["drc_report_path"] = drc_report_path
             
             response = self.session.post(
                 f"{self.server_url}/pcb/load-altium-export",

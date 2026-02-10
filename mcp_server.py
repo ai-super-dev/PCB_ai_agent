@@ -157,17 +157,18 @@ class AltiumMCPServer:
             import traceback
             return {"error": f"{str(e)}\n{traceback.format_exc()}"}
     
-    def load_from_altium_export(self, pcb_info_path: str = None, drc_report_path: str = None) -> dict:
+    def load_from_altium_export(self, pcb_info_path: str = None) -> dict:
         """
         Load from Altium-exported JSON files.
         
         This uses REAL data exported by running scripts inside Altium Designer:
         - pcb_info.json: From exportPCBInfo.pas
-        - verification_report.json: From runDRC.pas
+        
+        Note: DRC violations are computed by the Python DRC engine via run_drc(),
+        not loaded from pre-existing files.
         
         Args:
             pcb_info_path: Path to pcb_info.json (default: project folder)
-            drc_report_path: Path to verification_report.json (optional)
             
         Returns:
             dict with loaded data and analysis
@@ -193,11 +194,6 @@ class AltiumMCPServer:
                         pcb_info_path = base_path / "pcb_info.json"
             else:
                 pcb_info_path = Path(pcb_info_path)
-            
-            if drc_report_path is None:
-                drc_report_path = base_path / "verification_report.json"
-            else:
-                drc_report_path = Path(drc_report_path)
             
             # Load PCB info
             if not pcb_info_path.exists():
@@ -238,26 +234,6 @@ class AltiumMCPServer:
             # Auto-analyze
             analysis = self._auto_analyze_pcb(gir, stats)
             
-            # Load DRC violations if available
-            drc_violations = []
-            if drc_report_path.exists():
-                try:
-                    with open(drc_report_path, 'r', encoding='utf-8') as f:
-                        drc_data = json.load(f)
-                    drc_violations = drc_data.get('violations', [])
-                    
-                    # Add Altium DRC violations to analysis
-                    for viol in drc_violations:
-                        analysis['issues'].append({
-                            "severity": viol.get('severity', 'error'),
-                            "type": "altium_drc",
-                            "message": viol.get('description', viol.get('rule', 'DRC Violation')),
-                            "rule": viol.get('rule', 'Unknown'),
-                            "location": viol.get('location', {})
-                        })
-                except Exception as e:
-                    print(f"Warning: Could not load DRC report: {e}")
-            
             return {
                 "success": True,
                 "source": "altium_designer" if source == "altium_designer" else "python_file_reader",
@@ -266,8 +242,7 @@ class AltiumMCPServer:
                 "version": board.version,
                 "statistics": stats,
                 "analysis": analysis,
-                "drc_violations": len(drc_violations),
-                "message": f"Loaded from Altium export: {pcb_data.get('file_name', 'Unknown')}"
+                "message": f"Loaded from Altium export: {pcb_data.get('file_name', 'Unknown')}. Use /drc/run to compute DRC violations with Python engine."
             }
             
         except Exception as e:
@@ -1244,15 +1219,15 @@ class AltiumMCPServer:
                     }
                 ]
             
-                # Prepare PCB data for DRC engine (need full data, not samples)
-                pcb_data = {
-                    "tracks": raw_data.get('tracks', []),
-                    "vias": raw_data.get('vias', []),
-                    "pads": raw_data.get('pads', []),
-                    "nets": raw_data.get('nets', []),
-                    "components": raw_data.get('components', []),
-                    "polygons": raw_data.get('polygons', [])  # Now includes polygon/pour data
-                }
+            # Prepare PCB data for DRC engine (need full data, not samples)
+            pcb_data = {
+                "tracks": raw_data.get('tracks', []),
+                "vias": raw_data.get('vias', []),
+                "pads": raw_data.get('pads', []),
+                "nets": raw_data.get('nets', []),
+                "components": raw_data.get('components', []),
+                "polygons": raw_data.get('polygons', [])  # Now includes polygon/pour data
+            }
             
             # Run Python DRC engine
             from runtime.drc.python_drc_engine import PythonDRCEngine
@@ -1728,9 +1703,8 @@ class MCPRequestHandler(BaseHTTPRequestHandler):
         elif path == "/pcb/load-altium-export":
             # Load from Altium-exported JSON files
             pcb_info_path = data.get("pcb_info_path")  # Optional, defaults to pcb_info.json
-            drc_report_path = data.get("drc_report_path")  # Optional
             
-            result = mcp_server.load_from_altium_export(pcb_info_path, drc_report_path)
+            result = mcp_server.load_from_altium_export(pcb_info_path)
             self._send_json(result)
         
         elif path == "/routing/route":

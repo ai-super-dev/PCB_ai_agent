@@ -341,6 +341,36 @@ class PythonDRCEngine:
                 rule.allow_shelved_polygon = rule_dict.get('allow_shelved', False)
             elif rule_type == 'net_antennae':
                 rule.net_antennae_tolerance_mm = rule_dict.get('tolerance_mm', 0.0)
+            elif rule_type == 'diff_pairs_routing':
+                rule.diff_min_width_mm = rule_dict.get('min_width_mm', rule_dict.get('diff_min_width_mm', 0.1))
+                rule.diff_max_width_mm = rule_dict.get('max_width_mm', rule_dict.get('diff_max_width_mm', 0.3))
+                rule.diff_preferred_width_mm = rule_dict.get('preferred_width_mm', rule_dict.get('diff_preferred_width_mm', 0.2))
+                rule.diff_min_gap_mm = rule_dict.get('min_gap_mm', rule_dict.get('diff_min_gap_mm', 0.1))
+                rule.diff_max_gap_mm = rule_dict.get('max_gap_mm', rule_dict.get('diff_max_gap_mm', 0.3))
+                rule.diff_preferred_gap_mm = rule_dict.get('preferred_gap_mm', rule_dict.get('diff_preferred_gap_mm', 0.2))
+                rule.diff_max_uncoupled_length_mm = rule_dict.get('max_uncoupled_length_mm', 0.0)
+            elif rule_type == 'routing_topology':
+                rule.topology_type = rule_dict.get('topology', rule_dict.get('topology_type', 'Shortest'))
+            elif rule_type in ['routing_via_style', 'via_style']:
+                rule.via_style = rule_dict.get('via_style', 'Through Hole')
+                rule.min_via_diameter_mm = rule_dict.get('min_via_diameter_mm', 0.5)
+                rule.max_via_diameter_mm = rule_dict.get('max_via_diameter_mm', 1.0)
+                rule.preferred_via_diameter_mm = rule_dict.get('preferred_via_diameter_mm', 0.7)
+            elif rule_type == 'routing_corners':
+                rule.corner_style = rule_dict.get('corner_style', '45 Degrees')
+                rule.min_setback_mm = rule_dict.get('min_setback_mm', 0.0)
+                rule.max_setback_mm = rule_dict.get('max_setback_mm', 0.0)
+            elif rule_type == 'routing_layers':
+                rule.allowed_layers = rule_dict.get('allowed_layers', [])
+                rule.restricted_layers = rule_dict.get('restricted_layers', [])
+            elif rule_type == 'routing_priority':
+                rule.priority_value = rule_dict.get('priority_value', rule_dict.get('priority', 0))
+            elif rule_type == 'plane_connect':
+                rule.plane_connect_style = rule_dict.get('plane_connect_style', 'Relief Connect')
+                rule.plane_expansion_mm = rule_dict.get('plane_expansion_mm', 0.508)
+                rule.plane_conductor_width_mm = rule_dict.get('plane_conductor_width_mm', 0.254)
+                rule.plane_air_gap_mm = rule_dict.get('plane_air_gap_mm', 0.254)
+                rule.plane_entries = rule_dict.get('plane_entries', 4)
             
             drc_rules.append(rule)
         
@@ -997,6 +1027,387 @@ class PythonDRCEngine:
                         location={"x_mm": p2[0], "y_mm": p2[1]},
                         net_name=net_name
                     ))
+    
+    def _are_segments_parallel(self, seg1: Tuple[float, float, float, float], 
+                               seg2: Tuple[float, float, float, float], 
+                               tolerance: float = 0.01) -> bool:
+        """Check if two line segments are parallel"""
+        x1, y1, x2, y2 = seg1
+        x3, y3, x4, y4 = seg2
+        
+        # Calculate direction vectors
+        dx1 = x2 - x1
+        dy1 = y2 - y1
+        dx2 = x4 - x3
+        dy2 = y4 - y3
+        
+        # Check if vectors are parallel (cross product near zero)
+        cross = dx1 * dy2 - dy1 * dx2
+        return abs(cross) < tolerance
+    
+    def _calculate_segment_gap(self, seg1: Tuple[float, float, float, float], 
+                               seg2: Tuple[float, float, float, float]) -> float:
+        """Calculate minimum gap between two parallel segments"""
+        x1, y1, x2, y2 = seg1
+        x3, y3, x4, y4 = seg2
+        
+        # For parallel segments, calculate perpendicular distance
+        # Simplified: use midpoint distance minus half widths
+        mid1_x = (x1 + x2) / 2
+        mid1_y = (y1 + y2) / 2
+        mid2_x = (x3 + x4) / 2
+        mid2_y = (y3 + y4) / 2
+        
+        distance = math.sqrt((mid2_x - mid1_x)**2 + (mid2_y - mid1_y)**2)
+        return distance
+    
+    def _check_differential_pairs(self, rule: DRCRule, tracks: List[Dict], nets: List[Dict]):
+        """Check differential pair routing constraints"""
+        # Identify differential pair nets (typically named with _P/_N or +/- suffixes)
+        diff_pairs = {}
+        for net in nets:
+            net_name = net.get('name', '')
+            if not net_name:
+                continue
+            
+            # Try to find pair partner
+            base_name = net_name.rstrip('_P').rstrip('_N').rstrip('+').rstrip('-')
+            if base_name != net_name:
+                if base_name not in diff_pairs:
+                    diff_pairs[base_name] = []
+                diff_pairs[base_name].append(net_name)
+        
+        # Check tracks for each differential pair
+        for base_name, pair_nets in diff_pairs.items():
+            if len(pair_nets) != 2:
+                continue
+            
+            net1, net2 = pair_nets[0], pair_nets[1]
+            tracks1 = [t for t in tracks if t.get('net', '') == net1]
+            tracks2 = [t for t in tracks if t.get('net', '') == net2]
+            
+            # Check width constraints
+            for track in tracks1 + tracks2:
+                width = track.get('width_mm', 0)
+                if width > 0:
+                    if width < rule.diff_min_width_mm:
+                        loc = self._safe_get_location(track)
+                        self.violations.append(DRCViolation(
+                            rule_name=rule.name,
+                            rule_type="diff_pairs_routing",
+                            severity="error",
+                            message=f"Differential pair track width {width:.3f}mm < minimum {rule.diff_min_width_mm}mm",
+                            location=loc,
+                            actual_value=width,
+                            required_value=rule.diff_min_width_mm,
+                            net_name=track.get('net', '')
+                        ))
+                    elif width > rule.diff_max_width_mm:
+                        loc = self._safe_get_location(track)
+                        self.violations.append(DRCViolation(
+                            rule_name=rule.name,
+                            rule_type="diff_pairs_routing",
+                            severity="error",
+                            message=f"Differential pair track width {width:.3f}mm > maximum {rule.diff_max_width_mm}mm",
+                            location=loc,
+                            actual_value=width,
+                            required_value=rule.diff_max_width_mm,
+                            net_name=track.get('net', '')
+                        ))
+            
+            # Check gap between parallel segments
+            for track1 in tracks1:
+                segs1 = self._get_track_segments(track1)
+                for track2 in tracks2:
+                    segs2 = self._get_track_segments(track2)
+                    for seg1 in segs1:
+                        for seg2 in segs2:
+                            if self._are_segments_parallel(seg1, seg2):
+                                gap = self._calculate_segment_gap(seg1, seg2)
+                                if gap < rule.diff_min_gap_mm:
+                                    x1, y1, x2, y2 = seg1
+                                    self.violations.append(DRCViolation(
+                                        rule_name=rule.name,
+                                        rule_type="diff_pairs_routing",
+                                        severity="error",
+                                        message=f"Differential pair gap {gap:.3f}mm < minimum {rule.diff_min_gap_mm}mm",
+                                        location={"x_mm": (x1 + x2) / 2, "y_mm": (y1 + y2) / 2},
+                                        actual_value=gap,
+                                        required_value=rule.diff_min_gap_mm,
+                                        net_name=f"{net1}/{net2}"
+                                    ))
+                                elif gap > rule.diff_max_gap_mm:
+                                    x1, y1, x2, y2 = seg1
+                                    self.violations.append(DRCViolation(
+                                        rule_name=rule.name,
+                                        rule_type="diff_pairs_routing",
+                                        severity="warning",
+                                        message=f"Differential pair gap {gap:.3f}mm > maximum {rule.diff_max_gap_mm}mm",
+                                        location={"x_mm": (x1 + x2) / 2, "y_mm": (y1 + y2) / 2},
+                                        actual_value=gap,
+                                        required_value=rule.diff_max_gap_mm,
+                                        net_name=f"{net1}/{net2}"
+                                    ))
+    
+    def _check_routing_topology(self, rule: DRCRule, nets: List[Dict], tracks: List[Dict], 
+                               pads: List[Dict], vias: List[Dict]):
+        """Check routing topology constraints"""
+        # This is a complex check that requires graph analysis
+        # For now, we'll do a basic validation that routing exists
+        # Full topology validation would require building connectivity graphs
+        # and checking against topology types (Shortest, Daisy-Simple, etc.)
+        
+        # Basic check: ensure nets have routing if topology is specified
+        for net in nets:
+            net_name = net.get('name', '')
+            if not net_name or net_name == 'No Net':
+                continue
+            
+            # Check if net has tracks
+            net_tracks = [t for t in tracks if t.get('net', '') == net_name]
+            net_pads = [p for p in pads if p.get('net', '') == net_name]
+            
+            # If net has multiple pads but no tracks, topology might be violated
+            if len(net_pads) > 1 and len(net_tracks) == 0:
+                # This is more of an unrouted net issue, but we'll log it as topology warning
+                self.warnings.append(DRCViolation(
+                    rule_name=rule.name,
+                    rule_type="routing_topology",
+                    severity="warning",
+                    message=f"Net '{net_name}' has no routing - topology '{rule.topology_type}' cannot be validated",
+                    location={},
+                    net_name=net_name
+                ))
+    
+    def _check_via_style(self, rule: DRCRule, vias: List[Dict]):
+        """Check via style constraints"""
+        for via in vias:
+            via_style = via.get('style', 'Through Hole')
+            hole_size = via.get('hole_size_mm', 0)
+            diameter = via.get('diameter_mm', 0)
+            
+            # Check if via style matches rule
+            if rule.via_style != "Any" and via_style != rule.via_style:
+                loc = self._safe_get_location(via)
+                self.violations.append(DRCViolation(
+                    rule_name=rule.name,
+                    rule_type="routing_via_style",
+                    severity="error",
+                    message=f"Via style '{via_style}' does not match required '{rule.via_style}'",
+                    location=loc,
+                    objects=[via.get('net', '')]
+                ))
+            
+            # Check diameter constraints
+            if diameter > 0:
+                if diameter < rule.min_via_diameter_mm:
+                    loc = self._safe_get_location(via)
+                    self.violations.append(DRCViolation(
+                        rule_name=rule.name,
+                        rule_type="routing_via_style",
+                        severity="error",
+                        message=f"Via diameter {diameter:.3f}mm < minimum {rule.min_via_diameter_mm}mm",
+                        location=loc,
+                        actual_value=diameter,
+                        required_value=rule.min_via_diameter_mm
+                    ))
+                elif diameter > rule.max_via_diameter_mm:
+                    loc = self._safe_get_location(via)
+                    self.violations.append(DRCViolation(
+                        rule_name=rule.name,
+                        rule_type="routing_via_style",
+                        severity="error",
+                        message=f"Via diameter {diameter:.3f}mm > maximum {rule.max_via_diameter_mm}mm",
+                        location=loc,
+                        actual_value=diameter,
+                        required_value=rule.max_via_diameter_mm
+                    ))
+    
+    def _calculate_corner_angle(self, seg1: Tuple[float, float, float, float], 
+                                seg2: Tuple[float, float, float, float]) -> float:
+        """Calculate angle between two connected segments"""
+        x1, y1, x2, y2 = seg1
+        x3, y3, x4, y4 = seg2
+        
+        # Check if segments are connected
+        connected = False
+        if abs(x2 - x3) < 0.01 and abs(y2 - y3) < 0.01:
+            connected = True
+            # seg1 ends where seg2 starts
+            dir1 = (x2 - x1, y2 - y1)
+            dir2 = (x4 - x3, y4 - y3)
+        elif abs(x2 - x4) < 0.01 and abs(y2 - y4) < 0.01:
+            connected = True
+            # seg1 ends where seg2 ends
+            dir1 = (x2 - x1, y2 - y1)
+            dir2 = (x3 - x4, y3 - y4)
+        elif abs(x1 - x3) < 0.01 and abs(y1 - y3) < 0.01:
+            connected = True
+            # seg1 starts where seg2 starts
+            dir1 = (x2 - x1, y2 - y1)
+            dir2 = (x4 - x3, y4 - y3)
+        elif abs(x1 - x4) < 0.01 and abs(y1 - y4) < 0.01:
+            connected = True
+            # seg1 starts where seg2 ends
+            dir1 = (x2 - x1, y2 - y1)
+            dir2 = (x3 - x4, y3 - y4)
+        
+        if not connected:
+            return None
+        
+        # Calculate angle between direction vectors
+        dot = dir1[0] * dir2[0] + dir1[1] * dir2[1]
+        mag1 = math.sqrt(dir1[0]**2 + dir1[1]**2)
+        mag2 = math.sqrt(dir2[0]**2 + dir2[1]**2)
+        
+        if mag1 == 0 or mag2 == 0:
+            return None
+        
+        cos_angle = dot / (mag1 * mag2)
+        cos_angle = max(-1.0, min(1.0, cos_angle))  # Clamp to valid range
+        angle_rad = math.acos(cos_angle)
+        angle_deg = math.degrees(angle_rad)
+        
+        return angle_deg
+    
+    def _check_routing_corners(self, rule: DRCRule, tracks: List[Dict]):
+        """Check routing corner style constraints"""
+        for track in tracks:
+            segments = self._get_track_segments(track)
+            
+            # Check angles between consecutive segments
+            for i in range(len(segments) - 1):
+                seg1 = segments[i]
+                seg2 = segments[i + 1]
+                angle = self._calculate_corner_angle(seg1, seg2)
+                
+                if angle is None:
+                    continue
+                
+                # Check against corner style
+                if rule.corner_style == "45 Degrees":
+                    # Allow 45, 90, 135 degrees (common routing angles)
+                    if angle not in [45.0, 90.0, 135.0, 180.0]:
+                        # Allow small tolerance
+                        if not (44.0 <= angle <= 46.0 or 89.0 <= angle <= 91.0 or 
+                               134.0 <= angle <= 136.0 or 179.0 <= angle <= 181.0):
+                            x1, y1, x2, y2 = seg1
+                            self.violations.append(DRCViolation(
+                                rule_name=rule.name,
+                                rule_type="routing_corners",
+                                severity="error",
+                                message=f"Corner angle {angle:.1f}° does not match 45-degree style",
+                                location={"x_mm": x2, "y_mm": y2},
+                                actual_value=angle,
+                                required_value=45.0,
+                                net_name=track.get('net', '')
+                            ))
+                elif rule.corner_style == "90 Degrees":
+                    # Only allow 90 degrees
+                    if not (89.0 <= angle <= 91.0 or 179.0 <= angle <= 181.0):
+                        x1, y1, x2, y2 = seg1
+                        self.violations.append(DRCViolation(
+                            rule_name=rule.name,
+                            rule_type="routing_corners",
+                            severity="error",
+                            message=f"Corner angle {angle:.1f}° does not match 90-degree style",
+                            location={"x_mm": x2, "y_mm": y2},
+                            actual_value=angle,
+                            required_value=90.0,
+                            net_name=track.get('net', '')
+                        ))
+                # "Rounded" and "Any Angle" don't need strict validation
+    
+    def _check_routing_layers(self, rule: DRCRule, tracks: List[Dict]):
+        """Check routing layer constraints"""
+        allowed_layers = rule.allowed_layers or []
+        restricted_layers = rule.restricted_layers or []
+        
+        for track in tracks:
+            layer = track.get('layer', '')
+            if not layer:
+                continue
+            
+            # Check if layer is in restricted list
+            if restricted_layers and layer in restricted_layers:
+                loc = self._safe_get_location(track)
+                self.violations.append(DRCViolation(
+                    rule_name=rule.name,
+                    rule_type="routing_layers",
+                    severity="error",
+                    message=f"Track on restricted layer '{layer}'",
+                    location=loc,
+                    net_name=track.get('net', '')
+                ))
+            
+            # Check if layer is in allowed list (if specified)
+            if allowed_layers and layer not in allowed_layers:
+                loc = self._safe_get_location(track)
+                self.violations.append(DRCViolation(
+                    rule_name=rule.name,
+                    rule_type="routing_layers",
+                    severity="error",
+                    message=f"Track on layer '{layer}' not in allowed list",
+                    location=loc,
+                    net_name=track.get('net', '')
+                ))
+    
+    def _check_routing_priority(self, rule: DRCRule, nets: List[Dict], tracks: List[Dict]):
+        """Check routing priority constraints"""
+        # Priority rules are typically informational/guidance rather than hard constraints
+        # We'll check if high-priority nets have routing
+        for net in nets:
+            net_name = net.get('name', '')
+            if not net_name:
+                continue
+            
+            net_priority = net.get('priority', 0)
+            if net_priority > 0 and net_priority >= rule.priority_value:
+                # High-priority net should have routing
+                net_tracks = [t for t in tracks if t.get('net', '') == net_name]
+                if len(net_tracks) == 0:
+                    self.warnings.append(DRCViolation(
+                        rule_name=rule.name,
+                        rule_type="routing_priority",
+                        severity="warning",
+                        message=f"High-priority net '{net_name}' (priority {net_priority}) has no routing",
+                        location={},
+                        net_name=net_name
+                    ))
+    
+    def _check_plane_connect(self, rule: DRCRule, pads: List[Dict], vias: List[Dict], 
+                            polygons: List[Dict]):
+        """Check power plane connection style constraints"""
+        # This checks if pads/vias connected to power planes follow the specified connection style
+        # Connection styles: Relief Connect, Direct Connect, No Connect
+        
+        for polygon in polygons:
+            if not polygon.get('is_pour', False):
+                continue
+            
+            polygon_net = polygon.get('net', '')
+            if not polygon_net:
+                continue
+            
+            # Check pads connected to this plane
+            for pad in pads:
+                pad_net = pad.get('net', '')
+                if pad_net == polygon_net:
+                    # Check if pad has proper connection style
+                    # This would require checking pad connection properties
+                    # For now, we'll just validate that connection exists
+                    pass
+            
+            # Check vias connected to this plane
+            for via in vias:
+                via_net = via.get('net', '')
+                if via_net == polygon_net:
+                    # Check via connection style
+                    # This would require checking via connection properties
+                    pass
+        
+        # Note: Full implementation would require checking actual connection geometry
+        # and comparing against rule.plane_connect_style, rule.plane_expansion_mm, etc.
     
     def _violation_to_dict(self, violation: DRCViolation) -> Dict[str, Any]:
         """Convert DRCViolation to dictionary"""
