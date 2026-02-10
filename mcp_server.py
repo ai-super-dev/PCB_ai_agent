@@ -15,6 +15,7 @@ import os
 import time
 import threading
 from pathlib import Path
+from typing import Any, Dict, List, Optional
 
 # Import our modules
 from tools.altium_file_reader import AltiumFileReader
