@@ -429,21 +429,10 @@ class AltiumMCPClient:
             return None
     
     def get_verification_report(self) -> Optional[Dict[str, Any]]:
-        """Get verification (DRC/ERC) report"""
-        if not self.connected:
-            return None
-        
-        try:
-            response = self.session.get(
-                f"{self.server_url}/altium/verification/report",
-                timeout=MCP_TIMEOUT
-            )
-            if response.status_code == 200:
-                return response.json()
-            return None
-        except Exception as e:
-            print(f"Error getting verification report: {e}")
-            return None
+        """Get verification (DRC/ERC) report - DEPRECATED: Use run_drc() instead"""
+        # This endpoint doesn't exist - use run_drc() instead
+        print("Warning: get_verification_report() is deprecated. Use run_drc() instead.")
+        return None
     
     def get_output_result(self) -> Optional[Dict[str, Any]]:
         """Get output generation result"""

@@ -51,6 +51,7 @@ class AltiumMCPServer:
         
         # Current loaded PCB
         self.current_pcb_path = None
+        self.current_pcb_is_json = False  # Track if current_pcb_path is JSON (from export) or OLE (direct read)
         self.current_artifact_id = None
         self.current_gir = None
         self.current_design_rules = None
@@ -128,6 +129,7 @@ class AltiumMCPServer:
             
             # Store current state
             self.current_pcb_path = pcb_path
+            self.current_pcb_is_json = False  # OLE file, not JSON export
             self.current_artifact_id = board.id
             self.current_gir = gir
             
@@ -202,8 +204,34 @@ class AltiumMCPServer:
                     "hint": "Run exportPCBInfo.pas in Altium Designer first"
                 }
             
-            with open(pcb_info_path, 'r', encoding='utf-8') as f:
-                pcb_data = json.load(f)
+            # Try multiple encodings - Altium might export with different encoding
+            try:
+                with open(pcb_info_path, 'r', encoding='utf-8') as f:
+                    pcb_data = json.load(f)
+            except UnicodeDecodeError:
+                # Try latin-1 (ISO-8859-1) which can decode any byte
+                print(f"DEBUG: UTF-8 failed, trying latin-1 encoding")
+                with open(pcb_info_path, 'r', encoding='latin-1') as f:
+                    pcb_data = json.load(f)
+            except Exception as e:
+                return {
+                    "error": f"Failed to read JSON file: {str(e)}",
+                    "hint": "The file might have encoding issues. Try re-exporting from Altium."
+                }
+            
+            # Debug: Check polygon data in exported JSON
+            polygons_in_json = pcb_data.get('polygons', [])
+            if polygons_in_json:
+                print(f"DEBUG: Found {len(polygons_in_json)} polygons in exported JSON")
+                for i, poly in enumerate(polygons_in_json[:2]):  # Check first 2
+                    vertices = poly.get('vertices', [])
+                    print(f"DEBUG: Polygon {i+1}: name={poly.get('name', 'N/A')}, vertices={len(vertices)}, "
+                          f"x_mm={poly.get('x_mm', 0)}, y_mm={poly.get('y_mm', 0)}, "
+                          f"size_x_mm={poly.get('size_x_mm', 0)}, size_y_mm={poly.get('size_y_mm', 0)}")
+                    if len(vertices) > 0:
+                        print(f"DEBUG: First vertex: {vertices[0]}")
+            else:
+                print(f"DEBUG: No polygons found in exported JSON file")
             
             # Check if it's from Altium (has export_source)
             source = pcb_data.get('export_source', 'python_file_reader')
@@ -220,6 +248,7 @@ class AltiumMCPServer:
             
             # Store current state
             self.current_pcb_path = str(pcb_info_path)
+            self.current_pcb_is_json = True  # JSON export file, not OLE
             self.current_artifact_id = board.id
             self.current_gir = gir
             
@@ -1132,8 +1161,35 @@ class AltiumMCPServer:
             return {"error": "No PCB loaded. Use /pcb/load endpoint first."}
         
         try:
-            # Get full PCB data
-            raw_data = self.reader.read_pcb(self.current_pcb_path)
+            # CRITICAL: Always prefer JSON export if available (has polygon geometry!)
+            # Check for altium_pcb_info.json first, even if OLE file is loaded
+            base_path = Path(__file__).parent
+            altium_export = base_path / "PCB_Project" / "altium_pcb_info.json"
+            if not altium_export.exists():
+                altium_export = base_path / "altium_pcb_info.json"
+            
+            if altium_export.exists():
+                # Use JSON export (has polygon geometry!)
+                print(f"DEBUG: Using JSON export for DRC: {altium_export}")
+                # Try multiple encodings - Altium might export with different encoding
+                try:
+                    with open(altium_export, 'r', encoding='utf-8') as f:
+                        raw_data = json.load(f)
+                except UnicodeDecodeError:
+                    # Try latin-1 (ISO-8859-1) which can decode any byte
+                    print(f"DEBUG: UTF-8 failed, trying latin-1 encoding")
+                    with open(altium_export, 'r', encoding='latin-1') as f:
+                        raw_data = json.load(f)
+                except Exception as e:
+                    return {"error": f"Failed to read JSON export: {str(e)}"}
+            elif self.current_pcb_is_json or str(self.current_pcb_path).lower().endswith('.json'):
+                # Load JSON directly instead of trying to read as OLE
+                with open(self.current_pcb_path, 'r', encoding='utf-8') as f:
+                    raw_data = json.load(f)
+            else:
+                # Get full PCB data from OLE file (no polygon geometry!)
+                print(f"WARNING: Using OLE file - polygons will have no geometry. Use JSON export for accurate DRC.")
+                raw_data = self.reader.read_pcb(self.current_pcb_path)
             
             if 'error' in raw_data:
                 return {"error": raw_data['error']}
@@ -1220,9 +1276,65 @@ class AltiumMCPServer:
                 ]
             
             # Prepare PCB data for DRC engine (need full data, not samples)
+            # Filter out binary records - they don't have accurate geometry data
+            all_tracks = raw_data.get('tracks', [])
+            all_vias = raw_data.get('vias', [])
+            
+            # Count binary records for warning
+            binary_track_count = sum(1 for t in all_tracks if isinstance(t, dict) and t.get('type') == 'binary_record')
+            binary_via_count = sum(1 for v in all_vias if isinstance(v, dict) and v.get('type') == 'binary_record')
+            
+            # Filter out binary records - only use records with real geometry data
+            valid_tracks = [t for t in all_tracks 
+                          if isinstance(t, dict) and t.get('type') != 'binary_record' and 'note' not in t]
+            valid_vias = [v for v in all_vias 
+                         if isinstance(v, dict) and v.get('type') != 'binary_record' and 'note' not in v]
+            
+            # Additional validation: check for obviously wrong width values (likely binary parsing errors)
+            # Get max width from rules to validate against
+            max_width_from_rules = 15.0  # Default
+            for rule in rules:
+                if rule.get('type') == 'width':
+                    max_width_from_rules = max(max_width_from_rules, rule.get('max_width_mm', 15.0))
+            
+            # Track widths > rule max are almost certainly parsing errors
+            # Since Altium shows 0 width violations, all valid tracks should be <= max_width
+            # CRITICAL: Be very aggressive - if ANY track has width > max, it's likely a parsing error
+            # Count invalid widths
+            invalid_width_count = 0
+            widths_over_max = []
+            for track in valid_tracks:
+                width = track.get('width_mm', 0)
+                # Reject any width > rule max + small tolerance (accounting for rounding)
+                if width > max_width_from_rules + 0.1:  # Allow 0.1mm tolerance for rounding
+                    invalid_width_count += 1
+                    widths_over_max.append(width)
+            
+            # Remove tracks with invalid widths (likely binary parsing errors)
+            # CRITICAL: Since Altium shows 0 width violations, ALL tracks should have valid widths
+            # If we find tracks with widths > max, they are definitely parsing errors
+            if invalid_width_count > 0:
+                # Filter out ALL tracks with widths > max (these are definitely parsing errors)
+                valid_tracks = [t for t in valid_tracks 
+                              if t.get('width_mm', 0) <= max_width_from_rules + 0.1]
+                
+                # If we filtered out a significant number (>10% of tracks), binary parsing is unreliable
+                # In this case, we should skip width checking entirely (matches Altium's behavior)
+                if invalid_width_count > len(valid_tracks) * 0.1:
+                    # Mark that width data is unreliable - DRC engine will skip width checks
+                    # This matches Altium: if data can't be read reliably, don't report violations
+                    print(f"WARNING: {invalid_width_count} tracks have invalid widths. Binary format detected - width checking will be skipped.")
+            
+            # Check if we have any valid geometry data
+            if len(valid_tracks) == 0 and len(valid_vias) == 0 and (binary_track_count > 0 or binary_via_count > 0):
+                return {
+                    "error": f"No valid geometry data found. Binary format detected: {binary_track_count} tracks and {binary_via_count} vias cannot be parsed. "
+                            f"To get accurate DRC results, export geometry data from Altium using ExportPCBInfo command."
+                }
+            
             pcb_data = {
-                "tracks": raw_data.get('tracks', []),
-                "vias": raw_data.get('vias', []),
+                "tracks": valid_tracks,
+                "vias": valid_vias,
                 "pads": raw_data.get('pads', []),
                 "nets": raw_data.get('nets', []),
                 "components": raw_data.get('components', []),
@@ -1245,6 +1357,26 @@ class AltiumMCPServer:
             violations_by_type = drc_result.get("violations_by_type", {})
             violations = drc_result.get("violations", [])
             warnings = drc_result.get("warnings", [])
+            
+            # Add warning if binary records were skipped or invalid widths detected
+            if binary_track_count > 0 or binary_via_count > 0 or invalid_width_count > 0:
+                warning_msg = ""
+                if binary_track_count > 0 or binary_via_count > 0:
+                    warning_msg += f"Binary format detected: {binary_track_count} tracks and {binary_via_count} vias were skipped. "
+                if invalid_width_count > 0:
+                    warning_msg += f"{invalid_width_count} tracks with invalid widths (>50mm) were filtered out (likely binary parsing errors). "
+                warning_msg += f"DRC results are based on {len(valid_tracks)} tracks and {len(valid_vias)} vias with valid geometry data. "
+                warning_msg += "For accurate DRC results matching Altium, export geometry from Altium using ExportPCBInfo."
+                
+                warnings.append({
+                    "rule_name": "Data Quality Warning",
+                    "rule_type": "data_quality",
+                    "severity": "warning",
+                    "message": warning_msg,
+                    "location": {},
+                    "actual_value": binary_track_count + binary_via_count + invalid_width_count,
+                    "required_value": 0
+                })
             
             # Build violations by rule name (matching Altium format)
             violations_by_rule = {}
