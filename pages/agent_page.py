@@ -1377,15 +1377,6 @@ Chat with me to:
                         
                         msg += "---\n\n"
                         
-                        # Python DRC Engine Information with better formatting
-                        msg += "## 🔧 Python DRC Engine Information\n\n"
-                        
-                        # Summary stats in a clean box format
-                        msg += "| **Metric** | **Value** |\n"
-                        msg += "|:-----------|----------:|\n"
-                        msg += f"| Total Design Rules Found | **{total_rules}** |\n"
-                        msg += f"| Rules Checked by Python DRC | **{rules_checked_count}** |\n\n"
-                        
                         if python_checked_rules:
                             msg += "### 📋 Rules Currently Checked\n\n"
                             
@@ -1474,11 +1465,6 @@ Chat with me to:
                             msg += f"| {feature} | {desc} |\n"
                         
                         msg += "\n"
-                        
-                        if total_rules > rules_checked_count:
-                            msg += "---\n\n"
-                            msg += f"> ⚠️ **Note:** **{total_rules - rules_checked_count}** rule(s) found in PCB are not yet fully implemented.\n"
-                            msg += "> These rules appear in the table above but may have limited validation.\n\n"
                         
                         if summary.get("passed", False):
                             msg += "✅ **All checks passed!** No violations or warnings detected.\n\n"
