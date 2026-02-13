@@ -945,6 +945,44 @@ class AltiumFileReader:
                     # Extract scope for clearance rules
                     rule["scope1"] = scope1_expr if scope1_expr else "All"
                     rule["scope2"] = scope2_expr if scope2_expr else "All"
+                    
+                    # Extract polygon name from scope expression (e.g., "InNamedPolygon('LB')" -> "LB")
+                    if scope1_expr and "InNamedPolygon" in scope1_expr:
+                        match = re.search(r"InNamedPolygon\(['\"]([^'\"]+)['\"]\)", scope1_expr)
+                        if match:
+                            rule["scope1_polygon"] = match.group(1)
+                    
+                    # CRITICAL: Parse OBJECTCLEARANCES for per-object-type clearances
+                    # Altium allows different clearances for different object type pairs
+                    # e.g., Track-to-Poly might be 60mil even if generic clearance is 7.874mil
+                    # Format: "ClearanceObj_Track-ClearanceObj_Poly:600000;..."
+                    obj_clearances_str = pairs.get('OBJECTCLEARANCES', '')
+                    if obj_clearances_str:
+                        obj_clearances = {}
+                        # Clean up binary garbage at end
+                        clean_str = obj_clearances_str.split('\x00')[0]
+                        for pair_str in clean_str.split(';'):
+                            if ':' in pair_str:
+                                obj_pair, val_str = pair_str.rsplit(':', 1)
+                                try:
+                                    val_internal = float(val_str)
+                                    val_mm = round(val_internal * self.UNITS_TO_MM, 4)
+                                    obj_clearances[obj_pair] = val_mm
+                                except (ValueError, TypeError):
+                                    pass
+                        if obj_clearances:
+                            rule["object_clearances"] = obj_clearances
+                            # Extract key clearances for DRC
+                            track_to_poly = obj_clearances.get('ClearanceObj_Track-ClearanceObj_Poly', 0)
+                            if track_to_poly > 0:
+                                rule["track_to_poly_clearance_mm"] = track_to_poly
+                            pad_to_poly = obj_clearances.get('ClearanceObj_SMDPad-ClearanceObj_Poly', 0) or \
+                                         obj_clearances.get('ClearanceObj_THPad-ClearanceObj_Poly', 0)
+                            if pad_to_poly > 0:
+                                rule["pad_to_poly_clearance_mm"] = pad_to_poly
+                            via_to_poly = obj_clearances.get('ClearanceObj_Via-ClearanceObj_Poly', 0)
+                            if via_to_poly > 0:
+                                rule["via_to_poly_clearance_mm"] = via_to_poly
                 elif 'ROUTINGVIAS' in rule_kind_upper or 'VIASTYLE' in rule_kind_upper:
                     # Routing Via Style rules - Altium uses HOLEWIDTH, WIDTH, MINHOLEWIDTH, MINWIDTH, MAXHOLEWIDTH, MAXWIDTH
                     rule["min_hole_mm"] = self._convert_coord(pairs.get('MINHOLEWIDTH', '0') or pairs.get('MINHOLE', '0'))

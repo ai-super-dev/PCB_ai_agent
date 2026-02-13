@@ -401,12 +401,91 @@ class AltiumMCPServer:
             return {"error": str(e)}
     
     def _extract_design_rules(self, raw_data: dict) -> list:
-        """Extract design rules from raw PCB data"""
+        """Extract design rules from raw PCB data.
+        
+        CRITICAL: The JSON export from command_server.pas writes clearance_mm:0.0 
+        because DelphiScript can't read rule values. We must:
+        1. Read rules from JSON export (has names, types, scopes)
+        2. Merge actual values from OLE file reader (reads from Rules6/Data stream)
+        3. Fall back to defaults only if both fail
+        """
         rules = []
         
         # Get rules from export
         exported_rules = raw_data.get('rules', [])
+        
         if exported_rules:
+            # CRITICAL: Check if rules have 0.0 values OR missing per-object-type clearances
+            # (common with JSON export - DelphiScript can't read OBJECTCLEARANCES)
+            # If so, try to merge actual values from OLE PCB file
+            has_zero_values = any(
+                r.get('clearance_mm', -1) == 0.0 or 
+                r.get('min_width_mm', -1) == 0.0 or
+                (r.get('type') == 'clearance' and not r.get('track_to_poly_clearance_mm'))
+                for r in exported_rules if isinstance(r, dict)
+            )
+            
+            if has_zero_values:
+                # Try to get actual rule values from OLE file reader
+                pcb_file_path = raw_data.get('file_name', '')
+                if pcb_file_path:
+                    pcb_file_path = pcb_file_path.replace('\\', os.sep).replace('/', os.sep)
+                    if os.path.exists(pcb_file_path):
+                        try:
+                            pcb_data = self.reader.read_pcb(pcb_file_path)
+                            if pcb_data and 'rules' in pcb_data:
+                                file_rules = pcb_data['rules']
+                                file_lookup = {r.get('name', '').upper(): r for r in file_rules if isinstance(r, dict)}
+                                
+                                for rule in exported_rules:
+                                    if not isinstance(rule, dict):
+                                        continue
+                                    rule_name = rule.get('name', '').upper()
+                                    if rule_name in file_lookup:
+                                        fr = file_lookup[rule_name]
+                                        # Merge type
+                                        ft = fr.get('type', '')
+                                        if ft and ft != 'other':
+                                            rule['type'] = ft
+                                        # Merge clearance
+                                        if rule.get('clearance_mm', 0) == 0.0 and fr.get('clearance_mm', 0) > 0:
+                                            rule['clearance_mm'] = fr['clearance_mm']
+                                        # Merge width
+                                        if rule.get('min_width_mm', 0) == 0.0 and fr.get('min_width_mm', 0) > 0:
+                                            rule['min_width_mm'] = fr['min_width_mm']
+                                        if rule.get('max_width_mm', 0) == 0.0 and fr.get('max_width_mm', 0) > 0:
+                                            rule['max_width_mm'] = fr['max_width_mm']
+                                        if rule.get('preferred_width_mm', 0) == 0.0 and fr.get('preferred_width_mm', 0) > 0:
+                                            rule['preferred_width_mm'] = fr['preferred_width_mm']
+                                        # Merge hole size
+                                        if rule.get('min_hole_mm', 0) == 0.0 and fr.get('min_hole_mm', 0) > 0:
+                                            rule['min_hole_mm'] = fr['min_hole_mm']
+                                        if rule.get('max_hole_mm', 0) == 0.0 and fr.get('max_hole_mm', 0) > 0:
+                                            rule['max_hole_mm'] = fr['max_hole_mm']
+                                        # Merge gap
+                                        if rule.get('gap_mm', 0) == 0.0 and fr.get('gap_mm', 0) > 0:
+                                            rule['gap_mm'] = fr['gap_mm']
+                                        # Merge scope
+                                        if not rule.get('scope1') and fr.get('scope1'):
+                                            rule['scope1'] = fr['scope1']
+                                        if not rule.get('scope2') and fr.get('scope2'):
+                                            rule['scope2'] = fr['scope2']
+                                        # ALWAYS merge per-object-type clearances (critical for polygon-to-track DRC)
+                                        # These come from OBJECTCLEARANCES field in OLE binary, not available in JSON export
+                                        if fr.get('track_to_poly_clearance_mm', 0) > 0:
+                                            rule['track_to_poly_clearance_mm'] = fr['track_to_poly_clearance_mm']
+                                            if rule_name == 'CLEARANCE':
+                                                print(f"DEBUG: Merged track_to_poly_clearance_mm={fr['track_to_poly_clearance_mm']}mm for rule '{rule.get('name')}'")
+                                        if fr.get('pad_to_poly_clearance_mm', 0) > 0:
+                                            rule['pad_to_poly_clearance_mm'] = fr['pad_to_poly_clearance_mm']
+                                        if fr.get('via_to_poly_clearance_mm', 0) > 0:
+                                            rule['via_to_poly_clearance_mm'] = fr['via_to_poly_clearance_mm']
+                                        if fr.get('object_clearances'):
+                                            rule['object_clearances'] = fr['object_clearances']
+                                print(f"DEBUG: Merged rule values from OLE file into {len(exported_rules)} rules")
+                        except Exception as e:
+                            print(f"DEBUG: Failed to merge rule values from OLE: {e}")
+            
             return exported_rules
         
         # If no rules in export, try to get from Altium export file
@@ -1194,8 +1273,9 @@ class AltiumMCPServer:
             if 'error' in raw_data:
                 return {"error": raw_data['error']}
             
-            # Get design rules
-            rules = self.current_design_rules if self.current_design_rules else self._extract_design_rules(raw_data)
+            # Get design rules - ALWAYS extract fresh to ensure per-object-type clearances are merged
+            # (track_to_poly_clearance_mm comes from OLE binary, not JSON export)
+            rules = self._extract_design_rules(raw_data)
             
             # Ensure rules is a list (not tuple or other type)
             if not isinstance(rules, list):
