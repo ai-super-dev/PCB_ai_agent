@@ -1336,8 +1336,7 @@ Begin
     WriteLn(F, '],');
     
     // Fills (eFillObject - copper rectangles used for connections)
-    // Use Track variable for iteration — IPCB_Track has X1/Y1/X2/Y2 properties
-    // that are also present on IPCB_Fill objects at runtime
+    // Use Polygon variable + BoundingRectangle (works on all IPCB_Primitive objects)
     WriteLn(F, Q + 'fills' + Q + ':[');
     N := 0;
     Try
@@ -1345,24 +1344,24 @@ Begin
         Iter.AddFilter_ObjectSet(MkSet(eFillObject));
         Iter.AddFilter_LayerSet(AllLayers);
         
-        Track := Iter.FirstPCBObject;
-        While Track <> Nil Do
+        Polygon := Iter.FirstPCBObject;
+        While Polygon <> Nil Do
         Begin
             If N > 0 Then WriteLn(F, ',');
             NetName := '';
             Try
-                If Track.Net <> Nil Then NetName := Track.Net.Name;
+                If Polygon.Net <> Nil Then NetName := Polygon.Net.Name;
             Except
             End;
             
             WriteLn(F, Chr(123));
             WriteLn(F, Q + 'net' + Q + ':' + Q + NetName + Q + ',');
             Try
-                WriteLn(F, Q + 'layer' + Q + ':' + Q + Board.LayerName(Track.Layer) + Q + ',');
-                WriteLn(F, Q + 'x1_mm' + Q + ':' + FloatToStr(CoordToMMs(Track.X1)) + ',');
-                WriteLn(F, Q + 'y1_mm' + Q + ':' + FloatToStr(CoordToMMs(Track.Y1)) + ',');
-                WriteLn(F, Q + 'x2_mm' + Q + ':' + FloatToStr(CoordToMMs(Track.X2)) + ',');
-                WriteLn(F, Q + 'y2_mm' + Q + ':' + FloatToStr(CoordToMMs(Track.Y2)));
+                WriteLn(F, Q + 'layer' + Q + ':' + Q + Board.LayerName(Polygon.Layer) + Q + ',');
+                WriteLn(F, Q + 'x1_mm' + Q + ':' + FloatToStr(CoordToMMs(Polygon.BoundingRectangle.Left)) + ',');
+                WriteLn(F, Q + 'y1_mm' + Q + ':' + FloatToStr(CoordToMMs(Polygon.BoundingRectangle.Bottom)) + ',');
+                WriteLn(F, Q + 'x2_mm' + Q + ':' + FloatToStr(CoordToMMs(Polygon.BoundingRectangle.Right)) + ',');
+                WriteLn(F, Q + 'y2_mm' + Q + ':' + FloatToStr(CoordToMMs(Polygon.BoundingRectangle.Top)));
             Except
                 WriteLn(F, Q + 'layer' + Q + ':' + Q + '' + Q + ',');
                 WriteLn(F, Q + 'x1_mm' + Q + ':0,');
@@ -1372,7 +1371,7 @@ Begin
             End;
             Write(F, Chr(125));
             Inc(N);
-            Track := Iter.NextPCBObject;
+            Polygon := Iter.NextPCBObject;
         End;
         Board.BoardIterator_Destroy(Iter);
     Except
@@ -1380,7 +1379,7 @@ Begin
     WriteLn(F, '],');
     
     // Arcs (eArcObject - curved track segments)
-    // Use Track variable — arc start/end computed from bounding rect as fallback
+    // Use Polygon variable + BoundingRectangle for arc bounding box
     WriteLn(F, Q + 'arcs' + Q + ':[');
     N := 0;
     Try
@@ -1388,38 +1387,34 @@ Begin
         Iter.AddFilter_ObjectSet(MkSet(eArcObject));
         Iter.AddFilter_LayerSet(AllLayers);
         
-        Track := Iter.FirstPCBObject;
-        While Track <> Nil Do
+        Polygon := Iter.FirstPCBObject;
+        While Polygon <> Nil Do
         Begin
             If N > 0 Then WriteLn(F, ',');
             NetName := '';
             Try
-                If Track.Net <> Nil Then NetName := Track.Net.Name;
+                If Polygon.Net <> Nil Then NetName := Polygon.Net.Name;
             Except
             End;
             
             WriteLn(F, Chr(123));
             WriteLn(F, Q + 'net' + Q + ':' + Q + NetName + Q + ',');
             Try
-                WriteLn(F, Q + 'layer' + Q + ':' + Q + Board.LayerName(Track.Layer) + Q + ',');
-                // Export arc as start/end points using X1/Y1/X2/Y2
-                // These represent the arc's bounding endpoints
-                WriteLn(F, Q + 'x1_mm' + Q + ':' + FloatToStr(CoordToMMs(Track.X1)) + ',');
-                WriteLn(F, Q + 'y1_mm' + Q + ':' + FloatToStr(CoordToMMs(Track.Y1)) + ',');
-                WriteLn(F, Q + 'x2_mm' + Q + ':' + FloatToStr(CoordToMMs(Track.X2)) + ',');
-                WriteLn(F, Q + 'y2_mm' + Q + ':' + FloatToStr(CoordToMMs(Track.Y2)) + ',');
-                WriteLn(F, Q + 'width_mm' + Q + ':' + FloatToStr(CoordToMMs(Track.Width)));
+                WriteLn(F, Q + 'layer' + Q + ':' + Q + Board.LayerName(Polygon.Layer) + Q + ',');
+                WriteLn(F, Q + 'x1_mm' + Q + ':' + FloatToStr(CoordToMMs(Polygon.BoundingRectangle.Left)) + ',');
+                WriteLn(F, Q + 'y1_mm' + Q + ':' + FloatToStr(CoordToMMs(Polygon.BoundingRectangle.Bottom)) + ',');
+                WriteLn(F, Q + 'x2_mm' + Q + ':' + FloatToStr(CoordToMMs(Polygon.BoundingRectangle.Right)) + ',');
+                WriteLn(F, Q + 'y2_mm' + Q + ':' + FloatToStr(CoordToMMs(Polygon.BoundingRectangle.Top)));
             Except
                 WriteLn(F, Q + 'layer' + Q + ':' + Q + '' + Q + ',');
                 WriteLn(F, Q + 'x1_mm' + Q + ':0,');
                 WriteLn(F, Q + 'y1_mm' + Q + ':0,');
                 WriteLn(F, Q + 'x2_mm' + Q + ':0,');
-                WriteLn(F, Q + 'y2_mm' + Q + ':0,');
-                WriteLn(F, Q + 'width_mm' + Q + ':0');
+                WriteLn(F, Q + 'y2_mm' + Q + ':0');
             End;
             Write(F, Chr(125));
             Inc(N);
-            Track := Iter.NextPCBObject;
+            Polygon := Iter.NextPCBObject;
         End;
         Board.BoardIterator_Destroy(Iter);
     Except
