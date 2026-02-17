@@ -337,16 +337,24 @@ class AltiumFileReader:
             }
             
             # Look for layer definitions in the data
+            # Also extract internal plane net assignments (for connectivity)
+            # These map internal plane layers to their assigned nets
+            plane_nets = {}  # layer_name -> net_name
+            
             # Try multiple patterns Altium uses for layer storage
             for key, value in pairs.items():
                 if key.startswith('V9_LAYERID'):
-                    # Extract layer info
+                    # Extract layer info including plane net if available
                     layer_match = re.search(r'NAME=([^|]+)', value)
+                    plane_net_match = re.search(r'PLANENETNAME=([^|]+)', value)
+                    layer_entry = {}
                     if layer_match:
-                        layers.append({
-                            "id": key,
-                            "name": layer_match.group(1)
-                        })
+                        layer_entry["id"] = key
+                        layer_entry["name"] = layer_match.group(1)
+                        if plane_net_match:
+                            layer_entry["plane_net"] = plane_net_match.group(1)
+                            plane_nets[layer_match.group(1)] = plane_net_match.group(1)
+                        layers.append(layer_entry)
             
             # Try alternative layer patterns if V9_LAYERID not found
             if not layers:
@@ -380,13 +388,17 @@ class AltiumFileReader:
             if not layers:
                 print("WARNING: No layer information found in PCB file")
             
+            if plane_nets:
+                print(f"DEBUG: Found internal plane net assignments: {plane_nets}")
+            
             return {
                 "board_size": {
                     "width_mm": round(width_mm, 2) if width_mm > 0 else 100.0,
                     "height_mm": round(height_mm, 2) if height_mm > 0 else 80.0,
                     "area_mm2": round(width_mm * height_mm, 2)
                 },
-                "layers": layers
+                "layers": layers,
+                "plane_nets": plane_nets  # Map of plane layer name -> net name
             }
         except Exception as e:
             print(f"Error in _parse_board_data_detailed: {e}")

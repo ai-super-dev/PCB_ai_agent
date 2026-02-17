@@ -1051,18 +1051,21 @@ Var
     Net   : IPCB_Net;
     Track : IPCB_Track;
     Via   : IPCB_Via;
+    Pad   : IPCB_Pad;
     Rule  : IPCB_Rule;
     ClearanceRule : IPCB_ClearanceConstraint;
     WidthRule : IPCB_MaxMinWidthConstraint;
     ViaRule : IPCB_RoutingViaRule;
     ShortCircuitRule : IPCB_ShortCircuitRule;
+    SizeX, SizeY, HoleSize : Double;
     MaskRule : IPCB_SolderMaskExpansionRule;
     Polygon : IPCB_Polygon;
     Layer : TLayer;
-    Iter : IPCB_BoardIterator;
+    Iter, PadIter : IPCB_BoardIterator;
+    CompPad : IPCB_Pad;
     F, F2 : TextFile;
-    Q, S, LayerName, NetName, FinalPath, LineContent, TempFilePath : String;
-    N, I, LayerID, CompCount, NetCount, TrackCount, ViaCount, RuleCount, RetryCount, VCount : Integer;
+    Q, S, LayerName, NetName, FinalPath, LineContent, TempFilePath, ShapeStr : String;
+    N, I, LayerID, CompCount, NetCount, TrackCount, ViaCount, PadCount, RuleCount, RetryCount, VCount : Integer;
     RuleTypeDetected : Boolean;
     ClearanceMM : Double;
 Begin
@@ -1170,9 +1173,11 @@ Begin
             If LayerName <> '' Then
             Begin
                 If LayerID > 0 Then WriteLn(F, ',');
-                S := 'signal';
-                If Pos('GND', UpperCase(LayerName)) > 0 Then S := 'ground'
-                Else If (Pos('VCC', UpperCase(LayerName)) > 0) Or (Pos('POWER', UpperCase(LayerName)) > 0) Then S := 'power';
+                // Internal planes are always 'plane' kind
+                // Distinguish power/ground by name for additional info
+                S := 'plane';
+                If Pos('GND', UpperCase(LayerName)) > 0 Then S := 'plane'
+                Else If (Pos('VCC', UpperCase(LayerName)) > 0) Or (Pos('POWER', UpperCase(LayerName)) > 0) Then S := 'plane';
                 
                 WriteLn(F, Chr(123) + Q + 'id' + Q + ':' + Q + 'L' + IntToStr(LayerID+1) + Q);
                 WriteLn(F, ',' + Q + 'name' + Q + ':' + Q + LayerName + Q);
@@ -1206,7 +1211,27 @@ Begin
         WriteLn(F, Q + 'layer' + Q + ':' + Q + Board.LayerName(Comp.Layer) + Q + ',');
         WriteLn(F, Q + 'footprint' + Q + ':' + Q + Comp.Pattern + Q + ',');
         WriteLn(F, Q + 'comment' + Q + ':' + Q + Comp.Comment.Text + Q + ',');
-        WriteLn(F, Q + 'pads' + Q + ':[]');
+        
+        // CRITICAL: Export component pads (link pads to components)
+        // This is essential for DRC to understand component-pad relationships
+        WriteLn(F, Q + 'pads' + Q + ':[');
+        Try
+            PadCount := 0;
+            PadIter := Comp.GroupIterator_Create;
+            PadIter.AddFilter_ObjectSet(MkSet(ePadObject));
+            CompPad := PadIter.FirstPCBObject;
+            While CompPad <> Nil Do
+            Begin
+                If PadCount > 0 Then WriteLn(F, ',');
+                WriteLn(F, Q + CompPad.Name + Q);
+                Inc(PadCount);
+                CompPad := PadIter.NextPCBObject;
+            End;
+            Comp.GroupIterator_Destroy(PadIter);
+        Except
+            // If pad iteration fails, export empty array
+        End;
+        WriteLn(F, ']');
         Write(F, Chr(125));
         Inc(N);
         Comp := Iter.NextPCBObject;
@@ -1234,6 +1259,50 @@ Begin
     End;
     Board.BoardIterator_Destroy(Iter);
     NetCount := N;
+    WriteLn(F, '],');
+    
+    // Connections (Ratsnest lines - these represent UNROUTED pad pairs)
+    // In Altium, eConnectionObject stores ratsnest lines between pads that SHOULD be connected
+    // but have NO copper path between them. Once routed (via tracks/vias/planes), the connection
+    // object is removed. So remaining connections = unrouted connections.
+    // This gives Python DRC the EXACT unrouted connection data from Altium's connectivity engine.
+    WriteLn(F, Q + 'connections' + Q + ':[');
+    N := 0;
+    Try
+        Iter := Board.BoardIterator_Create;
+        Iter.AddFilter_ObjectSet(MkSet(eConnectionObject));
+        Iter.AddFilter_LayerSet(AllLayers);
+        
+        Net := Iter.FirstPCBObject;
+        While Net <> Nil Do
+        Begin
+            If N > 0 Then WriteLn(F, ',');
+            NetName := '';
+            Try
+                If Net.Net <> Nil Then NetName := Net.Net.Name;
+            Except
+            End;
+            
+            WriteLn(F, Chr(123));
+            WriteLn(F, Q + 'net' + Q + ':' + Q + NetName + Q + ',');
+            Try
+                WriteLn(F, Q + 'from_x_mm' + Q + ':' + FloatToStr(CoordToMMs(Net.X1)) + ',');
+                WriteLn(F, Q + 'from_y_mm' + Q + ':' + FloatToStr(CoordToMMs(Net.Y1)) + ',');
+                WriteLn(F, Q + 'to_x_mm' + Q + ':' + FloatToStr(CoordToMMs(Net.X2)) + ',');
+                WriteLn(F, Q + 'to_y_mm' + Q + ':' + FloatToStr(CoordToMMs(Net.Y2)));
+            Except
+                WriteLn(F, Q + 'from_x_mm' + Q + ':0,');
+                WriteLn(F, Q + 'from_y_mm' + Q + ':0,');
+                WriteLn(F, Q + 'to_x_mm' + Q + ':0,');
+                WriteLn(F, Q + 'to_y_mm' + Q + ':0');
+            End;
+            Write(F, Chr(125));
+            Inc(N);
+            Net := Iter.NextPCBObject;
+        End;
+        Board.BoardIterator_Destroy(Iter);
+    Except
+    End;
     WriteLn(F, '],');
     
     // Tracks
@@ -1266,6 +1335,97 @@ Begin
     TrackCount := N;
     WriteLn(F, '],');
     
+    // Fills (eFillObject - copper rectangles used for connections)
+    // Use Track variable for iteration — IPCB_Track has X1/Y1/X2/Y2 properties
+    // that are also present on IPCB_Fill objects at runtime
+    WriteLn(F, Q + 'fills' + Q + ':[');
+    N := 0;
+    Try
+        Iter := Board.BoardIterator_Create;
+        Iter.AddFilter_ObjectSet(MkSet(eFillObject));
+        Iter.AddFilter_LayerSet(AllLayers);
+        
+        Track := Iter.FirstPCBObject;
+        While Track <> Nil Do
+        Begin
+            If N > 0 Then WriteLn(F, ',');
+            NetName := '';
+            Try
+                If Track.Net <> Nil Then NetName := Track.Net.Name;
+            Except
+            End;
+            
+            WriteLn(F, Chr(123));
+            WriteLn(F, Q + 'net' + Q + ':' + Q + NetName + Q + ',');
+            Try
+                WriteLn(F, Q + 'layer' + Q + ':' + Q + Board.LayerName(Track.Layer) + Q + ',');
+                WriteLn(F, Q + 'x1_mm' + Q + ':' + FloatToStr(CoordToMMs(Track.X1)) + ',');
+                WriteLn(F, Q + 'y1_mm' + Q + ':' + FloatToStr(CoordToMMs(Track.Y1)) + ',');
+                WriteLn(F, Q + 'x2_mm' + Q + ':' + FloatToStr(CoordToMMs(Track.X2)) + ',');
+                WriteLn(F, Q + 'y2_mm' + Q + ':' + FloatToStr(CoordToMMs(Track.Y2)));
+            Except
+                WriteLn(F, Q + 'layer' + Q + ':' + Q + '' + Q + ',');
+                WriteLn(F, Q + 'x1_mm' + Q + ':0,');
+                WriteLn(F, Q + 'y1_mm' + Q + ':0,');
+                WriteLn(F, Q + 'x2_mm' + Q + ':0,');
+                WriteLn(F, Q + 'y2_mm' + Q + ':0');
+            End;
+            Write(F, Chr(125));
+            Inc(N);
+            Track := Iter.NextPCBObject;
+        End;
+        Board.BoardIterator_Destroy(Iter);
+    Except
+    End;
+    WriteLn(F, '],');
+    
+    // Arcs (eArcObject - curved track segments)
+    // Use Track variable — arc start/end computed from bounding rect as fallback
+    WriteLn(F, Q + 'arcs' + Q + ':[');
+    N := 0;
+    Try
+        Iter := Board.BoardIterator_Create;
+        Iter.AddFilter_ObjectSet(MkSet(eArcObject));
+        Iter.AddFilter_LayerSet(AllLayers);
+        
+        Track := Iter.FirstPCBObject;
+        While Track <> Nil Do
+        Begin
+            If N > 0 Then WriteLn(F, ',');
+            NetName := '';
+            Try
+                If Track.Net <> Nil Then NetName := Track.Net.Name;
+            Except
+            End;
+            
+            WriteLn(F, Chr(123));
+            WriteLn(F, Q + 'net' + Q + ':' + Q + NetName + Q + ',');
+            Try
+                WriteLn(F, Q + 'layer' + Q + ':' + Q + Board.LayerName(Track.Layer) + Q + ',');
+                // Export arc as start/end points using X1/Y1/X2/Y2
+                // These represent the arc's bounding endpoints
+                WriteLn(F, Q + 'x1_mm' + Q + ':' + FloatToStr(CoordToMMs(Track.X1)) + ',');
+                WriteLn(F, Q + 'y1_mm' + Q + ':' + FloatToStr(CoordToMMs(Track.Y1)) + ',');
+                WriteLn(F, Q + 'x2_mm' + Q + ':' + FloatToStr(CoordToMMs(Track.X2)) + ',');
+                WriteLn(F, Q + 'y2_mm' + Q + ':' + FloatToStr(CoordToMMs(Track.Y2)) + ',');
+                WriteLn(F, Q + 'width_mm' + Q + ':' + FloatToStr(CoordToMMs(Track.Width)));
+            Except
+                WriteLn(F, Q + 'layer' + Q + ':' + Q + '' + Q + ',');
+                WriteLn(F, Q + 'x1_mm' + Q + ':0,');
+                WriteLn(F, Q + 'y1_mm' + Q + ':0,');
+                WriteLn(F, Q + 'x2_mm' + Q + ':0,');
+                WriteLn(F, Q + 'y2_mm' + Q + ':0,');
+                WriteLn(F, Q + 'width_mm' + Q + ':0');
+            End;
+            Write(F, Chr(125));
+            Inc(N);
+            Track := Iter.NextPCBObject;
+        End;
+        Board.BoardIterator_Destroy(Iter);
+    Except
+    End;
+    WriteLn(F, '],');
+    
     // Vias
     WriteLn(F, Q + 'vias' + Q + ':[');
     N := 0;
@@ -1294,6 +1454,147 @@ Begin
     End;
     Board.BoardIterator_Destroy(Iter);
     ViaCount := N;
+    WriteLn(F, '],');
+    
+    // Pads (Component Pads)
+    WriteLn(F, Q + 'pads' + Q + ':[');
+    N := 0;
+    Iter := Board.BoardIterator_Create;
+    Iter.AddFilter_ObjectSet(MkSet(ePadObject));
+    Iter.AddFilter_LayerSet(AllLayers);
+    
+    Pad := Iter.FirstPCBObject;
+    While Pad <> Nil Do
+    Begin
+        If N > 0 Then WriteLn(F, ',');
+        NetName := '';
+        If Pad.Net <> Nil Then NetName := Pad.Net.Name;
+        
+        WriteLn(F, Chr(123));
+        WriteLn(F, Q + 'net' + Q + ':' + Q + NetName + Q + ',');
+        WriteLn(F, Q + 'x_mm' + Q + ':' + FloatToStr(CoordToMMs(Pad.X)) + ',');
+        WriteLn(F, Q + 'y_mm' + Q + ':' + FloatToStr(CoordToMMs(Pad.Y)) + ',');
+        WriteLn(F, Q + 'layer' + Q + ':' + Q + Board.LayerName(Pad.Layer) + Q + ',');
+        
+        // Export pad size (critical for connectivity checks and clearance calculations)
+        // CRITICAL: Pad size is essential for accurate DRC - without it, clearance checks fail
+        Try
+            // Try TopXSize/TopYSize first (most reliable for most pads)
+            SizeX := CoordToMMs(Pad.TopXSize);
+            SizeY := CoordToMMs(Pad.TopYSize);
+            // Validate sizes are reasonable (not zero or negative)
+            If (SizeX <= 0) Or (SizeY <= 0) Then
+            Begin
+                // If TopXSize/TopYSize returns invalid values, try fallback
+                // Don't raise exception, just fall through to next method
+                SizeX := 0;
+                SizeY := 0;
+            End;
+        Except
+            // If TopXSize/TopYSize access fails, set to 0 to trigger fallback
+            SizeX := 0;
+            SizeY := 0;
+        End;
+        
+        // Fallback: use bounding rectangle if TopXSize/TopYSize failed or returned invalid values
+        If (SizeX <= 0) Or (SizeY <= 0) Then
+        Begin
+            Try
+                SizeX := CoordToMMs(Pad.BoundingRectangle.Right - Pad.BoundingRectangle.Left);
+                SizeY := CoordToMMs(Pad.BoundingRectangle.Top - Pad.BoundingRectangle.Bottom);
+                // Validate bounding rectangle sizes
+                If (SizeX <= 0) Or (SizeY <= 0) Then
+                Begin
+                    // If bounding rectangle also fails, use default
+                    SizeX := 1.0;  // Default 1mm if all methods fail
+                    SizeY := 1.0;
+                End;
+            Except
+                // Final fallback: default size if all methods fail
+                // CRITICAL: Using 1.0mm default may cause false positives in clearance checks
+                // But it's better than 0 which would cause division by zero
+                SizeX := 1.0;  // Default 1mm if all methods fail
+                SizeY := 1.0;
+            End;
+        End;
+        WriteLn(F, Q + 'size_x_mm' + Q + ':' + FloatToStr(SizeX) + ',');
+        WriteLn(F, Q + 'size_y_mm' + Q + ':' + FloatToStr(SizeY) + ',');
+        
+        // Export pad hole size (critical for through-hole pads and clearance checks)
+        Try
+            HoleSize := CoordToMMs(Pad.HoleSize);
+            If HoleSize > 0 Then
+                WriteLn(F, Q + 'hole_size_mm' + Q + ':' + FloatToStr(HoleSize) + ',')
+            Else
+                WriteLn(F, Q + 'hole_size_mm' + Q + ':0,');
+        Except
+            WriteLn(F, Q + 'hole_size_mm' + Q + ':0,');
+        End;
+        
+        // Export pad shape/type (critical for accurate overlap detection)
+        // Note: Altium API doesn't have direct Pad.Shape property
+        // We infer shape from pad dimensions and use TopShape if available
+        Try
+            ShapeStr := 'Round';  // Default
+            Try
+                // Try to get shape from TopShape property (if available in this Altium version)
+                // TopShape returns: eRounded, eRectangular, eOctagonal, etc.
+                // Since direct access may not work, infer from dimensions
+                If Abs(SizeX - SizeY) < 0.001 Then
+                    ShapeStr := 'Round'  // Square pads appear as round when size_x == size_y
+                Else
+                    ShapeStr := 'Rectangular';  // Different X/Y sizes indicate rectangular
+            Except
+                // If TopShape access fails, infer from dimensions
+                If Abs(SizeX - SizeY) < 0.001 Then
+                    ShapeStr := 'Round'
+                Else
+                    ShapeStr := 'Rectangular';
+            End;
+            WriteLn(F, Q + 'shape' + Q + ':' + Q + ShapeStr + Q + ',');
+        Except
+            // Fallback: infer from dimensions
+            If Abs(SizeX - SizeY) < 0.001 Then
+                WriteLn(F, Q + 'shape' + Q + ':' + Q + 'Round' + Q + ',')
+            Else
+                WriteLn(F, Q + 'shape' + Q + ':' + Q + 'Rectangular' + Q + ',');
+        End;
+        
+        // Export pad rotation (affects bounding box calculation)
+        Try
+            WriteLn(F, Q + 'rotation' + Q + ':' + FloatToStr(Pad.Rotation) + ',');
+        Except
+            WriteLn(F, Q + 'rotation' + Q + ':0,');
+        End;
+        
+        // Export component reference (for linking pads to components)
+        If Pad.Component <> Nil Then
+        Begin
+            WriteLn(F, Q + 'component_designator' + Q + ':' + Q + Pad.Component.Name.Text + Q + ',');
+            WriteLn(F, Q + 'component_footprint' + Q + ':' + Q + Pad.Component.Pattern + Q + ',');
+        End
+        Else
+        Begin
+            WriteLn(F, Q + 'component_designator' + Q + ':' + Q + '' + Q + ',');
+            WriteLn(F, Q + 'component_footprint' + Q + ':' + Q + '' + Q + ',');
+        End;
+        
+        // Build designator from component name and pad name
+        // CRITICAL: Designator format must match what Python DRC expects
+        If Pad.Component <> Nil Then
+            WriteLn(F, Q + 'designator' + Q + ':' + Q + Pad.Component.Name.Text + '-' + Pad.Name + Q + ',')
+        Else
+            WriteLn(F, Q + 'designator' + Q + ':' + Q + 'PAD-' + IntToStr(N+1) + Q + ',');
+        
+        // Export pad name separately (useful for debugging)
+        WriteLn(F, Q + 'name' + Q + ':' + Q + Pad.Name + Q);
+        
+        Write(F, Chr(125));
+        Inc(N);
+        Pad := Iter.NextPCBObject;
+    End;
+    Board.BoardIterator_Destroy(Iter);
+    PadCount := N;
     WriteLn(F, '],');
     
     // Polygons (Polygon Regions/Pours)
@@ -1368,8 +1669,8 @@ Begin
             End;
             
             // Export polygon pour clearance (critical for DRC)
-            // The polygon's pour clearance may not be directly accessible as a simple property.
-            // Python DRC engine will determine the effective clearance from design rules.
+            // Note: IPCB_Polygon does not expose PourClearance/Clearance properties in DelphiScript
+            // Python DRC engine will determine the effective clearance from the design rules
             WriteLn(F, Q + 'pour_clearance_mm' + Q + ':0,');
             
             // CRITICAL: Export actual poured copper geometry
@@ -1388,15 +1689,18 @@ Begin
                     // For now, we'll export connection points and let Python simulate the pour
                     // This is more reliable than trying to access internal pour geometry
                     
-                    // Export connection information for Python to simulate dead copper removal
+                    // Export connection information
+                    // Note: IPCB_Polygon does not expose Grid/AirGap/TrackWidth properties
+                    // in DelphiScript. These cause compile-time errors, not runtime exceptions.
+                    // Python DRC engine determines effective clearance from design rules.
                     WriteLn(F, Chr(123));
                     WriteLn(F, Q + 'connection_simulation_data' + Q + ':' + Chr(123));
                     WriteLn(F, Q + 'thermal_relief_enabled' + Q + ':true,');
                     WriteLn(F, Q + 'remove_dead_copper' + Q + ':true,');
                     WriteLn(F, Q + 'pour_over_same_net_objects' + Q + ':true,');
-                    WriteLn(F, Q + 'connection_distance_mm' + Q + ':8.0,');  // Typical connection distance for dead copper removal
-                    WriteLn(F, Q + 'thermal_relief_gap_mm' + Q + ':0.254,');  // Typical thermal relief gap
-                    WriteLn(F, Q + 'thermal_relief_width_mm' + Q + ':0.381'); // Typical thermal relief spoke width
+                    WriteLn(F, Q + 'connection_distance_mm' + Q + ':0,');
+                    WriteLn(F, Q + 'thermal_relief_gap_mm' + Q + ':0,');
+                    WriteLn(F, Q + 'thermal_relief_width_mm' + Q + ':0');
                     WriteLn(F, Chr(125));
                     Write(F, Chr(125));
                 Except
@@ -1504,14 +1808,14 @@ Begin
         // CRITICAL: Improve rule type detection by checking rule names
         // The current logic marks everything as "clearance" which is wrong
         
-        // Width rules
+        // Width rules (name-based detection sets type; cast-based detection below reads actual values)
         If (Pos('WIDTH', S) > 0) And (Pos('CLEARANCE', S) = 0) Then
         Begin
             WriteLn(F, Q + 'type' + Q + ':' + Q + 'width' + Q + ',');
             WriteLn(F, Q + 'category' + Q + ':' + Q + 'Routing' + Q + ',');
-            WriteLn(F, Q + 'min_width_mm' + Q + ':0.254,');
-            WriteLn(F, Q + 'preferred_width_mm' + Q + ':0.838,');
-            WriteLn(F, Q + 'max_width_mm' + Q + ':15.0');
+            WriteLn(F, Q + 'min_width_mm' + Q + ':0,');
+            WriteLn(F, Q + 'preferred_width_mm' + Q + ':0,');
+            WriteLn(F, Q + 'max_width_mm' + Q + ':0');
             RuleTypeDetected := True;
         End
         
@@ -1601,15 +1905,15 @@ Begin
             RuleTypeDetected := True;
         End
         
-        // Via rules
+        // Via rules (name-based detection sets type; cast-based detection below reads actual values)
         Else If (Pos('VIA', S) > 0) And (Pos('CLEARANCE', S) = 0) Then
         Begin
             WriteLn(F, Q + 'type' + Q + ':' + Q + 'via' + Q + ',');
             WriteLn(F, Q + 'category' + Q + ':' + Q + 'Routing' + Q + ',');
-            WriteLn(F, Q + 'min_hole_mm' + Q + ':0.2,');
-            WriteLn(F, Q + 'max_hole_mm' + Q + ':1.0,');
-            WriteLn(F, Q + 'min_diameter_mm' + Q + ':0.5,');
-            WriteLn(F, Q + 'max_diameter_mm' + Q + ':2.0');
+            WriteLn(F, Q + 'min_hole_mm' + Q + ':0,');
+            WriteLn(F, Q + 'max_hole_mm' + Q + ':0,');
+            WriteLn(F, Q + 'min_diameter_mm' + Q + ':0,');
+            WriteLn(F, Q + 'max_diameter_mm' + Q + ':0');
             RuleTypeDetected := True;
         End
         
@@ -1684,82 +1988,53 @@ Begin
                 // If cast succeeds without exception, it's a clearance rule
                 WriteLn(F, Q + 'type' + Q + ':' + Q + 'clearance' + Q + ',');
                 WriteLn(F, Q + 'category' + Q + ':' + Q + 'Electrical' + Q + ',');
-                // CRITICAL: Read actual clearance value from rule
-                // Note: Altium API may not expose readable properties for clearance value
-                // Python will read the actual value from Rules6/Data stream in the PCB file
-                // For now, export rule type and name - Python's altium_file_reader.py will extract the actual value
-                Try
-                    // Try to read clearance value - but API may not support it
-                    // If this fails, Python will read from Rules6/Data stream instead
-                    ClearanceMM := 0.0;  // Placeholder - actual value read by Python from PCB file
-                    WriteLn(F, Q + 'clearance_mm' + Q + ':0.0');
-                Except
-                    WriteLn(F, Q + 'clearance_mm' + Q + ':0.0');
-                End;
+                // Note: ClearanceRule.Gap/Minimum are not readable in DelphiScript
+                // Python's OLE file reader will extract the actual clearance value
+                WriteLn(F, Q + 'clearance_mm' + Q + ':0.0');
                 RuleTypeDetected := True;
             Except
             End;
         End;
         
-        // Try to detect Width Rule
+        // Try to detect Width Rule by cast
+        // Note: WidthRule properties (MinWidth, MaxWidth, etc.) are WRITE-ONLY in DelphiScript
+        // Python's OLE file reader extracts actual values from the PCB binary
         If Not RuleTypeDetected Then
         Begin
             Try
                 WidthRule := Rule;
-                // If cast succeeds, it's a width rule
                 WriteLn(F, Q + 'type' + Q + ':' + Q + 'width' + Q + ',');
                 WriteLn(F, Q + 'category' + Q + ':' + Q + 'Routing' + Q + ',');
-                // CRITICAL: Read actual width values from rule
-                Try
-                    WriteLn(F, Q + 'min_width_mm' + Q + ':' + FloatToStr(CoordToMMs(WidthRule.MinWidth)) + ',');
-                Except
-                    WriteLn(F, Q + 'min_width_mm' + Q + ':0.254,');
-                End;
-                Try
-                    WriteLn(F, Q + 'preferred_width_mm' + Q + ':' + FloatToStr(CoordToMMs(WidthRule.PreferredWidth)) + ',');
-                Except
-                    Try
-                        WriteLn(F, Q + 'preferred_width_mm' + Q + ':' + FloatToStr(CoordToMMs(WidthRule.PreferedWidth)) + ',');
-                    Except
-                        WriteLn(F, Q + 'preferred_width_mm' + Q + ':0.838,');
-                    End;
-                End;
-                Try
-                    WriteLn(F, Q + 'max_width_mm' + Q + ':' + FloatToStr(CoordToMMs(WidthRule.MaxWidth)));
-                Except
-                    WriteLn(F, Q + 'max_width_mm' + Q + ':15.0');
-                End;
+                WriteLn(F, Q + 'min_width_mm' + Q + ':0,');
+                WriteLn(F, Q + 'preferred_width_mm' + Q + ':0,');
+                WriteLn(F, Q + 'max_width_mm' + Q + ':0');
                 RuleTypeDetected := True;
             Except
-                // Fallback: detect by name if cast fails
                 If Pos('WIDTH', UpperCase(LayerName)) > 0 Then
                 Begin
                     WriteLn(F, Q + 'type' + Q + ':' + Q + 'width' + Q + ',');
                     WriteLn(F, Q + 'category' + Q + ':' + Q + 'Routing' + Q + ',');
-                    WriteLn(F, Q + 'min_width_mm' + Q + ':0.254,');
-                    WriteLn(F, Q + 'preferred_width_mm' + Q + ':0.838,');
-                    WriteLn(F, Q + 'max_width_mm' + Q + ':15.0');
+                    WriteLn(F, Q + 'min_width_mm' + Q + ':0,');
+                    WriteLn(F, Q + 'preferred_width_mm' + Q + ':0,');
+                    WriteLn(F, Q + 'max_width_mm' + Q + ':0');
                     RuleTypeDetected := True;
                 End;
             End;
         End;
         
-        // Try to detect Via Rule - attempt cast to IPCB_RoutingViaRule
+        // Try to detect Via Rule by cast
+        // Note: ViaRule properties (MinHoleSize, MaxHoleSize, etc.) are WRITE-ONLY in DelphiScript
+        // Python's OLE file reader extracts actual values from the PCB binary
         If Not RuleTypeDetected Then
         Begin
             Try
                 ViaRule := Rule;
-                // If cast succeeds without exception, it's a via rule
                 WriteLn(F, Q + 'type' + Q + ':' + Q + 'via' + Q + ',');
                 WriteLn(F, Q + 'category' + Q + ':' + Q + 'Routing' + Q + ',');
-                Try
-                    WriteLn(F, Q + 'min_hole_mm' + Q + ':' + FloatToStr(CoordToMMs(ViaRule.MinHoleSize)) + ',');
-                    WriteLn(F, Q + 'max_hole_mm' + Q + ':' + FloatToStr(CoordToMMs(ViaRule.MaxHoleSize)) + ',');
-                    WriteLn(F, Q + 'min_diameter_mm' + Q + ':' + FloatToStr(CoordToMMs(ViaRule.MinWidth)) + ',');
-                    WriteLn(F, Q + 'max_diameter_mm' + Q + ':' + FloatToStr(CoordToMMs(ViaRule.MaxWidth)));
-                Except
-                    WriteLn(F, Q + 'min_hole_mm' + Q + ':0.0');
-                End;
+                WriteLn(F, Q + 'min_hole_mm' + Q + ':0,');
+                WriteLn(F, Q + 'max_hole_mm' + Q + ':0,');
+                WriteLn(F, Q + 'min_diameter_mm' + Q + ':0,');
+                WriteLn(F, Q + 'max_diameter_mm' + Q + ':0');
                 RuleTypeDetected := True;
             Except
             End;

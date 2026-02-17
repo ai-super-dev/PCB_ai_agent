@@ -404,10 +404,10 @@ class AltiumMCPServer:
     def _extract_design_rules(self, raw_data: dict) -> list:
         """Extract design rules from raw PCB data.
         
-        CRITICAL: The JSON export from command_server.pas writes clearance_mm:0.0 
-        because DelphiScript can't read rule values. We must:
-        1. Read rules from JSON export (has names, types, scopes)
-        2. Merge actual values from OLE file reader (reads from Rules6/Data stream)
+        command_server.pas tries to read actual rule values (e.g. ClearanceRule.Gap).
+        If the API fails, it falls back to 0.0. In that case:
+        1. Read rules from JSON export (has names, types, scopes, and values when readable)
+        2. Merge actual values from OLE file reader (reads from Rules6/Data stream) for any 0.0 values
         3. Fall back to defaults only if both fail
         """
         rules = []
@@ -434,6 +434,19 @@ class AltiumMCPServer:
                     if os.path.exists(pcb_file_path):
                         try:
                             pcb_data = self.reader.read_pcb(pcb_file_path)
+                            
+                            # Merge plane net data from OLE reader into exported layers
+                            if pcb_data and 'plane_nets' in pcb_data:
+                                plane_nets_from_ole = pcb_data['plane_nets']
+                                if plane_nets_from_ole:
+                                    print(f"✅ Found internal plane net assignments from OLE: {plane_nets_from_ole}")
+                                    # Add plane_net to the exported layers
+                                    for layer in raw_data.get('layers', []):
+                                        if isinstance(layer, dict):
+                                            layer_name = layer.get('name', '')
+                                            if layer_name in plane_nets_from_ole:
+                                                layer['plane_net'] = plane_nets_from_ole[layer_name]
+                            
                             if pcb_data and 'rules' in pcb_data:
                                 file_rules = pcb_data['rules']
                                 file_lookup = {r.get('name', '').upper(): r for r in file_rules if isinstance(r, dict)}
@@ -1355,42 +1368,14 @@ class AltiumMCPServer:
             if 'error' in raw_data:
                 return {"error": raw_data['error']}
             
-            # STEP 4: Fix clearance rules - MAJOR IMPROVEMENT: Disable problematic specialized rules
-            # This eliminates the 29 false positives by only enabling the main clearance rule
+            # STEP 4: Extract design rules from exported PCB data
+            # Use actual rule values from the export - no hard-coded overrides
             rules = self._extract_design_rules(raw_data)
             
-            # CRITICAL FIX: Only enable main clearance rule, disable specialized rules
-            # This reduces violations from 31 to 0-2 (much closer to Altium's 2)
-            main_clearance_rules = ["Clearance"]
-            
-            fixed_rules = []
-            disabled_count = 0
-            for rule in rules:
-                if not isinstance(rule, dict):
-                    continue
-                
-                rule_type = rule.get("type", "")
-                rule_name = rule.get("name", "")
-                
-                if rule_type == "clearance":
-                    if rule_name in main_clearance_rules:
-                        # Enable main clearance rule with correct 0.2mm value
-                        rule["enabled"] = True
-                        rule["clearance_mm"] = 0.2  # Based on Altium's "Gap=0.2mm" message
-                        rule["track_to_poly_clearance_mm"] = 0.2
-                        rule["pad_to_poly_clearance_mm"] = 0.2
-                        rule["via_to_poly_clearance_mm"] = 0.2
-                        fixed_rules.append(rule)
-                    else:
-                        # Disable specialized clearance rules to eliminate false positives
-                        rule["enabled"] = False
-                        disabled_count += 1
-                else:
-                    # Keep non-clearance rules as-is
-                    fixed_rules.append(rule)
-            
+            # Filter out non-dict entries but keep ALL rules enabled as exported
+            fixed_rules = [rule for rule in rules if isinstance(rule, dict)]
             rules = fixed_rules
-            print(f"✅ DRC Calibration: Disabled {disabled_count} specialized rules to eliminate false positives")
+            print(f"✅ DRC: Using {len(rules)} rules from PCB data (no hard-coded overrides)")
             
             # Ensure rules is a list (not tuple or other type)
             if not isinstance(rules, list):
@@ -1399,7 +1384,8 @@ class AltiumMCPServer:
                 else:
                     rules = []
             
-            # If no rules found, use comprehensive defaults (matching common Altium rules)
+            # If no rules found at all (export failed), use Altium's typical defaults as fallback
+            # These are only used when the PCB export has no rules section
             if not rules:
                 rules = [
                     {
@@ -1534,165 +1520,22 @@ class AltiumMCPServer:
                 "nets": raw_data.get('nets', []),
                 "components": raw_data.get('components', []),
                 "polygons": raw_data.get('polygons', []),  # Original polygon outlines
-                "copper_regions": copper_regions  # CRITICAL: Actual poured copper regions
+                "copper_regions": copper_regions,  # Actual poured copper regions
+                "layers": raw_data.get('layers', []),
+                "connections": raw_data.get('connections', []),  # Ratsnest = unrouted pad pairs
+                "fills": raw_data.get('fills', []),  # Copper fill rectangles
+                "arcs": raw_data.get('arcs', [])  # Arc track segments
             }
             
-            # HYBRID APPROACH: Use Altium DRC results as ground truth
-            # Since getting exact poured copper geometry is complex, we'll use Altium's
-            # accurate DRC detection and focus Python DRC on analysis and fixes
+            # Use Python DRC engine only (no Altium HTML parsing)
+            print("🔄 Running Python DRC engine...")
             
-            print("🔄 Attempting to get Altium DRC results for accurate violation detection...")
-            altium_violations = []
-            
-            # Try to parse Altium's HTML DRC report if available
-            # Find the most recent DRC report HTML file (not hardcoded)
-            drc_report_path = None
-            
-            # Determine project directory from current PCB path
-            if self.current_pcb_path:
-                pcb_path = Path(self.current_pcb_path)
-                project_dir = pcb_path.parent
-                project_name = pcb_path.stem  # Get filename without extension
-                
-                # Look for "Project Outputs for <ProjectName>" directory
-                project_outputs_dir = project_dir / f"Project Outputs for {project_name}"
-                
-                # If not found, try looking for any "Project Outputs" directory
-                if not project_outputs_dir.exists():
-                    project_outputs_dirs = list(project_dir.glob("Project Outputs for *"))
-                    if project_outputs_dirs:
-                        project_outputs_dir = project_outputs_dirs[0]
-                
-                if project_outputs_dir.exists():
-                    # Find all DRC HTML files
-                    drc_files = list(project_outputs_dir.glob("Design Rule Check*.html"))
-                    if drc_files:
-                        # Use the most recently modified file
-                        drc_report_path = max(drc_files, key=lambda p: p.stat().st_mtime)
-                        print(f"📄 Found Altium DRC report: {drc_report_path.name}")
-                    else:
-                        print(f"⚠️ No DRC report HTML files found in {project_outputs_dir}")
-                else:
-                    print(f"⚠️ Project outputs directory not found: {project_outputs_dir}")
-            else:
-                print("⚠️ No PCB file loaded, cannot locate DRC report")
-            
-            if drc_report_path and drc_report_path.exists():
-                try:
-                    print(f"📄 Found Altium DRC report: {drc_report_path.name}")
-                    with open(drc_report_path, 'r', encoding='utf-8') as f:
-                        html_content = f.read()
-                    
-                    # Parse violations from HTML
-                    import re
-                    
-                    # Extract clearance violations
-                    clearance_pattern = r'Clearance Constraint:.*?Between (.*?) And (.*?)</acronym>'
-                    clearance_matches = re.findall(clearance_pattern, html_content, re.DOTALL)
-                    for match in clearance_matches:
-                        obj1, obj2 = match
-                        # Extract location if available
-                        loc_match = re.search(r'\((\d+\.?\d*)mm,(\d+\.?\d*)mm\)', obj1)
-                        location = {}
-                        if loc_match:
-                            location = {"x_mm": float(loc_match.group(1)), "y_mm": float(loc_match.group(2))}
-                        
-                        altium_violations.append({
-                            "rule_name": "Clearance",
-                            "rule_type": "clearance",
-                            "severity": "error",
-                            "message": f"Clearance violation between {obj1.strip()} and {obj2.strip()}",
-                            "location": location
-                        })
-                    
-                    # Extract short-circuit violations
-                    short_pattern = r'Short-Circuit Constraint:.*?Between (.*?) And (.*?)</acronym>'
-                    short_matches = re.findall(short_pattern, html_content, re.DOTALL)
-                    for match in short_matches:
-                        obj1, obj2 = match
-                        loc_match = re.search(r'\((\d+\.?\d*)mm,(\d+\.?\d*)mm\)', obj1)
-                        location = {}
-                        if loc_match:
-                            location = {"x_mm": float(loc_match.group(1)), "y_mm": float(loc_match.group(2))}
-                        
-                        altium_violations.append({
-                            "rule_name": "ShortCircuit",
-                            "rule_type": "short_circuit",
-                            "severity": "error",
-                            "message": f"Short circuit between {obj1.strip()} and {obj2.strip()}",
-                            "location": location
-                        })
-                    
-                    # Extract un-routed net violations
-                    unrouted_pattern = r'Un-Routed Net Constraint:.*?Net (.*?) Between (.*?) And (.*?)</acronym>'
-                    unrouted_matches = re.findall(unrouted_pattern, html_content, re.DOTALL)
-                    for match in unrouted_matches:
-                        net_name, obj1, obj2 = match
-                        loc_match = re.search(r'\((\d+\.?\d*)mm,(\d+\.?\d*)mm\)', obj1)
-                        location = {}
-                        if loc_match:
-                            location = {"x_mm": float(loc_match.group(1)), "y_mm": float(loc_match.group(2))}
-                        
-                        altium_violations.append({
-                            "rule_name": "UnRoutedNet",
-                            "rule_type": "unrouted_net",
-                            "severity": "error",
-                            "message": f"Un-routed net {net_name.strip()} between {obj1.strip()} and {obj2.strip()}",
-                            "location": location
-                        })
-                    
-                    print(f"✅ Parsed {len(altium_violations)} violations from Altium DRC report")
-                    
-                except Exception as e:
-                    print(f"⚠️ Could not parse Altium DRC report: {e}")
-                    import traceback
-                    traceback.print_exc()
-            else:
-                print(f"⚠️ Altium DRC report not found at: {drc_report_path}")
-                # Try to get from script client as fallback
-                if SCRIPT_CLIENT_AVAILABLE and self.script_client:
-                    try:
-                        drc_result = self.script_client._send_command({"action": "get_drc_status"})
-                        if drc_result.get("success") and drc_result.get("violations"):
-                            altium_violations = drc_result.get("violations", [])
-                            print(f"✅ Found {len(altium_violations)} violations from Altium script")
-                    except Exception as e:
-                        print(f"⚠️ Could not get Altium DRC results from script: {e}")
-            
-            # Run Python DRC engine for analysis and additional checks
+            # Run Python DRC engine
             drc_engine = PythonDRCEngine()
             try:
                 drc_result = drc_engine.run_drc(pcb_data, rules)
-                python_violations = drc_result.get("violations", [])
-                print(f"📊 Python DRC found {len(python_violations)} additional violations")
-                
-                # Combine Altium violations (accurate) with Python analysis
-                if altium_violations:
-                    # Use Altium violations as primary source
-                    all_violations = altium_violations
-                    # Add any additional violations found by Python DRC that aren't duplicates
-                    for pv in python_violations:
-                        # Simple duplicate check based on location and type
-                        is_duplicate = False
-                        for av in altium_violations:
-                            if (abs(pv.get("location", {}).get("x_mm", 0) - av.get("location", {}).get("x_mm", 0)) < 1.0 and
-                                abs(pv.get("location", {}).get("y_mm", 0) - av.get("location", {}).get("y_mm", 0)) < 1.0 and
-                                pv.get("rule_type") == av.get("rule_type")):
-                                is_duplicate = True
-                                break
-                        if not is_duplicate:
-                            all_violations.append(pv)
-                    
-                    print(f"🎯 Hybrid DRC: {len(altium_violations)} from Altium + {len(all_violations) - len(altium_violations)} additional from Python = {len(all_violations)} total")
-                else:
-                    # Fall back to Python DRC only
-                    all_violations = python_violations
-                    print(f"📊 Using Python DRC only: {len(all_violations)} violations")
-                
-                # Update the result with combined violations
-                drc_result["violations"] = all_violations
-                drc_result["summary"]["total_violations"] = len(all_violations)
-                drc_result["hybrid_mode"] = len(altium_violations) > 0
+                violations = drc_result.get("violations", [])
+                print(f"📊 Python DRC found {len(violations)} violations")
                 
             except Exception as e:
                 import traceback
@@ -1839,12 +1682,11 @@ class AltiumMCPServer:
                 "detailed_violations": violations,
                 "total_violations": actual_violation_count,
                 "total_warnings": actual_warning_count,
-                "message": "DRC check completed using hybrid Altium + Python validation",
+                "message": "DRC check completed using Python DRC engine",
                 "filename": Path(self.current_pcb_path).name if self.current_pcb_path else "Unknown",
                 "python_checked_rules": python_checked_rules,
                 "total_rules": len(all_rules_checked),
-                "rules_checked_count": len(python_checked_rules),
-                "hybrid_mode": drc_result.get("hybrid_mode", False)
+                "rules_checked_count": len(python_checked_rules)
             }
             
         except Exception as e:
