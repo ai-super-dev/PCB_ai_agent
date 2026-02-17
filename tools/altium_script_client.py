@@ -149,40 +149,76 @@ class AltiumScriptClient:
         if not self.command_file.parent.exists():
             return {"success": False, "error": f"Command file directory does not exist: {self.command_file.parent}"}
         
-        # STEP 2: Write command ATOMICALLY: write to temp file, then rename
+        # STEP 2: Write command ATOMICALLY with retry logic for file locking
         # This prevents Altium from reading a partially-written or locked file
         temp_command = Path(str(self.command_file) + '.tmp')
-        try:
-            # Write to temp file
-            with open(temp_command, 'w') as f:
-                json.dump(command, f)
-                f.flush()
-                os.fsync(f.fileno())
-            
-            # Remove old command file if it exists
-            if self.command_file.exists():
-                try:
-                    self.command_file.unlink()
-                except:
-                    time.sleep(0.1)
+        
+        # Retry writing the command file if it's locked
+        max_write_attempts = 10
+        for write_attempt in range(max_write_attempts):
+            try:
+                # Clean up any existing temp file first
+                if temp_command.exists():
                     try:
-                        self.command_file.unlink()
+                        temp_command.unlink()
                     except:
                         pass
-            
-            # Atomic rename (temp -> real)
-            os.rename(str(temp_command), str(self.command_file))
-            
-            time.sleep(0.1)  # Brief filesystem settle
-            
-        except Exception as e:
-            # Clean up temp file on error
-            if temp_command.exists():
-                try:
-                    temp_command.unlink()
-                except:
-                    pass
-            return {"success": False, "error": f"Failed to write command file: {str(e)}"}
+                
+                # Write to temp file
+                with open(temp_command, 'w') as f:
+                    json.dump(command, f)
+                    f.flush()
+                    os.fsync(f.fileno())
+                
+                # Remove old command file if it exists (with retry)
+                if self.command_file.exists():
+                    for del_attempt in range(5):
+                        try:
+                            self.command_file.unlink()
+                            break
+                        except PermissionError:
+                            if del_attempt < 4:
+                                time.sleep(0.2 * (del_attempt + 1))  # Exponential backoff
+                            else:
+                                raise  # Give up after 5 attempts
+                        except:
+                            break  # File doesn't exist anymore
+                
+                # Atomic rename (temp -> real) with retry
+                for rename_attempt in range(5):
+                    try:
+                        os.rename(str(temp_command), str(self.command_file))
+                        break
+                    except PermissionError:
+                        if rename_attempt < 4:
+                            time.sleep(0.2 * (rename_attempt + 1))  # Exponential backoff
+                        else:
+                            raise  # Give up after 5 attempts
+                
+                time.sleep(0.1)  # Brief filesystem settle
+                break  # Success - exit retry loop
+                
+            except Exception as e:
+                # Clean up temp file on error
+                if temp_command.exists():
+                    try:
+                        temp_command.unlink()
+                    except:
+                        pass
+                
+                if write_attempt < max_write_attempts - 1:
+                    # Wait longer before retrying, with exponential backoff
+                    wait_time = 0.5 * (2 ** write_attempt)  # 0.5s, 1s, 2s, 4s, etc.
+                    print(f"  Command file write attempt {write_attempt + 1} failed: {str(e)}")
+                    print(f"  Retrying in {wait_time:.1f}s...")
+                    time.sleep(wait_time)
+                else:
+                    # Final attempt failed
+                    return {"success": False, "error": f"Failed to write command file after {max_write_attempts} attempts: {str(e)}"}
+        
+        # Verify command file was actually created
+        if not self.command_file.exists():
+            return {"success": False, "error": "Command file was not created successfully"}
         
         # STEP 2b: Double-check no stale result appeared between our clear and command write
         if self.result_file.exists():
@@ -352,6 +388,108 @@ class AltiumScriptClient:
             "rotation": rotation
         })
     
+    def rotate_component(self, designator: str, rotation: float) -> Dict[str, Any]:
+        """
+        Rotate a component.
+        
+        Args:
+            designator: Component designator (e.g., "U1")
+            rotation: New rotation in degrees
+            
+        Returns:
+            Result dict with success/error
+        """
+        return self._send_command({
+            "action": "rotate_component",
+            "designator": designator,
+            "rotation": rotation
+        })
+    
+    def move_and_rotate_component(self, designator: str, x: float, y: float, 
+                                  rotation: float) -> Dict[str, Any]:
+        """
+        Move and rotate a component in one operation.
+        
+        Args:
+            designator: Component designator (e.g., "U1")
+            x, y: New position in mm
+            rotation: New rotation in degrees
+            
+        Returns:
+            Result dict with success/error
+        """
+        return self._send_command({
+            "action": "move_and_rotate_component",
+            "designator": designator,
+            "x": x,
+            "y": y,
+            "rotation": rotation
+        })
+    
+    def adjust_copper_pour_clearance(self, x: float, y: float, clearance_mm: float = 0.4) -> Dict[str, Any]:
+        """
+        Adjust copper pour clearance near a specific location.
+        
+        Args:
+            x, y: Location in mm where violation occurred
+            clearance_mm: New clearance value in mm (default 0.4mm)
+            
+        Returns:
+            Result dict with success/error
+        """
+        return self._send_command({
+            "action": "adjust_copper_pour_clearance",
+            "x": x,
+            "y": y,
+            "clearance_mm": clearance_mm
+        })
+    
+    def adjust_copper_pour_clearance_by_net(self, net: str, clearance_mm: float = 0.4) -> Dict[str, Any]:
+        """
+        Adjust copper pour clearance for all pours on a specific net.
+        
+        Args:
+            net: Net name (e.g., "GND", "VCC")
+            clearance_mm: New clearance value in mm (default 0.4mm)
+            
+        Returns:
+            Result dict with success/error
+        """
+        return self._send_command({
+            "action": "adjust_copper_pour_clearance_by_net",
+            "net": net,
+            "clearance_mm": clearance_mm
+        })
+    
+    def rebuild_polygons(self) -> Dict[str, Any]:
+        """
+        Rebuild all polygons/copper pours on the PCB.
+        
+        Returns:
+            Result dict with success/error
+        """
+        return self._send_command({
+            "action": "rebuild_polygons"
+        })
+    
+    def repour_polygons(self) -> Dict[str, Any]:
+        """
+        Force repour of all polygons with updated clearances.
+        
+        Returns:
+            Result dict with success/error
+        """
+        return self._send_command({"action": "repour_polygons"})
+    
+    def export_copper_primitives(self) -> Dict[str, Any]:
+        """
+        Export actual poured copper primitives to copper_primitives.json.
+        
+        Returns:
+            Result dict with success/error
+        """
+        return self._send_command({"action": "export_copper_primitives"})
+    
     def run_drc(self) -> Dict[str, Any]:
         """
         Run Design Rule Check in Altium.
@@ -475,37 +613,3 @@ class AltiumScriptClient:
         return self._send_command(command)
 
 
-def test_server():
-    """Test the script server connection."""
-    print("Testing Altium Script Server Connection...")
-    print()
-    
-    client = AltiumScriptClient()
-    
-    # Show detected paths
-    print(f"Detected base path: {client.base_path}")
-    print(f"Command file: {client.command_file}")
-    print(f"Result file: {client.result_file}")
-    print(f"Command file exists: {client.command_file.exists()}")
-    print(f"Result file exists: {client.result_file.exists()}")
-    print()
-    
-    print("Sending ping command...")
-    if client.ping():
-        print("✓ Script server is running!")
-        return True
-    else:
-        print("✗ Script server not responding")
-        print()
-        print("Make sure you:")
-        print("1. Open Altium Designer")
-        print("2. Open a PCB document")
-        print("3. Run: DXP → Run Script → command_server.pas → StartServer")
-        print()
-        print("IMPORTANT: Check that the file paths shown above match")
-        print("the paths shown in Altium's StartServer message dialog!")
-        return False
-
-
-if __name__ == "__main__":
-    test_server()

@@ -12,10 +12,6 @@ NOT just a command executor - a design intelligence partner.
 from typing import Dict, Any, Optional, Tuple, Callable
 from llm_client import LLMClient
 from mcp_client import AltiumMCPClient
-from design_analyzer import DesignAnalyzer
-from layout_generator import LayoutGenerator, generate_layout_from_schematic
-from batch_executor import BatchExecutor, AutoLayoutExecutor
-from constraint_generator import ConstraintGenerator, generate_constraints_from_design
 import json
 import re
 import logging
@@ -36,10 +32,6 @@ class AgentOrchestrator:
     def __init__(self, llm_client: LLMClient, mcp_client: AltiumMCPClient):
         self.llm_client = llm_client
         self.mcp_client = mcp_client
-        self.design_analyzer = DesignAnalyzer(llm_client)
-        self.layout_generator = LayoutGenerator()
-        self.constraint_generator = ConstraintGenerator()
-        self.auto_executor = AutoLayoutExecutor(mcp_client)
         self.conversation_history = []
         self.current_analysis = None  # Cache for design analysis
         self.current_layout = None  # Cache for generated layout
@@ -52,8 +44,8 @@ class AgentOrchestrator:
         Process user query with design intelligence
         
         Args:
-            user_query: User's query
-            stream_callback: Optional callback function for streaming chunks (chunk_text) -> None
+            user_query: User query
+            stream_callback: Optional callback function for streaming chunks
         
         Returns:
             tuple: (response_text, status_message, is_execution)
@@ -294,7 +286,7 @@ class AgentOrchestrator:
             return response_text, status, is_execution
     
     def _summarize_pcb_info(self, pcb_info: Dict[str, Any] = None) -> str:
-        """Create a concise summary of PCB info to avoid token limits"""
+        # Create a concise summary of PCB info to avoid token limits
         if not pcb_info:
             return "No PCB info available"
         
@@ -357,7 +349,7 @@ class AgentOrchestrator:
             return f"PCB info available but could not summarize: {str(e)}"
     
     def _summarize_schematic_info(self, sch_info: Dict[str, Any] = None) -> str:
-        """Create a concise summary of schematic info"""
+        # Create a concise summary of schematic info
         if not sch_info:
             return "No schematic info available"
         
@@ -379,7 +371,7 @@ class AgentOrchestrator:
             return "Schematic info available but could not summarize"
     
     def _summarize_project_info(self, prj_info: Dict[str, Any] = None) -> str:
-        """Create a concise summary of project info"""
+        # Create a concise summary of project info
         if not prj_info:
             return "No project info available"
         
@@ -401,7 +393,7 @@ class AgentOrchestrator:
             return "Project info available but could not summarize"
     
     def _summarize_design_rules(self, rules_info: Dict[str, Any] = None) -> str:
-        """Create a concise summary of design rules"""
+        # Create a concise summary of design rules
         if not rules_info:
             return "No design rules available"
         
@@ -430,7 +422,7 @@ class AgentOrchestrator:
             return "Design rules available but could not summarize"
     
     def _summarize_board_config(self, board_config: Dict[str, Any] = None) -> str:
-        """Create a concise summary of board configuration"""
+        # Create a concise summary of board configuration
         if not board_config:
             return "No board configuration available"
         
@@ -447,7 +439,7 @@ class AgentOrchestrator:
             return "Board config available but could not summarize"
     
     def _summarize_verification(self, verification: Dict[str, Any] = None) -> str:
-        """Create a concise summary of verification report"""
+        # Create a concise summary of verification report
         if not verification:
             return "No verification report available"
         
@@ -474,7 +466,7 @@ class AgentOrchestrator:
             return "Verification report available but could not summarize"
     
     def _summarize_component_search(self, search_results: Dict[str, Any] = None) -> str:
-        """Create a concise summary of component search results"""
+        # Create a concise summary of component search results
         if not search_results:
             return "No component search results available"
         
@@ -495,7 +487,7 @@ class AgentOrchestrator:
             return "Component search results available but could not summarize"
     
     def _get_all_available_context(self) -> Dict[str, Any]:
-        """Get ALL available context data - returns dict of all data sources"""
+        # Get ALL available context data - returns dict of all data sources
         context = {}
         
         if not self.mcp_client.connected:
@@ -514,7 +506,7 @@ class AgentOrchestrator:
         return context
     
     def _get_all_context(self) -> str:
-        """Get context from all available data sources as formatted string"""
+        # Get context from all available data sources as formatted string
         context = ""
         all_data = self._get_all_available_context()
         
@@ -549,7 +541,7 @@ class AgentOrchestrator:
         return context if context else "No design data available"
     
     def _determine_intent(self, query: str, all_context: Dict[str, Any] = None) -> Dict[str, Any]:
-        """Use LLM to determine if query requires execution or just answering"""
+        # Use LLM to determine if query requires execution or just answering
         if all_context is None:
             all_context = {}
         
@@ -638,7 +630,7 @@ Default to answering questions using the loaded PCB data."""
         return self._fallback_intent_detection(query)
     
     def _fallback_intent_detection(self, query: str) -> Dict[str, Any]:
-        """Fallback intent detection using keywords"""
+        # Fallback intent detection using keywords
         query_lower = query.lower()
         
         # Check for artifact queries
@@ -687,7 +679,7 @@ Default to answering questions using the loaded PCB data."""
             }
     
     def _prepare_command_confirmation(self, intent: Dict[str, Any], pcb_info: Dict[str, Any] = None) -> Dict[str, Any]:
-        """Prepare command confirmation message - returns confirmation request instead of executing"""
+        # Prepare command confirmation message - returns confirmation request instead of executing
         logger.info(f"Preparing command confirmation with intent: {intent}")
         
         if not self.mcp_client.connected:
@@ -727,7 +719,7 @@ Default to answering questions using the loaded PCB data."""
             }
     
     def _generate_confirmation_message(self, command: str, parameters: Dict[str, Any], user_query: str = "") -> str:
-        """Generate a natural confirmation message for the command"""
+        # Generate a natural confirmation message for the command
         # Map commands to friendly names
         command_names = {
             "create_project": "create a new project",
@@ -761,7 +753,7 @@ Default to answering questions using the loaded PCB data."""
         return f"Are you going to {friendly_action}{param_text}?"
     
     def execute_pending_command(self) -> Dict[str, Any]:
-        """Execute the pending command after user confirmation"""
+        # Execute the pending command after user confirmation
         if not self.pending_command:
             return {
                 "status": "error",
@@ -778,7 +770,7 @@ Default to answering questions using the loaded PCB data."""
         return self._execute_command(intent, pcb_info)
     
     def _execute_command(self, intent: Dict[str, Any], pcb_info: Dict[str, Any] = None) -> Dict[str, Any]:
-        """Execute command via MCP - routes to PCB or Schematic based on command type"""
+        # Execute command via MCP - routes to PCB or Schematic based on command type
         logger.info(f"Executing command with intent: {intent}")
         
         if not self.mcp_client.connected:
@@ -878,7 +870,7 @@ Default to answering questions using the loaded PCB data."""
             }
     
     def _get_relevant_context_data(self, query: str, all_context: Dict[str, Any] = None) -> str:
-        """Extract only relevant data based on query to save tokens - uses ALL available context"""
+        # Extract only relevant data based on query to save tokens - uses ALL available context
         if not all_context:
             all_context = {}
         
@@ -988,7 +980,7 @@ Default to answering questions using the loaded PCB data."""
         return context
     
     def _get_relevant_pcb_data(self, query: str, pcb_info: Dict[str, Any] = None) -> str:
-        """Extract only relevant PCB data based on query to save tokens"""
+        # Extract only relevant PCB data based on query to save tokens
         if not pcb_info:
             return "No PCB information available."
         
@@ -1145,7 +1137,7 @@ Default to answering questions using the loaded PCB data."""
         return context
     
     def _generate_response(self, query: str, all_context: Dict[str, Any] = None) -> str:
-        """Generate concise, short response using all available context"""
+        # Generate concise, short response using all available context
         if all_context is None:
             all_context = {}
         
@@ -1184,7 +1176,7 @@ Answer questions directly using this data. If no PCB is loaded, tell user to upl
         return response or "I'm sorry, I couldn't generate a response. Please try again."
     
     def _generate_response_stream(self, query: str, all_context: Dict[str, Any] = None, stream_callback: Callable[[str], None] = None) -> str:
-        """Generate conversational response with streaming using all available context"""
+        # Generate conversational response with streaming using all available context
         if all_context is None:
             all_context = {}
         
@@ -1230,9 +1222,7 @@ Answer questions directly using this data. If no PCB is loaded, tell user to upl
     
     def _generate_command_response(self, user_query: str, command: str, parameters: Dict[str, Any], 
                                    script_name: str, procedure_name: str, command_type: str) -> str:
-        """
-        Generate natural response for command execution
-        """
+        """Generate natural response for command execution"""
         system_prompt = f"""You are a helpful PCB design assistant. The user requested: {command}
 
 Parameters: {json.dumps(parameters, indent=2)}
@@ -1257,7 +1247,7 @@ NEVER mention Altium scripts, File → Run Script, or .pas files."""
             return f"✅ {command} completed with {json.dumps(parameters)}"
     
     def clear_history(self):
-        """Clear conversation history"""
+        # Clear conversation history
         self.conversation_history = []
         self.current_analysis = None
     
@@ -1267,127 +1257,133 @@ NEVER mention Altium scripts, File → Run Script, or .pas files."""
     
     def _perform_design_analysis(self, query: str, all_context: Dict[str, Any], 
                                   intent: Dict[str, Any]) -> str:
-        """
-        Perform intelligent design analysis using the DesignAnalyzer.
-        Identifies functional blocks, signals, and design patterns.
-        """
+        """Perform basic design analysis. Identifies basic design information and patterns."""
         analysis_type = intent.get("analysis_type", "full")
         
-        # Load data into analyzer
-        if all_context.get("schematic_info"):
-            self.design_analyzer.load_schematic_data(all_context["schematic_info"])
-        if all_context.get("pcb_info"):
-            self.design_analyzer.load_pcb_data(all_context["pcb_info"])
+        # Basic analysis using available data
+        pcb_info = all_context.get("pcb_info", {})
         
-        # Perform analysis
-        analysis = self.design_analyzer.analyze_schematic()
-        
-        # Check for errors
-        if isinstance(analysis, dict) and "error" in analysis:
+        if not pcb_info:
             return (
                 "I need PCB data to analyze your design.\n\n"
-                "Please upload your .PcbDoc file using the 📁 button.\n"
-                "The Python file reader will extract all component, net, and layer data automatically."
+                "Please load a PCB file first using the Load PCB button."
             )
         
-        self.current_analysis = analysis  # Cache for follow-up questions
+        # Extract basic information
+        components = pcb_info.get("components", [])
+        nets = pcb_info.get("nets", [])
+        tracks = pcb_info.get("tracks", [])
         
-        # Format response using LLM for natural language
-        prompt = f"""Based on this design analysis, provide a clear summary for the PCB engineer.
-
-User Question: {query}
-
-Analysis Results:
-{json.dumps(analysis, indent=2)}
-
-Provide a professional, insightful response that:
-1. Summarizes the key findings
-2. Identifies the functional blocks found
-3. Highlights critical components and their placement requirements
-4. Notes any potential issues or considerations
-5. Suggests next steps if appropriate
-
-Be specific and technical - this is for a professional PCB engineer."""
-
-        messages = [
-            {"role": "system", "content": "You are an expert PCB design engineer providing design analysis insights."},
-            {"role": "user", "content": prompt}
-        ]
+        analysis_text = f"## Design Analysis\n\n"
+        analysis_text += f"**Board Statistics:**\n"
+        analysis_text += f"- Components: {len(components)}\n"
+        analysis_text += f"- Nets: {len(nets)}\n" 
+        analysis_text += f"- Tracks: {len(tracks)}\n\n"
         
-        response = self.llm_client.chat(messages, temperature=0.5)
-        return response or "Analysis complete. Please check the design data."
+        # Identify power/ground nets
+        power_nets = [net for net in nets if any(keyword in net.get('name', '').upper() 
+                     for keyword in ['VCC', 'VDD', 'POWER', '+3V', '+5V', '+12V'])]
+        ground_nets = [net for net in nets if any(keyword in net.get('name', '').upper() 
+                      for keyword in ['GND', 'GROUND', 'VSS'])]
+        
+        if power_nets or ground_nets:
+            analysis_text += f"**Power Distribution:**\n"
+            if power_nets:
+                analysis_text += f"- Power nets: {len(power_nets)}\n"
+            if ground_nets:
+                analysis_text += f"- Ground nets: {len(ground_nets)}\n"
+        
+        return analysis_text
     
     def _generate_placement_strategy(self, query: str, all_context: Dict[str, Any]) -> str:
-        """
-        Generate intelligent placement strategy recommendations.
-        Uses schematic topology to suggest component placement.
-        """
-        # Load data into analyzer
-        if all_context.get("schematic_info"):
-            self.design_analyzer.load_schematic_data(all_context["schematic_info"])
-        if all_context.get("pcb_info"):
-            self.design_analyzer.load_pcb_data(all_context["pcb_info"])
+        """Generate basic placement strategy recommendations."""
+        pcb_info = all_context.get("pcb_info", {})
         
-        # Generate placement strategy
-        strategy = self.design_analyzer.generate_placement_strategy()
+        if not pcb_info:
+            return "I need PCB data to generate a placement strategy. Please load a PCB file first."
         
-        if "error" in strategy:
-            return "I need PCB data to generate a placement strategy. Please upload your .PcbDoc file using the 📁 button."
+        components = pcb_info.get("components", [])
         
-        # Format response
-        prompt = f"""Based on this placement strategy analysis, provide clear recommendations.
-
-User Request: {query}
-
-Strategy Analysis:
-{json.dumps(strategy, indent=2)}
-
-Provide actionable placement recommendations that:
-1. Explain the recommended board zones and why
-2. List the placement order with priorities
-3. Highlight critical spacing requirements
-4. Suggest routing priorities
-5. Note any special considerations
-
-Be specific with measurements and component references."""
-
-        messages = [
-            {"role": "system", "content": "You are an expert PCB layout engineer providing placement strategy recommendations."},
-            {"role": "user", "content": prompt}
-        ]
+        if not components:
+            return "No components found in the PCB data."
         
-        response = self.llm_client.chat(messages, temperature=0.5)
-        return response or "Strategy generated. Please review the placement recommendations."
+        # Basic placement recommendations
+        strategy_text = f"## Placement Strategy\n\n"
+        strategy_text += f"**Component Count:** {len(components)}\n\n"
+        
+        # Group components by type
+        component_types = {}
+        for comp in components:
+            footprint = comp.get('footprint', 'Unknown')
+            if footprint not in component_types:
+                component_types[footprint] = []
+            component_types[footprint].append(comp.get('designator', 'Unknown'))
+        
+        strategy_text += f"**Component Types:**\n"
+        for footprint, designators in component_types.items():
+            strategy_text += f"- {footprint}: {len(designators)} components ({', '.join(designators[:5])}{'...' if len(designators) > 5 else ''})\n"
+        
+        strategy_text += f"\n**Basic Placement Guidelines:**\n"
+        strategy_text += f"1. Place power components first (regulators, capacitors)\n"
+        strategy_text += f"2. Group related functional blocks together\n"
+        strategy_text += f"3. Keep high-speed signals short\n"
+        strategy_text += f"4. Maintain proper clearances\n"
+        
+        return strategy_text
     
     def _perform_design_review(self, query: str, all_context: Dict[str, Any]) -> str:
-        """
-        Perform design review to identify issues and suggest improvements.
-        Checks for missing components, design rule violations, etc.
-        """
-        # Load data into analyzer
-        if all_context.get("schematic_info"):
-            self.design_analyzer.load_schematic_data(all_context["schematic_info"])
-        if all_context.get("pcb_info"):
-            self.design_analyzer.load_pcb_data(all_context["pcb_info"])
+        """Perform basic design review to identify issues and suggest improvements."""
+        pcb_info = all_context.get("pcb_info", {})
         
-        # Perform review
-        review = self.design_analyzer.review_design()
+        if not pcb_info:
+            return "I need PCB data to perform a design review. Please load a PCB file first."
         
-        # Also get verification data if available
-        verification = all_context.get("verification_report", {})
+        # Basic review using available data
+        components = pcb_info.get("components", [])
+        nets = pcb_info.get("nets", [])
+        tracks = pcb_info.get("tracks", [])
+        rules = pcb_info.get("rules", [])
         
-        # Format response
-        prompt = f"""Based on this design review, provide a comprehensive assessment.
+        review_text = f"## Design Review\n\n"
+        
+        # Basic statistics
+        review_text += f"**Design Statistics:**\n"
+        review_text += f"- Components: {len(components)}\n"
+        review_text += f"- Nets: {len(nets)}\n"
+        review_text += f"- Tracks: {len(tracks)}\n"
+        review_text += f"- Rules: {len(rules)}\n\n"
+        
+        # Check for basic issues
+        issues = []
+        
+        # Check for unconnected nets
+        unconnected_nets = [net for net in nets if not any(track.get('net') == net.get('name') for track in tracks)]
+        if unconnected_nets:
+            issues.append(f"Found {len(unconnected_nets)} potentially unrouted nets")
+        
+        # Check for missing power/ground connections
+        power_nets = [net for net in nets if any(keyword in net.get('name', '').upper() 
+                     for keyword in ['VCC', 'VDD', 'POWER', '+3V', '+5V', '+12V'])]
+        ground_nets = [net for net in nets if any(keyword in net.get('name', '').upper() 
+                      for keyword in ['GND', 'GROUND', 'VSS'])]
+        
+        if not power_nets:
+            issues.append("No power nets detected - check power distribution")
+        if not ground_nets:
+            issues.append("No ground nets detected - check ground connections")
+        
+        if issues:
+            review_text += f"**Potential Issues:**\n"
+            for issue in issues:
+                review_text += f"- {issue}\n"
+        else:
+            review_text += f"**Status:** No obvious issues detected\n"
+        
+        return review_text
 
-User Request: {query}
-
-Design Review Results:
-{json.dumps(review, indent=2)}
-
-Verification Data:
-{json.dumps(verification, indent=2) if verification else "No verification data available"}
-
-Provide a professional design review that:
+    def _generate_design_review(self, query: str, all_context: Dict[str, Any]) -> str:
+        # Generate comprehensive design review
+        prompt = f"""Provide a professional design review that:
 1. Lists any issues found (warnings, errors)
 2. Explains why each issue matters
 3. Provides specific recommendations to fix each issue
@@ -1405,102 +1401,58 @@ Be constructive and specific - help the engineer improve the design."""
         return response or "Review complete. Please check the findings."
     
     def _generate_autonomous_layout(self, query: str, all_context: Dict[str, Any]) -> str:
-        """
-        Generate a complete PCB layout autonomously.
-        This is the core capability that converts schematic → PCB layout.
-        """
+        """Generate basic layout recommendations."""
         # Check for required data
-        schematic_info = all_context.get("schematic_info")
         pcb_info = all_context.get("pcb_info")
         
-        if not schematic_info and not pcb_info:
+        if not pcb_info:
             return (
-                "I need PCB data to generate a layout.\n\n"
-                "Please upload your .PcbDoc file using the 📁 button.\n"
-                "The Python file reader will extract all data automatically - no scripts needed!"
+                "I need PCB data to generate layout recommendations.\n\n"
+                "Please load a PCB file first using the Load PCB button."
             )
         
-        # Get board size from PCB info or use defaults
-        board_width = 100.0
-        board_height = 80.0
+        # Get board size and components
+        board_size = pcb_info.get("board_size", {})
+        board_width = board_size.get("width_mm", 100.0)
+        board_height = board_size.get("height_mm", 80.0)
         
-        if pcb_info:
-            board_size = pcb_info.get("board_size", {})
-            board_width = board_size.get("width_mm", 100.0)
-            board_height = board_size.get("height_mm", 80.0)
-        
-        # Get components from schematic or PCB
-        components = []
-        if schematic_info:
-            components = schematic_info.get("components", [])
-        elif pcb_info:
-            components = pcb_info.get("components", [])
+        components = pcb_info.get("components", [])
         
         if not components:
-            return "No components found in the design data. Please ensure your schematic has components and export the data again."
+            return "No components found in the PCB data."
         
-        # First, analyze the design
-        self.design_analyzer.load_schematic_data(schematic_info or {})
-        if pcb_info:
-            self.design_analyzer.load_pcb_data(pcb_info)
+        # Generate basic layout recommendations
+        layout_text = f"## Layout Recommendations\n\n"
+        layout_text += f"**Board Size:** {board_width:.1f} x {board_height:.1f} mm\n"
+        layout_text += f"**Components:** {len(components)}\n\n"
         
-        analysis = self.design_analyzer.analyze_schematic()
+        # Basic placement suggestions
+        layout_text += f"**Placement Strategy:**\n"
+        layout_text += f"1. Place power management components first\n"
+        layout_text += f"2. Group functional blocks together\n"
+        layout_text += f"3. Keep critical signals short\n"
+        layout_text += f"4. Maintain proper component spacing\n\n"
         
-        # Generate layout
-        self.layout_generator.set_board_size(board_width, board_height)
-        placements = self.layout_generator.generate_layout(components)
-        constraints = self.layout_generator.generate_constraints(analysis.get("signal_analysis"))
+        # Component density analysis
+        board_area = board_width * board_height
+        component_density = len(components) / board_area * 100
         
-        # Generate batch execution
-        commands = self.layout_generator.generate_placement_commands()
-        execution_result = self.auto_executor.execute_layout(commands, method="batch_script")
+        layout_text += f"**Component Density:** {component_density:.1f} components per cm²\n"
         
-        # Cache for follow-up
-        self.current_layout = {
-            "placements": placements,
-            "constraints": constraints,
-            "execution": execution_result
-        }
+        if component_density > 2.0:
+            layout_text += f"⚠️ High component density - consider larger board or fewer components\n"
+        elif component_density < 0.5:
+            layout_text += f"✅ Good component density - plenty of routing space\n"
+        else:
+            layout_text += f"✅ Moderate component density - should be manageable\n"
         
-        # Generate response
-        summary = self.layout_generator.get_placement_summary()
-        
-        response = f"""## Layout Generated Successfully
+        return layout_text
 
-I've analyzed your design and generated an initial PCB layout.
-
-### Summary
-- **Components placed:** {summary['total_components']}
-- **Board size:** {summary['board_size']['width_mm']}mm x {summary['board_size']['height_mm']}mm
-- **Design constraints:** {summary['constraints_count']} rules generated
-
-### Functional Block Placement
-"""
-        
-        for block, count in summary.get("by_block", {}).items():
-            response += f"- **{block.replace('_', ' ').title()}:** {count} components\n"
-        
-        response += f"""
-### Generated Files
-- **Batch Script:** `{execution_result.get('files', {}).get('script', 'batch_placement.pas')}`
-
-### To Apply the Layout
-
-{execution_result.get('instructions', '')}
-
-### What's Next?
-1. Review the placement in Altium
-2. Adjust any components that need fine-tuning
-3. Ask me to "review the design" for any issues
-4. Start routing when satisfied with placement
-
-Would you like me to explain the placement strategy or make any adjustments?
-"""
         
         return response
     
     def _handle_routing(self, query: str, intent: Dict[str, Any]) -> str:
-        """Handle routing commands via MCP server"""
+        # Handle routing commands via MCP server
         import requests
         import re
         
@@ -1688,7 +1640,7 @@ Would you like me to explain the placement strategy or make any adjustments?
             return f"Error connecting to MCP server: {str(e)}\n\nMake sure the MCP server is running (python mcp_server.py)"
     
     def _handle_drc(self, query: str) -> str:
-        """Handle DRC commands via MCP server"""
+        # Handle DRC commands via MCP server
         import requests
         
         try:
@@ -1725,7 +1677,7 @@ Would you like me to explain the placement strategy or make any adjustments?
             return f"Error connecting to MCP server: {str(e)}\n\nMake sure the MCP server is running (python mcp_server.py)"
     
     def _list_pcb_issues(self) -> str:
-        """List all issues found in current PCB"""
+        # List all issues found in current PCB
         import requests
         
         try:
@@ -1776,7 +1728,7 @@ Would you like me to explain the placement strategy or make any adjustments?
             return f"Error: {str(e)}"
     
     def _suggest_solutions(self) -> str:
-        """Suggest multiple solutions for the issues"""
+        # Suggest multiple solutions for the issues
         import requests
         
         try:
@@ -1838,7 +1790,7 @@ Would you like me to explain the placement strategy or make any adjustments?
             return f"Error: {str(e)}"
     
     def _explain_error(self, query: str) -> str:
-        """Explain why something is an error with reasoning"""
+        # Explain why something is an error with reasoning
         query_lower = query.lower()
         
         # Common PCB design error explanations
@@ -1901,7 +1853,7 @@ Would you like me to explain the placement strategy or make any adjustments?
         return "Please specify which issue you want me to explain. For example: 'Why is unrouted power an error?'"
     
     def _apply_selected_solution(self, query: str) -> str:
-        """Apply a specific selected solution"""
+        # Apply a specific selected solution
         import requests
         import re
         
@@ -1956,7 +1908,7 @@ Would you like me to explain the placement strategy or make any adjustments?
             return f"Error: {str(e)}"
     
     def _apply_recommendations(self) -> str:
-        """Apply the recommended changes based on analysis"""
+        # Apply the recommended changes based on analysis
         import requests
         
         try:
@@ -2016,10 +1968,8 @@ Would you like me to explain the placement strategy or make any adjustments?
             return f"Error applying recommendations: {str(e)}"
     
     def _move_component_direct(self, comp_name: str, new_x: float, new_y: float, all_context: Dict[str, Any]) -> str:
-        """
-        Move a component - creates a command for Altium script server.
-        Also updates the artifact store.
-        """
+        # Move a component - creates a command for Altium script server.
+        # Also updates the artifact store.
         import requests
         from tools.altium_script_client import AltiumScriptClient
         
@@ -2083,10 +2033,8 @@ Would you like me to explain the placement strategy or make any adjustments?
         return response
     
     def _get_component_location_direct(self, comp_name: str, all_context: Dict[str, Any]) -> Optional[str]:
-        """
-        Get component location DIRECTLY from data - no LLM hallucination.
-        Returns formatted response or None if component not found.
-        """
+        # Get component location DIRECTLY from data - no LLM hallucination.
+        # Returns formatted response or None if component not found.
         pcb_info = all_context.get("pcb_info", {})
         components = pcb_info.get("components", [])
         
@@ -2127,7 +2075,7 @@ Would you like me to explain the placement strategy or make any adjustments?
         return response
     
     def _check_altium_drc_result(self) -> str:
-        """Run Python DRC check and generate AI summary"""
+        # Run Python DRC check and generate AI summary
         import requests
         
         try:
@@ -2216,45 +2164,37 @@ Would you like me to explain the placement strategy or make any adjustments?
                    "Make sure the MCP server is running (python mcp_server.py)"
     
     def _generate_drc_ai_summary(self, report_data: Dict[str, Any]) -> str:
-        """Generate AI-powered summary and recommendations from DRC report"""
+        # Generate AI-powered summary and recommendations from DRC report
         violations = report_data.get("total_violations", 0)
         warnings = report_data.get("total_warnings", 0)
         violations_by_type = report_data.get("violations_by_type", {})
         detailed_violations = report_data.get("detailed_violations", [])
         
         # Build context for LLM
-        context = f"""
-DRC Report Summary:
-- Total Violations: {violations}
-- Total Warnings: {warnings}
-- Violation Types: {', '.join(violations_by_type.keys())}
-
-Top Violations:
-"""
+        context = "DRC Report Summary:\n"
+        context += f"- Total Violations: {violations}\n"
+        context += f"- Total Warnings: {warnings}\n"
+        context += f"- Violation Types: {', '.join(violations_by_type.keys())}\n\n"
+        context += "Top Violations:\n"
         for i, viol in enumerate(detailed_violations[:10], 1):
             context += f"{i}. {viol.get('type', 'unknown')}: {viol.get('message', '')[:80]}\n"
         
         # Create prompt for LLM
-        prompt = f"""You are a PCB design expert analyzing a Design Rule Check (DRC) report from Altium Designer.
-
-{context}
-
-The user can already see the raw DRC report in Altium. Your job is to provide VALUE-ADDED intelligence:
-
-1. **Interpretation**: What do these violations actually mean? What's the impact?
-2. **Prioritization**: Which violations should be fixed first and why?
-3. **Specific Solutions**: Not just "fix clearance violation" but "move component C135 2mm to the right"
-4. **Context**: How do these violations relate to each other? Are there patterns?
-5. **Actionable Steps**: Concrete commands the user can give you to fix issues
-
-Provide a concise, actionable summary with:
-- Overall assessment (1-2 sentences)
-- Top 3 priority issues to address first (with specific component/net names)
-- Specific fix recommendations (e.g., "move C135 to position 50, 60")
-- Patterns or related issues
-- Next steps
-
-Be specific and actionable. The user wants to know HOW to fix things, not just WHAT is wrong."""
+        prompt = "You are a PCB design expert analyzing a Design Rule Check (DRC) report from Altium Designer.\n\n"
+        prompt += context + "\n\n"
+        prompt += "The user can already see the raw DRC report in Altium. Your job is to provide VALUE-ADDED intelligence:\n\n"
+        prompt += "1. Interpretation: What do these violations actually mean? What is the impact?\n"
+        prompt += "2. Prioritization: Which violations should be fixed first and why?\n"
+        prompt += "3. Specific Solutions: Not just fix clearance violation but move component C135 away from other components\n"
+        prompt += "4. Context: How do these violations relate to each other? Are there patterns?\n"
+        prompt += "5. Actionable Steps: Concrete commands the user can give you to fix issues\n\n"
+        prompt += "Provide a concise actionable summary with:\n"
+        prompt += "- Overall assessment (1-2 sentences)\n"
+        prompt += "- Top 3 priority issues to address first (with specific component/net names)\n"
+        prompt += "- Specific fix recommendations (e.g. move C135 to position 50 60)\n"
+        prompt += "- Patterns or related issues\n"
+        prompt += "- Next steps\n\n"
+        prompt += "Be specific and actionable. The user wants to know HOW to fix things not just WHAT is wrong."
 
         try:
             # Use LLM to generate summary
@@ -2270,7 +2210,7 @@ Be specific and actionable. The user wants to know HOW to fix things, not just W
     
     def _generate_fallback_recommendations(self, violations_by_type: Dict[str, int], 
                                          detailed_violations: List[Dict[str, Any]]) -> str:
-        """Generate rule-based recommendations if LLM fails"""
+        # Generate rule-based recommendations if LLM fails
         recommendations = []
         
         if "clearance" in str(violations_by_type).lower():
@@ -2314,7 +2254,7 @@ Be specific and actionable. The user wants to know HOW to fix things, not just W
         return "\n".join(recommendations) + "\n"
     
     def _handle_design_rules_query(self, query: str, all_context: Dict[str, Any]) -> str:
-        """Handle design rules queries - supports specific questions like 'what is minimum trace width?'"""
+        # Handle design rules queries - supports specific questions like 'what is minimum trace width?'
         query_lower = query.lower()
         
         # Check if asking for specific rule value
@@ -2577,7 +2517,7 @@ Be specific and actionable. The user wants to know HOW to fix things, not just W
         return response
     
     def _handle_artifact_query(self, query: str) -> str:
-        """Handle artifact info queries via MCP server"""
+        # Handle artifact info queries via MCP server
         import requests
         
         try:
@@ -2608,3 +2548,4 @@ Be specific and actionable. The user wants to know HOW to fix things, not just W
         except requests.exceptions.RequestException as e:
             return f"Error connecting to MCP server: {str(e)}"
 
+# End of file

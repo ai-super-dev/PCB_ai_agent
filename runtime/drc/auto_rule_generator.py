@@ -13,10 +13,23 @@ from core.ir.gir import GeometryIR
 from core.ir.cir import ConstraintIR, Rule, RuleType, RuleScope, RuleParams, Netclass, NetclassDefaults
 import sys
 from pathlib import Path
-# Import constraint generator from parent directory
+# Import core modules
+import sys
+from pathlib import Path
+from typing import Dict, List, Any, Optional
+from enum import Enum
+
+# Add parent directories to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
-from constraint_generator import ConstraintGenerator, NetClassType
 import json
+
+# Define NetClassType locally since constraint_generator was removed
+class NetClassType(Enum):
+    POWER = "power"
+    GROUND = "ground" 
+    SIGNAL = "signal"
+    CLOCK = "clock"
+    DIFFERENTIAL = "differential"
 
 
 class AutoDRCRuleGenerator:
@@ -31,7 +44,6 @@ class AutoDRCRuleGenerator:
     """
     
     def __init__(self):
-        self.constraint_generator = ConstraintGenerator()
         self.rule_history = []  # Track rule changes for learning
         
     def generate_rules_from_pcb(self, gir: GeometryIR, 
@@ -46,15 +58,28 @@ class AutoDRCRuleGenerator:
         Returns:
             ConstraintIR with generated rules
         """
-        # Step 1: Analyze nets and classify them
-        nets_data = [{"name": net.name} for net in gir.nets]
-        classified_nets = self.constraint_generator.analyze_nets(nets_data)
+        # Create basic constraint IR with default rules
+        constraint_ir = ConstraintIR()
         
-        # Step 2: Generate net classes
-        net_classes = self.constraint_generator.generate_net_classes(classified_nets)
+        # Add basic clearance rules
+        clearance_rule = Rule(
+            name="Basic_Clearance",
+            rule_type=RuleType.CLEARANCE,
+            scope=RuleScope(),
+            parameters={"clearance_mm": 0.2}
+        )
+        constraint_ir.rules.append(clearance_rule)
         
-        # Step 3: Generate rules using constraint generator
-        self.constraint_generator.generate_rules(classified_nets)
+        # Add basic width rules
+        width_rule = Rule(
+            name="Basic_Width", 
+            rule_type=RuleType.WIDTH,
+            scope=RuleScope(),
+            parameters={"min_width_mm": 0.254, "max_width_mm": 15.0, "preferred_width_mm": 0.838}
+        )
+        constraint_ir.rules.append(width_rule)
+        
+        return constraint_ir
         
         # Step 4: Convert to C-IR format
         rules = []
@@ -79,19 +104,26 @@ class AutoDRCRuleGenerator:
             )
             netclasses.append(netclass)
         
-        # Convert rules
-        for rule in self.constraint_generator.rules:
-            # Determine scope
-            scope = RuleScope()
-            if rule.scope.startswith("InNetClass"):
-                # Extract net class name from scope string
-                import re
-                match = re.search(r"InNetClass\('([^']+)'\)", rule.scope)
-                if match:
-                    scope.netclass = match.group(1)
-            elif rule.scope != "All":
-                # Try to find matching nets
-                pass  # Keep default scope for "All"
+        # Convert basic rules (simplified since constraint_generator was removed)
+        # Add the basic rules we created earlier
+        for rule in constraint_ir.rules:
+            # Convert to C-IR format
+            if rule.rule_type == RuleType.CLEARANCE:
+                c_rule = Rule(
+                    name=rule.name,
+                    rule_type=RuleType.CLEARANCE,
+                    scope=RuleScope(),
+                    parameters=rule.parameters
+                )
+                constraint_ir.rules.append(c_rule)
+            elif rule.rule_type == RuleType.WIDTH:
+                c_rule = Rule(
+                    name=rule.name,
+                    rule_type=RuleType.WIDTH,
+                    scope=RuleScope(),
+                    parameters=rule.parameters
+                )
+                constraint_ir.rules.append(c_rule)
             
             # Convert rule type
             rule_type_map = {
@@ -311,19 +343,28 @@ class AutoDRCRuleGenerator:
         """
         suggestions = []
         
-        # Analyze nets
-        nets_data = [{"name": net.name} for net in gir.nets]
-        classified_nets = self.constraint_generator.analyze_nets(nets_data)
+        # Simple analysis - look for power/ground nets by name
+        power_nets = [net for net in gir.nets if any(keyword in net.name.upper() 
+                     for keyword in ['VCC', 'VDD', 'POWER', '+3V', '+5V', '+12V'])]
+        ground_nets = [net for net in gir.nets if any(keyword in net.name.upper() 
+                      for keyword in ['GND', 'GROUND', 'VSS'])]
         
-        # Suggest net class rules if we have power/ground nets but no specific rules
-        if classified_nets.get(NetClassType.POWER.value) and not any(
-            nc.name == NetClassType.POWER.value for nc in self.constraint_generator.net_classes
-        ):
+        # Suggest power net class if we have power nets
+        if power_nets:
             suggestions.append({
                 "type": "net_class",
                 "priority": "high",
-                "message": f"Found {len(classified_nets[NetClassType.POWER.value])} power nets. Consider creating a Power net class with wider trace width rules.",
+                "message": f"Found {len(power_nets)} power nets. Consider creating a Power net class with wider trace width rules.",
                 "action": "create_power_netclass"
+            })
+        
+        # Suggest ground net class if we have ground nets
+        if ground_nets:
+            suggestions.append({
+                "type": "net_class", 
+                "priority": "high",
+                "message": f"Found {len(ground_nets)} ground nets. Consider creating a Ground net class with wider trace width rules.",
+                "action": "create_ground_netclass"
             })
         
         # Suggest high-speed rules if we have high-speed nets

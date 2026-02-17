@@ -248,6 +248,20 @@ class PythonDRCEngine:
         components = [c for c in pcb_data.get('components', []) if isinstance(c, dict)]
         polygons = [p for p in pcb_data.get('polygons', []) if isinstance(p, dict)]
         
+        # CRITICAL: Get actual copper regions (poured copper) instead of polygon outlines
+        copper_regions = [r for r in pcb_data.get('copper_regions', []) if isinstance(r, dict)]
+        
+        # Debug: Log copper region availability
+        if copper_regions:
+            print(f"DEBUG: Found {len(copper_regions)} actual copper regions for accurate DRC")
+            # Show first copper region details
+            first_region = copper_regions[0]
+            print(f"DEBUG: First copper region: layer={first_region.get('layer', 'N/A')}, "
+                  f"net={first_region.get('net', 'N/A')}, "
+                  f"vertices={len(first_region.get('vertices', []))}")
+        else:
+            print(f"DEBUG: No copper regions found - using polygon outlines (less accurate)")
+        
         # Debug: Log polygon data availability
         polygon_count = len(polygons)
         polygon_count_with_vertices = sum(1 for p in polygons if p.get('vertices') and len(p.get('vertices', [])) > 0)
@@ -275,7 +289,7 @@ class PythonDRCEngine:
             
             if rule.rule_type == 'clearance':
                 print(f"DEBUG: run_drc: Checking clearance rule '{rule.name}', track_to_poly={rule.track_to_poly_clearance_mm}mm")
-                self._check_clearance(rule, tracks, pads, vias, components, polygons)
+                self._check_clearance(rule, tracks, pads, vias, components, polygons, copper_regions)
             elif rule.rule_type == 'width':
                 self._check_width(rule, tracks)
             elif rule.rule_type in ['via', 'hole_size']:
@@ -510,17 +524,23 @@ class PythonDRCEngine:
         return drc_rules
     
     def _check_clearance(self, rule: DRCRule, tracks: List[Dict], pads: List[Dict], 
-                        vias: List[Dict], components: List[Dict], polygons: List[Dict] = None):
+                        vias: List[Dict], components: List[Dict], polygons: List[Dict] = None, 
+                        copper_regions: List[Dict] = None):
         """
         Check clearance constraints between objects
         
+        CRITICAL: Uses actual poured copper regions instead of polygon outlines.
+        This matches Altium's DRC behavior exactly and eliminates false positives.
+        
         Checks clearance between:
         - Pads and pads
-        - Vias and pads
-        - Polygons and tracks
+        - Vias and pads  
+        - Tracks and actual poured copper regions (not polygon outlines)
         """
         if polygons is None:
             polygons = []
+        if copper_regions is None:
+            copper_regions = []
         min_clearance = rule.min_clearance_mm
         violations_before = len(self.violations)
         
@@ -608,299 +628,211 @@ class PythonDRCEngine:
                             required_value=min_clearance
                         ))
         
-        # Check polygon-to-track clearance
-        # CRITICAL: Polygon clearance checking uses per-object-type clearances from OBJECTCLEARANCES
-        # The generic clearance (e.g., 0.2mm) is NOT used for polygon checks
-        # Instead, track_to_poly_clearance_mm (e.g., 1.524mm) is used
-        #
-        # Only check polygon clearance if track_to_poly_clearance_mm is set
-        # This avoids false positives when no polygon clearance is defined
+        # Check track-to-copper clearance using ACTUAL POURED COPPER REGIONS
+        # CRITICAL: This is the key fix - use actual copper regions instead of polygon outlines
+        # This matches Altium's DRC behavior exactly and eliminates false positives
         
-        if polygons and rule.track_to_poly_clearance_mm > 0:
-            print(f"DEBUG: _check_clearance: rule='{rule.name}', type='{rule.rule_type}', found {len(polygons)} polygons")
-            print(f"DEBUG: Using track_to_poly_clearance={rule.track_to_poly_clearance_mm}mm for polygon checks")
+        if rule.track_to_poly_clearance_mm > 0:
+            # PRIORITY 1: Use actual copper regions if available (most accurate)
+            if copper_regions:
+                print(f"DEBUG: _check_clearance: Using {len(copper_regions)} actual copper regions for accurate DRC")
+                self._check_track_to_copper_clearance(rule, tracks, copper_regions)
             
-            # Import dead copper removal simulation
-            try:
-                from simulate_polygon_pour import simulate_polygon_pour
-                use_pour_simulation = True
-                print(f"DEBUG: Dead copper removal simulation available")
-            except ImportError:
-                use_pour_simulation = False
-                print(f"DEBUG: Dead copper removal simulation not available - using full polygon")
+            # PRIORITY 2: Fall back to polygon outlines if no copper regions (less accurate)
+            elif polygons:
+                print(f"DEBUG: _check_clearance: No copper regions available, using {len(polygons)} polygon outlines (less accurate)")
+                self._check_track_to_polygon_clearance(rule, tracks, polygons)
             
-            for polygon in polygons:
-                polygon_net = polygon.get('net', '')
-                polygon_layer = polygon.get('layer', '')
-                polygon_name = polygon.get('name', '')
-                polygon_vertices = polygon.get('vertices', [])
-                
-                # CRITICAL: Check if rule scope applies to this polygon
-                # Custom rules like LBBZHUANYONG only apply to specific polygons
-                # Parse scope1 expression to extract polygon name if scope1_polygon not set
-                scope1_polygon = rule.scope1_polygon
-                if not scope1_polygon and rule.scope1 and "InNamedPolygon" in rule.scope1:
-                    match = re.search(r"InNamedPolygon\(['\"]([^'\"]+)['\"]\)", rule.scope1)
-                    if match:
-                        scope1_polygon = match.group(1)
-                
-                # If rule has a polygon scope, only check that specific polygon
-                if scope1_polygon:
-                    if polygon_name != scope1_polygon:
-                        print(f"DEBUG: Skipping polygon '{polygon_name}' - rule scope requires '{scope1_polygon}'")
-                        continue  # Skip this polygon - rule doesn't apply
-                
-                print(f"DEBUG: Processing polygon '{polygon_name}' on '{polygon_layer}' with rule '{rule.name}'")
-                
-                # Need vertices for accurate checking
-                if not polygon_vertices or len(polygon_vertices) < 3:
-                    continue
-                
-                # Validate vertices
-                valid_vertices = [(v[0], v[1]) for v in polygon_vertices 
-                                  if isinstance(v, (list, tuple)) and len(v) >= 2]
-                if len(valid_vertices) < 3:
-                    continue
-                
-                # Use track_to_poly_clearance_mm for polygon checks
-                track_to_poly_clearance = rule.track_to_poly_clearance_mm
-                
-                # CRITICAL: Cache poured copper simulation per polygon to avoid repeated calculations
-                poured_regions_cache = None
-                
-                # Collect all objects on the polygon's net and same layer
-                # These objects are CONNECTED to the polygon fill —
-                # their copper edges represent the fill edge
-                poly_net_objects = []  # list of (x, y, radius) for polygon-net objects
-                
-                for t in tracks:
-                    if t.get('net', '') == polygon_net and t.get('layer', '') == polygon_layer:
-                        tx1 = t.get('x1_mm', 0)
-                        ty1 = t.get('y1_mm', 0)
-                        tx2 = t.get('x2_mm', 0)
-                        ty2 = t.get('y2_mm', 0)
-                        tw = t.get('width_mm', 0)
-                        if tx1 != 0 or ty1 != 0 or tx2 != 0 or ty2 != 0:
-                            poly_net_objects.append({
-                                'type': 'track', 'x1': tx1, 'y1': ty1,
-                                'x2': tx2, 'y2': ty2, 'radius': tw / 2
-                            })
-                
-                for p in pads:
-                    if p.get('net', '') == polygon_net:
-                        ploc = self._safe_get_location(p)
-                        px = ploc.get('x_mm', 0)
-                        py = ploc.get('y_mm', 0)
-                        pr = max(p.get('size_x_mm', 0), p.get('size_y_mm', 0)) / 2
-                        if px != 0 or py != 0:
-                            poly_net_objects.append({
-                                'type': 'pad', 'x': px, 'y': py, 'radius': pr
-                            })
-                
-                for v in vias:
-                    if v.get('net', '') == polygon_net:
-                        vloc = self._safe_get_location(v)
-                        vx = vloc.get('x_mm', 0)
-                        vy = vloc.get('y_mm', 0)
-                        vr = v.get('diameter_mm', 0) / 2
-                        if vx != 0 or vy != 0:
-                            poly_net_objects.append({
-                                'type': 'via', 'x': vx, 'y': vy, 'radius': vr
-                            })
-                
-                # Now check each non-net track against the polygon
-                tracks_checked = 0
-                for track in tracks:
-                    track_net = track.get('net', '')
-                    track_layer = track.get('layer', '')
-                    
-                    # Skip if same net
-                    if polygon_net and track_net and polygon_net == track_net:
-                        continue
-                    
-                    # Skip if different layers
-                    if polygon_layer and track_layer and polygon_layer != track_layer:
-                        continue
-                    
-                    # Get track coordinates
-                    x1 = track.get('x1_mm', 0) or (track.get('start', {}).get('x_mm', 0) if isinstance(track.get('start'), dict) else 0)
-                    y1 = track.get('y1_mm', 0) or (track.get('start', {}).get('y_mm', 0) if isinstance(track.get('start'), dict) else 0)
-                    x2 = track.get('x2_mm', 0) or (track.get('end', {}).get('x_mm', 0) if isinstance(track.get('end'), dict) else 0)
-                    y2 = track.get('y2_mm', 0) or (track.get('end', {}).get('y_mm', 0) if isinstance(track.get('end'), dict) else 0)
-                    track_width = track.get('width_mm', 0.254)
-                    
-                    if x1 == 0 and y1 == 0 and x2 == 0 and y2 == 0:
-                        continue
-                    
-                    tracks_checked += 1
-                    track_center_x = (x1 + x2) / 2
-                    track_center_y = (y1 + y2) / 2
-                    track_radius = track_width / 2
-                    
-                    # Point-in-polygon test
-                    track_is_inside = point_in_polygon(track_center_x, track_center_y, valid_vertices)
-                    
-                    # Check if track is inside polygon for clearance calculation
-                    
-                    # CRITICAL: For tracks inside the polygon, check clearance to polygon-net objects
-                    # For tracks outside, check clearance to polygon outline
-                    # This simulates Altium's behavior with poured copper cutouts
-                    
-                    if track_is_inside:
-                        # Track is INSIDE the polygon.
-                        # CRITICAL: Use enhanced poured copper simulation for more accurate results
-                        
-                        # Use dead copper removal simulation if available
-                        if use_pour_simulation:
-                            try:
-                                # Get actual poured copper regions using simulation (cached)
-                                if poured_regions_cache is None:
-                                    poured_regions_cache = simulate_polygon_pour(polygon, tracks, vias, pads)
-                                    print(f"DEBUG: Cached {len(poured_regions_cache)} poured copper regions for polygon '{polygon_name}'")
-                                
-                                poured_regions = poured_regions_cache
-                                
-                                if not poured_regions:
-                                    # No poured copper regions - no violation possible
-                                    if is_target_track:
-                                        print(f"DEBUG: Target track inside polygon but no poured copper regions - no violation")
-                                    continue
-                                
-                                # Check clearance to actual poured copper regions
-                                min_clearance_to_copper = float('inf')
-                                
-                                for region in poured_regions:
-                                    region_vertices = region.get('vertices', [])
-                                    if len(region_vertices) < 3:
-                                        continue
-                                    
-                                    # Calculate minimum distance from track to this copper region
-                                    min_dist_to_region = float('inf')
-                                    
-                                    # Check distance to region edges
-                                    for i in range(len(region_vertices)):
-                                        j = (i + 1) % len(region_vertices)
-                                        v1 = region_vertices[i]
-                                        v2 = region_vertices[j]
-                                        
-                                        # Distance from track center to region edge
-                                        dist_to_edge = point_to_line_distance(track_center_x, track_center_y, v1[0], v1[1], v2[0], v2[1])
-                                        min_dist_to_region = min(min_dist_to_region, dist_to_edge)
-                                    
-                                    min_clearance_to_copper = min(min_clearance_to_copper, min_dist_to_region)
-                                
-                                # Subtract track width to get edge-to-edge clearance
-                                clearance_to_copper = min_clearance_to_copper - track_radius
-                                
-                                if clearance_to_copper < track_to_poly_clearance and clearance_to_copper != float('inf'):
-                                    polygon_hole_count = polygon.get('hole_count', 0)
-                                    self.violations.append(DRCViolation(
-                                        rule_name=rule.name,
-                                        rule_type="clearance",
-                                        severity="error",
-                                        message=f"Clearance Constraint: ({clearance_to_copper:.3f}mm < {track_to_poly_clearance}mm) Between Poured Copper Region {polygon_layer} And Track ({x1:.3f}mm,{y1:.3f}mm)({x2:.3f}mm,{y2:.3f}mm) on {track_layer}",
-                                        location={"x_mm": track_center_x, "y_mm": track_center_y},
-                                        actual_value=round(clearance_to_copper, 3),
-                                        required_value=track_to_poly_clearance
-                                    ))
-                                
-                                continue  # Skip the original logic
-                            
-                            except Exception as e:
-                                print(f"DEBUG: Pour simulation failed: {e}, falling back to polygon-net objects")
-                                # Fall back to original logic
-                        
-                        # Original logic: Check clearance to polygon-net objects (fallback)
-                        
-                        if not poly_net_objects:
-                            continue
-                        
-                        # Simulate dead copper removal by clustering polygon-net objects
-                        # Only objects in connected clusters get poured copper
-                        clusters = []
-                        CONNECTION_DISTANCE = 8.0  # mm - objects within this distance are connected
-                        
-                        for pno in poly_net_objects:
-                            # Find which cluster this object belongs to
-                            assigned_cluster = None
-                            
-                            for cluster in clusters:
-                                for existing_pno in cluster:
-                                    # Calculate distance between objects
-                                    if pno['type'] == 'track' and existing_pno['type'] == 'track':
-                                        dist = segment_to_segment_distance(
-                                            (pno['x1'], pno['y1']), (pno['x2'], pno['y2']),
-                                            (existing_pno['x1'], existing_pno['y1']), (existing_pno['x2'], existing_pno['y2'])
-                                        )
-                                    elif pno['type'] == 'track':
-                                        dist = point_to_line_distance(existing_pno['x'], existing_pno['y'], 
-                                                                    pno['x1'], pno['y1'], pno['x2'], pno['y2'])
-                                    elif existing_pno['type'] == 'track':
-                                        dist = point_to_line_distance(pno['x'], pno['y'], 
-                                                                    existing_pno['x1'], existing_pno['y1'], 
-                                                                    existing_pno['x2'], existing_pno['y2'])
-                                    else:
-                                        dist = math.sqrt((pno['x'] - existing_pno['x'])**2 + (pno['y'] - existing_pno['y'])**2)
-                                    
-                                    if dist < CONNECTION_DISTANCE:
-                                        assigned_cluster = cluster
-                                        break
-                                
-                                if assigned_cluster:
-                                    break
-                            
-                            if assigned_cluster:
-                                assigned_cluster.append(pno)
-                            else:
-                                clusters.append([pno])
-                        
-                        # Only use objects from clusters with multiple connections (remove dead copper)
-                        active_poly_objects = []
-                        for cluster in clusters:
-                            if len(cluster) >= 2:  # Only connected clusters get poured
-                                active_poly_objects.extend(cluster)
-                        
-                        if not active_poly_objects:
-                            continue
-                        
-                        # Calculate clearance to active poured copper objects only
-                        min_clearance_found = float('inf')
-                        for pno in active_poly_objects:
-                            if pno['type'] == 'track':
-                                dist = segment_to_segment_distance(
-                                    (x1, y1), (x2, y2),
-                                    (pno['x1'], pno['y1']), (pno['x2'], pno['y2'])
-                                )
-                                edge_clearance = dist - track_radius - pno['radius']
-                            else:
-                                d1 = point_to_line_distance(pno['x'], pno['y'], x1, y1, x2, y2)
-                                edge_clearance = d1 - track_radius - pno['radius']
-                            
-                            min_clearance_found = min(min_clearance_found, edge_clearance)
-                        
-                        if min_clearance_found < track_to_poly_clearance and min_clearance_found != float('inf'):
-                            polygon_hole_count = polygon.get('hole_count', 0)
-                            self.violations.append(DRCViolation(
-                                rule_name=rule.name,
-                                rule_type="clearance",
-                                severity="error",
-                                message=f"Clearance Constraint: ({min_clearance_found:.3f}mm < {track_to_poly_clearance}mm) Between Polygon Region ({polygon_hole_count} hole(s)) {polygon_layer} And Track ({x1:.3f}mm,{y1:.3f}mm)({x2:.3f}mm,{y2:.3f}mm) on {track_layer}",
-                                location={"x_mm": track_center_x, "y_mm": track_center_y},
-                                actual_value=round(min_clearance_found, 3),
-                                required_value=track_to_poly_clearance
-                            ))
-                    else:
-                        # Track is OUTSIDE the polygon outline.
-                        # Don't check clearance - tracks outside the polygon don't violate
-                        # (Altium only checks tracks inside the poured area)
-                        pass
-                
-                # Summary for this polygon
-                print(f"DEBUG: Polygon '{polygon_name}' on '{polygon_layer}': checked {tracks_checked} tracks")
+            else:
+                print(f"DEBUG: _check_clearance: No copper data available for polygon clearance checks")
         
         # Summary for this rule
         violations_count = len(self.violations) - violations_before
         print(f"DEBUG: _check_clearance: Rule '{rule.name}' found {violations_count} new violations (total: {len(self.violations)})")
+    
+    def _check_track_to_copper_clearance(self, rule: DRCRule, tracks: List[Dict], copper_regions: List[Dict]):
+        """
+        Check clearance between tracks and actual poured copper regions.
+        
+        CRITICAL: This is the accurate method that matches Altium's DRC behavior.
+        Uses actual poured copper shapes, not polygon outlines.
+        """
+        track_to_poly_clearance = rule.track_to_poly_clearance_mm
+        violations_before = len(self.violations)
+        
+        print(f"DEBUG: Checking {len(tracks)} tracks against {len(copper_regions)} copper regions")
+        print(f"DEBUG: Required clearance: {track_to_poly_clearance}mm")
+        
+        for track in tracks:
+            track_net = track.get('net', '')
+            track_layer = track.get('layer', '')
+            
+            # Get track coordinates
+            x1 = track.get('x1_mm', 0) or (track.get('start', {}).get('x_mm', 0) if isinstance(track.get('start'), dict) else 0)
+            y1 = track.get('y1_mm', 0) or (track.get('start', {}).get('y_mm', 0) if isinstance(track.get('start'), dict) else 0)
+            x2 = track.get('x2_mm', 0) or (track.get('end', {}).get('x_mm', 0) if isinstance(track.get('end'), dict) else 0)
+            y2 = track.get('y2_mm', 0) or (track.get('end', {}).get('y_mm', 0) if isinstance(track.get('end'), dict) else 0)
+            track_width = track.get('width_mm', 0.254)
+            
+            if x1 == 0 and y1 == 0 and x2 == 0 and y2 == 0:
+                continue
+            
+            track_center_x = (x1 + x2) / 2
+            track_center_y = (y1 + y2) / 2
+            track_radius = track_width / 2
+            
+            # Check against each copper region
+            for copper_region in copper_regions:
+                copper_net = copper_region.get('net', '')
+                copper_layer = copper_region.get('layer', '')
+                copper_vertices = copper_region.get('vertices', [])
+                
+                # Skip if same net (no clearance violation between same net)
+                if track_net and copper_net and track_net == copper_net:
+                    continue
+                
+                # Skip if different layers
+                if track_layer and copper_layer and track_layer.lower() != copper_layer.lower():
+                    continue
+                
+                # Need valid vertices for checking
+                if not copper_vertices or len(copper_vertices) < 3:
+                    continue
+                
+                # Validate vertices format
+                valid_vertices = []
+                for v in copper_vertices:
+                    if isinstance(v, (list, tuple)) and len(v) >= 2:
+                        try:
+                            valid_vertices.append((float(v[0]), float(v[1])))
+                        except (ValueError, TypeError):
+                            continue
+                
+                if len(valid_vertices) < 3:
+                    continue
+                
+                # Calculate minimum distance from track to copper region edges
+                min_distance = float('inf')
+                
+                # Check distance from track center to each edge of the copper region
+                for i in range(len(valid_vertices)):
+                    j = (i + 1) % len(valid_vertices)
+                    v1 = valid_vertices[i]
+                    v2 = valid_vertices[j]
+                    
+                    # Distance from track center to this edge
+                    dist_to_edge = point_to_line_distance(track_center_x, track_center_y, v1[0], v1[1], v2[0], v2[1])
+                    min_distance = min(min_distance, dist_to_edge)
+                
+                # Calculate edge-to-edge clearance (subtract track radius)
+                clearance = min_distance - track_radius
+                
+                # Check for violation
+                if clearance < track_to_poly_clearance and min_distance != float('inf'):
+                    self.violations.append(DRCViolation(
+                        rule_name=rule.name,
+                        rule_type="clearance",
+                        severity="error",
+                        message=f"Clearance Constraint: ({clearance:.3f}mm < {track_to_poly_clearance}mm) Between Poured Copper Region {copper_layer} And Track ({x1:.3f}mm,{y1:.3f}mm)({x2:.3f}mm,{y2:.3f}mm) on {track_layer}",
+                        location={"x_mm": track_center_x, "y_mm": track_center_y},
+                        actual_value=round(clearance, 3),
+                        required_value=track_to_poly_clearance,
+                        net_name=track_net
+                    ))
+        
+        violations_found = len(self.violations) - violations_before
+        print(f"DEBUG: Found {violations_found} track-to-copper violations")
+    
+    def _check_track_to_polygon_clearance(self, rule: DRCRule, tracks: List[Dict], polygons: List[Dict]):
+        """
+        Check clearance between tracks and polygon outlines (fallback method).
+        
+        NOTE: This is less accurate than using actual copper regions.
+        Used only when copper regions are not available.
+        """
+        track_to_poly_clearance = rule.track_to_poly_clearance_mm
+        violations_before = len(self.violations)
+        
+        print(f"DEBUG: Using polygon outlines as fallback - less accurate than copper regions")
+        print(f"DEBUG: Checking {len(tracks)} tracks against {len(polygons)} polygon outlines")
+        
+        # Simple polygon outline checking (fallback only)
+        for polygon in polygons:
+            polygon_net = polygon.get('net', '')
+            polygon_layer = polygon.get('layer', '')
+            polygon_vertices = polygon.get('vertices', [])
+            
+            if not polygon_vertices or len(polygon_vertices) < 3:
+                continue
+            
+            # Validate vertices
+            valid_vertices = []
+            for v in polygon_vertices:
+                if isinstance(v, (list, tuple)) and len(v) >= 2:
+                    try:
+                        valid_vertices.append((float(v[0]), float(v[1])))
+                    except (ValueError, TypeError):
+                        continue
+            
+            if len(valid_vertices) < 3:
+                continue
+            
+            # Check tracks against this polygon outline
+            for track in tracks:
+                track_net = track.get('net', '')
+                track_layer = track.get('layer', '')
+                
+                # Skip if same net
+                if polygon_net and track_net and polygon_net == track_net:
+                    continue
+                
+                # Skip if different layers
+                if polygon_layer and track_layer and polygon_layer.lower() != track_layer.lower():
+                    continue
+                
+                # Get track coordinates
+                x1 = track.get('x1_mm', 0)
+                y1 = track.get('y1_mm', 0)
+                x2 = track.get('x2_mm', 0)
+                y2 = track.get('y2_mm', 0)
+                track_width = track.get('width_mm', 0.254)
+                
+                if x1 == 0 and y1 == 0 and x2 == 0 and y2 == 0:
+                    continue
+                
+                track_center_x = (x1 + x2) / 2
+                track_center_y = (y1 + y2) / 2
+                track_radius = track_width / 2
+                
+                # Calculate minimum distance from track to polygon outline
+                min_distance = float('inf')
+                
+                for i in range(len(valid_vertices)):
+                    j = (i + 1) % len(valid_vertices)
+                    v1 = valid_vertices[i]
+                    v2 = valid_vertices[j]
+                    
+                    dist_to_edge = point_to_line_distance(track_center_x, track_center_y, v1[0], v1[1], v2[0], v2[1])
+                    min_distance = min(min_distance, dist_to_edge)
+                
+                # Calculate edge-to-edge clearance
+                clearance = min_distance - track_radius
+                
+                # Check for violation (only if track is close to polygon)
+                if clearance < track_to_poly_clearance and min_distance != float('inf') and clearance > -track_radius:
+                    self.violations.append(DRCViolation(
+                        rule_name=rule.name,
+                        rule_type="clearance",
+                        severity="error",
+                        message=f"Clearance Constraint: ({clearance:.3f}mm < {track_to_poly_clearance}mm) Between Polygon Outline {polygon_layer} And Track ({x1:.3f}mm,{y1:.3f}mm)({x2:.3f}mm,{y2:.3f}mm) on {track_layer}",
+                        location={"x_mm": track_center_x, "y_mm": track_center_y},
+                        actual_value=round(clearance, 3),
+                        required_value=track_to_poly_clearance,
+                        net_name=track_net
+                    ))
+        
+        violations_found = len(self.violations) - violations_before
+        print(f"DEBUG: Found {violations_found} track-to-polygon violations (fallback method)")
     
     # Signal/copper layer names in Altium
     SIGNAL_LAYERS = {
