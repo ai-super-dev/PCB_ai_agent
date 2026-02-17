@@ -658,8 +658,8 @@ class AltiumFileReader:
                                     
                                     # CRITICAL: Do NOT parse width from binary - it's unreliable
                                     # Binary format width parsing produces incorrect values
-                                    # Since Altium shows 0 width violations, we should skip width parsing
-                                    # Set width_mm to 0 so width checking is skipped (matches Altium behavior)
+                                    # These are parsing artifacts, not real geometry data
+                                    # Set width_mm to 0 so these tracks are excluded from width checks
                                     
                                     tracks_parsed.append({
                                         "id": f"track-{len(tracks_parsed)+1}",

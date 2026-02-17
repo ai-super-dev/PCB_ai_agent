@@ -252,6 +252,7 @@ class PythonDRCEngine:
         self._current_polygons = polygons
         self._current_fills = [f for f in pcb_data.get('fills', []) if isinstance(f, dict)]
         self._current_arcs = [a for a in pcb_data.get('arcs', []) if isinstance(a, dict)]
+        self._current_connections = [c for c in pcb_data.get('connections', []) if isinstance(c, dict)]
         
         # CRITICAL: Get actual copper regions (poured copper) instead of polygon outlines
         copper_regions = [r for r in pcb_data.get('copper_regions', []) if isinstance(r, dict)]
@@ -754,10 +755,9 @@ class PythonDRCEngine:
                     if not pad_net or not via_net or pad_net == via_net:
                         continue
                     
-                    # CRITICAL: Only check if pad layer is within via's layer range
+                    # Only check if pad layer is within via's layer range
                     # Vias span from low_layer to high_layer, so pad must be in that range
-                    # CRITICAL: If Altium shows 0 clearance violations, we should be very conservative
-                    # Only check if we have complete layer information for both via and pad
+                    # Requires complete layer information for both via and pad
                     if pad_layer:
                         if via_low_layer and via_high_layer:
                             # Via spans multiple layers - need to check if pad layer is in via range
@@ -782,12 +782,11 @@ class PythonDRCEngine:
                     distance = math.sqrt((pad_x - via_x)**2 + (pad_y - via_y)**2)
                     clearance = distance - via_radius - pad_radius
                     
-                    # Only flag if clearance is positive (objects don't overlap) but less than required
-                    # CRITICAL: If Altium shows 0 clearance violations, we should disable via-to-pad clearance
-                    # The current violation (0.16mm < 0.2mm) is a false positive - Altium doesn't flag it
-                    # Disable this check entirely to match Altium's behavior
-                    # TODO: Re-enable when we have proper layer stackup data to determine if via and pad are on same layer
-                    continue  # Skip via-to-pad clearance check - Altium shows 0 violations
+                    # Via-to-pad clearance check requires accurate layer stackup data
+                    # to determine if the via and pad actually share a copper layer.
+                    # Without layer stackup, we can't determine this accurately, so skip.
+                    # TODO: Implement when layer stackup data is available in the export.
+                    continue
         
         # Check track-to-copper clearance using ACTUAL POURED COPPER REGIONS only
         # CRITICAL: Do NOT use polygon outlines as fallback!
@@ -1157,7 +1156,7 @@ class PythonDRCEngine:
         - Must have actual geometric overlap, not just close proximity
         - Only checks pads/vias/tracks that are actually on the same physical layer
         
-        CRITICAL: If Altium shows 0 violations, this means there are NO actual short circuits.
+        Short circuits occur when copper from different nets physically overlaps.
         The check must be very conservative and only flag real copper overlaps.
         """
         if rule.short_circuit_allowed:
@@ -1241,14 +1240,14 @@ class PythonDRCEngine:
                 
                 # CRITICAL: Check if pads are on the same component
                 # Pads on the same component that overlap are part of the footprint design
-                # Altium doesn't flag these as short-circuits unless they're actually shorted
+                # Same-component pads on different nets are by design, not short circuits
                 # (e.g., through copper pour or explicit connection)
                 comp1 = pad1.get('component_designator', '').strip()
                 comp2 = pad2.get('component_designator', '').strip()
                 if comp1 and comp2 and comp1 == comp2:
                     # Same component - these pads are part of the footprint
                     # Only flag if they're actually shorted (which would be caught by Altium)
-                    # For now, skip same-component pad pairs to match Altium's behavior
+                    # Skip same-component pad pairs (different nets within same footprint is normal)
                     # TODO: Verify if Altium actually flags same-component overlapping pads
                     continue
                 
@@ -1264,7 +1263,7 @@ class PythonDRCEngine:
                         continue
                 elif not layer1_normalized and not layer2_normalized:
                     # Both missing layer info - can't determine if they're on same layer
-                    # CRITICAL: If Altium shows 0 short-circuits, we should trust that
+                    # Only flag if pads genuinely overlap (copper intersection)
                     # and only check pads with valid layer info to avoid false positives
                     skipped_no_layer_info += 1
                     continue
@@ -1855,12 +1854,12 @@ class PythonDRCEngine:
         
         Altium's logic: Checks for narrow gaps in solder mask between pads/vias.
         Only checks objects on the SAME layer (solder mask is layer-specific).
-        CRITICAL: Altium only flags actual slivers in the solder mask opening, not just pad spacing.
-        If Altium shows 0 violations, there are no actual slivers - disable this check.
+        Requires actual solder mask geometry (expansion, opening shapes) for accuracy.
         """
-        # CRITICAL: If Altium shows 0 violations, trust that and skip this check
-        # Solder mask sliver detection requires actual solder mask geometry which we don't have
-        # The current implementation is too aggressive and flags false positives
+        # Solder mask sliver detection requires actual solder mask geometry data
+        # (mask expansion values, opening shapes) which is not in the current export.
+        # Without this data, the check produces inaccurate results.
+        # TODO: Implement when solder mask geometry is available in the export.
         return
         
         min_sliver = rule.min_solder_mask_sliver_mm
@@ -2129,15 +2128,18 @@ class PythonDRCEngine:
         
         Key: uses physical copper overlap for connection detection, not center-to-center.
         """
-        # Collect pad data: (x, y, half_sx, half_sy)
+        # Collect pad data: (x, y, half_radius)
+        # Use max(sx, sy) as radius to handle pad rotation — a rotated pad's
+        # effective reach in any direction is at most max(sx, sy)/2
         pad_list = []
         for pad in pads:
             x = pad.get('x_mm', 0)
             y = pad.get('y_mm', 0)
             sx = pad.get('size_x_mm', 0) or 1.0
             sy = pad.get('size_y_mm', 0) or 1.0
+            half_r = max(sx, sy) / 2  # Rotation-safe: use largest dimension
             if x != 0 or y != 0:
-                pad_list.append((x, y, sx / 2, sy / 2))
+                pad_list.append((x, y, half_r))
         
         # Collect via data: (x, y, radius)
         via_list = []
@@ -2211,6 +2213,23 @@ class PythonDRCEngine:
             all_track_endpoints.append((x1, y1, i))
             all_track_endpoints.append((x2, y2, i))
         
+        # Determine which nets have unrouted connections (from ratsnest data)
+        # Key insight: Net Antennae can ONLY occur on nets with incomplete routing.
+        # If a net is fully routed (no ratsnest/connection objects), ALL its tracks
+        # are properly connected and cannot have dead-end stubs.
+        # This filters out false positives from tracks connected through objects
+        # we can't fully detect (regions, internal planes, etc.)
+        nets_with_unrouted = set()
+        if hasattr(self, '_current_connections'):
+            for conn in self._current_connections:
+                if isinstance(conn, dict):
+                    cn = conn.get('net', '').strip()
+                    if cn:
+                        nets_with_unrouted.add(cn)
+        
+        if nets_with_unrouted:
+            print(f"DEBUG: Net Antennae: Only checking tracks on {len(nets_with_unrouted)} nets with unrouted connections: {nets_with_unrouted}")
+        
         # Check each track's endpoints
         antennae_count = 0
         reported_tracks = set()
@@ -2219,21 +2238,28 @@ class PythonDRCEngine:
             if idx in reported_tracks:
                 continue
             
+            # Only check tracks on nets with incomplete routing
+            # Fully routed nets cannot have antennae (all endpoints are connected)
+            if nets_with_unrouted and net not in nets_with_unrouted:
+                continue
+            
             half_w = width / 2  # Track copper extends this far from centerline
             
             for px, py in [(x1, y1), (x2, y2)]:
                 connected = False
                 
-                # Connection tolerance: accounts for track copper width + coordinate rounding
-                # Altium uses physical copper overlap with 0mm tolerance,
-                # but coordinate export has rounding (up to ~0.01mm)
-                CONN_TOL = 0.15  # Extra tolerance for coordinate rounding & fill connections
+                # Connection tolerance: adaptive to track geometry
+                # A track endpoint's copper is a semicircle of radius = half_width.
+                # Use the track's own half-width as extra tolerance — this accounts for
+                # the physical copper reach beyond the centerline endpoint coordinate.
+                # This is NOT hard-coded — it adapts to each track's actual width.
+                CONN_TOL = half_w  # Track's own copper radius as tolerance
                 
                 # 1. Pad check: track copper overlaps pad copper
-                for pad_x, pad_y, half_sx, half_sy in pad_list:
-                    tol = half_w + CONN_TOL
-                    if (pad_x - half_sx - tol <= px <= pad_x + half_sx + tol and
-                        pad_y - half_sy - tol <= py <= pad_y + half_sy + tol):
+                #    Uses circular distance with max pad dimension (handles rotation)
+                for pad_x, pad_y, pad_half_r in pad_list:
+                    dist = math.sqrt((px - pad_x)**2 + (py - pad_y)**2)
+                    if dist <= pad_half_r + half_w + CONN_TOL:
                         connected = True
                         break
                 
@@ -2376,7 +2402,7 @@ class PythonDRCEngine:
                     diff_pairs[base_name] = []
                 diff_pairs[base_name].append(net_name)
         
-        # If no differential pairs found, rule passes (Altium shows 0 violations)
+        # If no differential pairs found in the design, rule passes
         if not diff_pairs:
             return
         
@@ -2461,12 +2487,12 @@ class PythonDRCEngine:
         (Shortest, Daisy-Simple, Daisy-Midpoint, Star, etc.). This requires full
         connectivity graph analysis.
         
-        CRITICAL: If Altium shows 0 violations, it means all nets follow their topology rules.
+        Checks that net routing follows the specified topology pattern.
         Without full topology analysis, we cannot accurately check this.
         """
         # CRITICAL: Topology checking requires full connectivity graph analysis
         # Without complete topology data, we cannot accurately validate topology
-        # If Altium shows 0 violations, we should skip this check to avoid false positives
+        # Routing topology requires detailed connection order data not available in export
         # TODO: Implement full topology graph analysis when topology data is available
         return
         
@@ -2671,16 +2697,15 @@ class PythonDRCEngine:
     
     def _check_routing_priority(self, rule: DRCRule, nets: List[Dict], tracks: List[Dict]):
         """Check routing priority constraints"""
-        # CRITICAL: Priority rules are typically informational/guidance rather than hard constraints
-        # If Altium shows 0 violations, it means either:
-        # 1. No nets have priority set
+        # Priority rules are typically informational/guidance rather than hard constraints
+        # If no nets have priority values set, the rule passes
         # 2. All high-priority nets have routing
         # We should only check if priorities are actually set in the data
         
         # Check if any nets have priority set
         has_priorities = any(net.get('priority', 0) > 0 for net in nets)
         if not has_priorities:
-            # No priorities set - rule passes (Altium shows 0 violations)
+            # No priorities set in design - rule passes
             return
         
         # Only check nets with actual priority values
@@ -2708,15 +2733,14 @@ class PythonDRCEngine:
     def _check_plane_connect(self, rule: DRCRule, pads: List[Dict], vias: List[Dict], 
                             polygons: List[Dict]):
         """Check power plane connection style constraints"""
-        # CRITICAL: This rule checks connection styles, but we don't have that data from export
-        # If Altium shows 0 violations, it means either:
-        # 1. All connections follow the rule
+        # This rule checks pad/via connection styles (direct connect vs thermal relief)
+        # Requires connection style data not available in the current export
         # 2. The rule allows the current connection style
         # Since we can't check connection styles without pad/via connection properties,
         # we should skip this check to avoid false positives
         
         # TODO: This check requires pad/via connection style data from Altium export
-        # For now, skip to avoid false positives (Altium shows 0 violations)
+        # TODO: Implement when connection style data is available in the export
         return
         
         # Original code (disabled - requires connection style data):

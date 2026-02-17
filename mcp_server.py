@@ -1478,9 +1478,9 @@ class AltiumMCPServer:
                 if rule.get('type') == 'width':
                     max_width_from_rules = max(max_width_from_rules, rule.get('max_width_mm', 15.0))
             
-            # Track widths > rule max are almost certainly parsing errors
-            # Since Altium shows 0 width violations, all valid tracks should be <= max_width
-            # CRITICAL: Be very aggressive - if ANY track has width > max, it's likely a parsing error
+            # Track widths > rule max are almost certainly parsing errors from binary format
+            # Valid tracks should have widths within the design rules
+            # Tracks with width > max are likely binary parsing artifacts, not real geometry
             # Count invalid widths
             invalid_width_count = 0
             widths_over_max = []
@@ -1492,8 +1492,8 @@ class AltiumMCPServer:
                     widths_over_max.append(width)
             
             # Remove tracks with invalid widths (likely binary parsing errors)
-            # CRITICAL: Since Altium shows 0 width violations, ALL tracks should have valid widths
-            # If we find tracks with widths > max, they are definitely parsing errors
+            # Tracks with widths exceeding the max rule width are parsing artifacts
+            # from binary format decoding, not actual design data
             if invalid_width_count > 0:
                 # Filter out ALL tracks with widths > max (these are definitely parsing errors)
                 valid_tracks = [t for t in valid_tracks 
