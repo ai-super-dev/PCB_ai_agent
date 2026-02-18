@@ -1,7 +1,7 @@
 {..............................................................................}
 { Altium Command Server - Full Integration with EagilinsED Agent             }
 { Supports: DRC, Export, Move, Add Track, Add Via, Delete                     }
-{ Updated: Dynamic paths, Complete rule export                                }
+{ Updated: Dynamic paths, Complete rule export, Component type detection      }
 { Fixed: ShowMessage blocking, log spam, ViaRule type, hardcoded paths       }
 {..............................................................................}
 
@@ -11,6 +11,7 @@ Function AdjustCopperPourClearanceByNet(NetName : String; NewClearanceMM : Doubl
 Function RebuildAllPolygons : Boolean; Forward;
 Function RepourAllPolygons : Boolean; Forward;
 Function ExportActualCopperPrimitives : Boolean; Forward;
+Function DetectComponentType(Comp : IPCB_Component) : String; Forward;
 
 Var
     ServerRunning : Boolean;
@@ -90,8 +91,9 @@ Begin
         End;
     End;
     
-    // PRIORITY 4: Hardcoded fallback
-    Result := 'E:\Altium_Project\PCB_ai_agent\';
+    // PRIORITY 4: No hardcoded fallback path.
+    // Return empty string and let callers use relative paths if needed.
+    Result := '';
     
     If (Result <> '') And (Result[Length(Result)] <> '\') Then
         Result := Result + '\';
@@ -834,6 +836,8 @@ Function AddTrack(NetName, LayerName : String; X1, Y1, X2, Y2, Width : Double) :
 Var
     Board : IPCB_Board;
     Track : IPCB_Track;
+    Net   : IPCB_Net;
+    Iter  : IPCB_BoardIterator;
 Begin
     Result := False;
     Board := GetBoard;
@@ -853,12 +857,98 @@ Begin
     Else
         Track.Layer := eTopLayer;
     
+    // CRITICAL: Assign net to the track so it counts as routing
+    If NetName <> '' Then
+    Begin
+        Try
+            Iter := Board.BoardIterator_Create;
+            Iter.AddFilter_ObjectSet(MkSet(eNetObject));
+            Iter.AddFilter_LayerSet(AllLayers);
+            Net := Iter.FirstPCBObject;
+            While Net <> Nil Do
+            Begin
+                If UpperCase(Net.Name) = UpperCase(NetName) Then
+                Begin
+                    Track.Net := Net;
+                    Break;
+                End;
+                Net := Iter.NextPCBObject;
+            End;
+            Board.BoardIterator_Destroy(Iter);
+        Except
+        End;
+    End;
+    
     PCBServer.PreProcess;
     Board.AddPCBObject(Track);
     PCBServer.PostProcess;
     Board.GraphicallyInvalidate;
     
     Result := True;
+End;
+
+{..............................................................................}
+{ DELETE TRACK - Remove a track matching specific coordinates                   }
+{..............................................................................}
+Function DeleteTrackAt(X1, Y1, X2, Y2 : Double; Tolerance : Double) : Boolean;
+Var
+    Board : IPCB_Board;
+    Track : IPCB_Track;
+    Iter  : IPCB_BoardIterator;
+    TX1, TY1, TX2, TY2, Dist1, Dist2 : Double;
+Begin
+    Result := False;
+    Board := GetBoard;
+    If Board = Nil Then Exit;
+    
+    If Tolerance <= 0 Then Tolerance := 0.1;
+    
+    Iter := Board.BoardIterator_Create;
+    Iter.AddFilter_ObjectSet(MkSet(eTrackObject));
+    Iter.AddFilter_LayerSet(AllLayers);
+    
+    Track := Iter.FirstPCBObject;
+    While Track <> Nil Do
+    Begin
+        TX1 := CoordToMMs(Track.X1);
+        TY1 := CoordToMMs(Track.Y1);
+        TX2 := CoordToMMs(Track.X2);
+        TY2 := CoordToMMs(Track.Y2);
+        
+        // Check both orientations (track endpoints can be swapped)
+        Dist1 := Sqrt((TX1 - X1) * (TX1 - X1) + (TY1 - Y1) * (TY1 - Y1));
+        Dist2 := Sqrt((TX2 - X2) * (TX2 - X2) + (TY2 - Y2) * (TY2 - Y2));
+        
+        If (Dist1 < Tolerance) And (Dist2 < Tolerance) Then
+        Begin
+            PCBServer.PreProcess;
+            Board.RemovePCBObject(Track);
+            PCBServer.PostProcess;
+            Board.GraphicallyInvalidate;
+            Result := True;
+            Board.BoardIterator_Destroy(Iter);
+            Exit;
+        End;
+        
+        // Try swapped endpoints
+        Dist1 := Sqrt((TX1 - X2) * (TX1 - X2) + (TY1 - Y2) * (TY1 - Y2));
+        Dist2 := Sqrt((TX2 - X1) * (TX2 - X1) + (TY2 - Y1) * (TY2 - Y1));
+        
+        If (Dist1 < Tolerance) And (Dist2 < Tolerance) Then
+        Begin
+            PCBServer.PreProcess;
+            Board.RemovePCBObject(Track);
+            PCBServer.PostProcess;
+            Board.GraphicallyInvalidate;
+            Result := True;
+            Board.BoardIterator_Destroy(Iter);
+            Exit;
+        End;
+        
+        Track := Iter.NextPCBObject;
+    End;
+    
+    Board.BoardIterator_Destroy(Iter);
 End;
 
 {..............................................................................}
@@ -901,10 +991,9 @@ Var
     Iter : IPCB_BoardIterator;
     ViolationCount : Integer;
     ViolationList : TStringList;
-    Q, ViolationText, FinalPath, TempFilePath : String;
-    F, F2 : TextFile;
-    RetryCount : Integer;
-    LineContent : String;
+    Q, ViolationText, FinalPath : String;
+    F : TextFile;
+    ExportOK : Boolean;
 Begin
     Board := GetBoard;
     If Board = Nil Then
@@ -943,14 +1032,26 @@ Begin
             Try
                 ViolationText := ViolationText + Q + 'id' + Q + ':' + Q + 'violation-' + IntToStr(ViolationCount) + Q + ',';
                 If Violation.Rule <> Nil Then
-                    ViolationText := ViolationText + Q + 'rule_name' + Q + ':' + Q + EscapeJSONString(Violation.Rule.Name) + Q + ','
+                Begin
+                    ViolationText := ViolationText + Q + 'rule_name' + Q + ':' + Q + EscapeJSONString(Violation.Rule.Name) + Q + ',';
+                    // RuleKind is not available in some Altium script environments.
+                    // Use rule name as a stable fallback kind for downstream parsing.
+                    ViolationText := ViolationText + Q + 'rule_kind' + Q + ':' + Q + EscapeJSONString(Violation.Rule.Name) + Q + ',';
+                End
                 Else
+                Begin
                     ViolationText := ViolationText + Q + 'rule_name' + Q + ':' + Q + 'Unknown' + Q + ',';
-                ViolationText := ViolationText + Q + 'rule_kind' + Q + ':' + Q + EscapeJSONString(Violation.RuleKind) + Q + ',';
-                ViolationText := ViolationText + Q + 'message' + Q + ':' + Q + EscapeJSONString(Violation.Message) + Q + ',';
-                ViolationText := ViolationText + Q + 'x_mm' + Q + ':' + FloatToStr(CoordToMMs(Violation.X)) + ',';
-                ViolationText := ViolationText + Q + 'y_mm' + Q + ':' + FloatToStr(CoordToMMs(Violation.Y)) + ',';
-                ViolationText := ViolationText + Q + 'layer' + Q + ':' + Q + EscapeJSONString(Board.LayerName(Violation.Layer)) + Q;
+                    ViolationText := ViolationText + Q + 'rule_kind' + Q + ':' + Q + 'Unknown' + Q + ',';
+                End;
+                // Violation.Message/X/Y/Layer may not be available in some Altium script environments.
+                // Avoid hardcoded fake values; export dynamic minimal message and null coordinates.
+                If Violation.Rule <> Nil Then
+                    ViolationText := ViolationText + Q + 'message' + Q + ':' + Q + EscapeJSONString(Violation.Rule.Name + ' violation') + Q + ','
+                Else
+                    ViolationText := ViolationText + Q + 'message' + Q + ':' + Q + 'Unknown violation' + Q + ',';
+                ViolationText := ViolationText + Q + 'x_mm' + Q + ':' + 'null' + ',';
+                ViolationText := ViolationText + Q + 'y_mm' + Q + ':' + 'null' + ',';
+                ViolationText := ViolationText + Q + 'layer' + Q + ':' + Q + '' + Q;
             Except
                 // If any property access fails, just add basic info
                 ViolationText := ViolationText + Q + 'id' + Q + ':' + Q + 'violation-' + IntToStr(ViolationCount) + Q + ',';
@@ -969,14 +1070,22 @@ Begin
         End;
     End;
     
-    // Write violations to JSON file
-    FinalPath := BasePath + 'PCB_Project\altium_drc_violations.json';
-    TempFilePath := 'C:\Windows\Temp\altium_drc_' + FormatDateTime('yyyymmddhhnnss', Now) + '.json';
-    If Not DirectoryExists('C:\Windows\Temp\') Then
-        TempFilePath := BasePath + 'altium_drc_temp.json';
+    ExportOK := False;
     
+    // Remove stale file first (if present)
+    FinalPath := BasePath + 'altium_drc_violations.json';
+    If FileExists(FinalPath) Then
+    Begin
+        Try
+            DeleteFile(FinalPath);
+        Except
+        End;
+    End;
+    
+    // Write violations to JSON file (direct write, avoids temp-file Reset() failures)
+    FinalPath := BasePath + 'altium_drc_violations.json';
     Try
-        AssignFile(F, TempFilePath);
+        AssignFile(F, FinalPath);
         Rewrite(F);
         WriteLn(F, Chr(123));
         WriteLn(F, Q + 'violation_count' + Q + ':' + IntToStr(ViolationCount) + ',');
@@ -985,56 +1094,40 @@ Begin
         WriteLn(F, ']');
         WriteLn(F, Chr(125));
         CloseFile(F);
-        
-        // Copy to final location
-        RetryCount := 0;
-        While RetryCount < 10 Do
-        Begin
-            Try
-                If FileExists(FinalPath) Then
-                Begin
-                    Try
-                        DeleteFile(FinalPath);
-                        Sleep(300);
-                    Except
-                        Sleep(1000);
-                    End;
-                End;
-                
-                AssignFile(F, TempFilePath);
-                Reset(F);
-                AssignFile(F2, FinalPath);
-                Rewrite(F2);
-                
-                While Not EOF(F) Do
-                Begin
-                    ReadLn(F, LineContent);
-                    WriteLn(F2, LineContent);
-                End;
-                
-                CloseFile(F);
-                CloseFile(F2);
-                
-                If FileExists(FinalPath) Then
-                Begin
-                    Try
-                        DeleteFile(TempFilePath);
-                    Except
-                    End;
-                    Break;
-                End;
-            Except
-                Inc(RetryCount);
-                If RetryCount < 10 Then
-                    Sleep(500 * RetryCount);
-            End;
-        End;
+        ExportOK := FileExists(FinalPath);
     Except
+        // Fallback path for environments where BasePath root is not writable
+        Try
+            FinalPath := BasePath + 'PCB_Project\altium_drc_violations.json';
+            If FileExists(FinalPath) Then
+            Begin
+                Try
+                    DeleteFile(FinalPath);
+                Except
+                End;
+            End;
+            AssignFile(F, FinalPath);
+            Rewrite(F);
+            WriteLn(F, Chr(123));
+            WriteLn(F, Q + 'violation_count' + Q + ':' + IntToStr(ViolationCount) + ',');
+            WriteLn(F, Q + 'violations' + Q + ':[');
+            WriteLn(F, ViolationText);
+            WriteLn(F, ']');
+            WriteLn(F, Chr(125));
+            CloseFile(F);
+            ExportOK := FileExists(FinalPath);
+        Except
+            ExportOK := False;
+        End;
     End;
     
     ViolationList.Free;
     
-    If ViolationCount = 0 Then
+    If Not ExportOK Then
+    Begin
+        WriteRes(False, 'DRC completed but export failed. Could not write altium_drc_violations.json. Last path: ' + FinalPath);
+    End
+    Else If ViolationCount = 0 Then
         WriteRes(True, 'DRC completed. No violations found. Violations exported to: ' + FinalPath)
     Else
         WriteRes(True, 'DRC completed. Found ' + IntToStr(ViolationCount) + ' violations. Exported to: ' + FinalPath);
@@ -1044,6 +1137,59 @@ End;
 { EXPORT PCB INFO - Silent-mode aware                                         }
 { When SilentMode=True, skips ShowMessage calls (used during rule creation)   }
 {..............................................................................}
+{..............................................................................}
+{ Detect Component Type from Footprint Pattern                                }
+{ Returns: BGA, SOIC, QFP, DIP, SOP, TSOP, TQFP, QFN, PLCC, SIP, SOJ, SOT, etc. }
+{..............................................................................}
+Function DetectComponentType(Comp : IPCB_Component) : String;
+Var
+    Pattern : String;
+    UpperPattern : String;
+Begin
+    Result := 'Unknown';
+    
+    If Comp = Nil Then Exit;
+    
+    Pattern := Comp.Pattern;
+    If Pattern = '' Then Pattern := Comp.SourceFootprintLibrary;
+    
+    UpperPattern := UpperCase(Pattern);
+    
+    // Check for common package types in order of specificity
+    If Pos('BGA', UpperPattern) > 0 Then Result := 'BGA'
+    Else If Pos('SOIC', UpperPattern) > 0 Then Result := 'SOIC'
+    Else If Pos('TQFP', UpperPattern) > 0 Then Result := 'TQFP'
+    Else If Pos('QFP', UpperPattern) > 0 Then Result := 'QFP'
+    Else If Pos('TSOP', UpperPattern) > 0 Then Result := 'TSOP'
+    Else If Pos('SOP', UpperPattern) > 0 Then Result := 'SOP'
+    Else If Pos('QFN', UpperPattern) > 0 Then Result := 'QFN'
+    Else If Pos('DFN', UpperPattern) > 0 Then Result := 'DFN'
+    Else If Pos('SON', UpperPattern) > 0 Then Result := 'SON'
+    Else If Pos('PLCC', UpperPattern) > 0 Then Result := 'PLCC'
+    Else If Pos('LCC', UpperPattern) > 0 Then Result := 'LCC'
+    Else If Pos('DIP', UpperPattern) > 0 Then Result := 'DIP'
+    Else If Pos('SIP', UpperPattern) > 0 Then Result := 'SIP'
+    Else If Pos('SOJ', UpperPattern) > 0 Then Result := 'SOJ'
+    Else If Pos('SOT', UpperPattern) > 0 Then Result := 'SOT'
+    Else If Pos('TO-', UpperPattern) > 0 Then Result := 'TO'
+    Else If Pos('SSOP', UpperPattern) > 0 Then Result := 'SSOP'
+    Else If Pos('TSSOP', UpperPattern) > 0 Then Result := 'TSSOP'
+    Else If Pos('MSOP', UpperPattern) > 0 Then Result := 'MSOP'
+    Else If Pos('VSOP', UpperPattern) > 0 Then Result := 'VSOP'
+    Else If Pos('LQFP', UpperPattern) > 0 Then Result := 'LQFP'
+    Else If Pos('PQFP', UpperPattern) > 0 Then Result := 'PQFP'
+    Else If Pos('VQFP', UpperPattern) > 0 Then Result := 'VQFP'
+    // Check for passive components
+    Else If (Pos('0402', UpperPattern) > 0) Or (Pos('0603', UpperPattern) > 0) Or 
+            (Pos('0805', UpperPattern) > 0) Or (Pos('1206', UpperPattern) > 0) Or
+            (Pos('1210', UpperPattern) > 0) Or (Pos('2512', UpperPattern) > 0) Then
+        Result := 'SMD'
+    // Check for connectors
+    Else If (Pos('CONN', UpperPattern) > 0) Or (Pos('HEADER', UpperPattern) > 0) Or
+            (Pos('PIN', UpperPattern) > 0) Then
+        Result := 'Connector';
+End;
+
 Procedure ExportPCBInfo;
 Var
     Board : IPCB_Board;
@@ -1211,6 +1357,7 @@ Begin
         WriteLn(F, Q + 'layer' + Q + ':' + Q + Board.LayerName(Comp.Layer) + Q + ',');
         WriteLn(F, Q + 'footprint' + Q + ':' + Q + Comp.Pattern + Q + ',');
         WriteLn(F, Q + 'comment' + Q + ':' + Q + Comp.Comment.Text + Q + ',');
+        WriteLn(F, Q + 'component_type' + Q + ':' + Q + DetectComponentType(Comp) + Q + ',');
         
         // CRITICAL: Export component pads (link pads to components)
         // This is essential for DRC to understand component-pad relationships
@@ -1983,9 +2130,12 @@ Begin
                 // If cast succeeds without exception, it's a clearance rule
                 WriteLn(F, Q + 'type' + Q + ':' + Q + 'clearance' + Q + ',');
                 WriteLn(F, Q + 'category' + Q + ':' + Q + 'Electrical' + Q + ',');
-                // Note: ClearanceRule.Gap/Minimum are not readable in DelphiScript
-                // Python's OLE file reader will extract the actual clearance value
+                
+                // CRITICAL: Gap property is NOT accessible via Altium scripting API
+                // The property exists in the UI but is not exposed to DelphiScript
+                // We must default to 0.0 and fix it manually using fix_clearance_values.py
                 WriteLn(F, Q + 'clearance_mm' + Q + ':0.0');
+                
                 RuleTypeDetected := True;
             Except
             End;
@@ -3149,6 +3299,22 @@ Begin
             WriteRes(True, 'Via added at (' + FloatToStr(X) + ', ' + FloatToStr(Y) + ')')
         Else
             WriteRes(False, 'Failed to add via');
+    End
+    
+    // DELETE TRACK
+    Else If Act = 'delete_track' Then
+    Begin
+        X1 := StrToFloat(ParseValue(Cmd, 'x1'));
+        Y1 := StrToFloat(ParseValue(Cmd, 'y1'));
+        X2 := StrToFloat(ParseValue(Cmd, 'x2'));
+        Y2 := StrToFloat(ParseValue(Cmd, 'y2'));
+        
+        OK := DeleteTrackAt(X1, Y1, X2, Y2, 0.1);
+        
+        If OK Then
+            WriteRes(True, 'Track deleted at (' + FloatToStr(X1) + ',' + FloatToStr(Y1) + ')-(' + FloatToStr(X2) + ',' + FloatToStr(Y2) + ')')
+        Else
+            WriteRes(False, 'No track found at specified coordinates');
     End
     
     // RUN DRC

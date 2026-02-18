@@ -1,8 +1,0 @@
-{"success": true, "action": "get_drc_status", "violations": [
-{"rule_name": "Clearance", "rule_type": "clearance", "severity": "error",
- "message": "Clearance Constraint: (0.127mm < 0.2mm) Between Track and Poured Copper",
- "location": {"x_mm": 140.0, "y_mm": 34.0}, "actual_value": 0.127, "required_value": 0.2},
-{"rule_name": "Clearance", "rule_type": "clearance", "severity": "error",
- "message": "Clearance Constraint: (0.150mm < 0.2mm) Between Track and Poured Copper",
- "location": {"x_mm": 145.0, "y_mm": 30.0}, "actual_value": 0.150, "required_value": 0.2}
-]}

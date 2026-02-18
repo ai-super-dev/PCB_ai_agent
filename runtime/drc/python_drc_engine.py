@@ -289,9 +289,34 @@ class PythonDRCEngine:
         clearance_rules = [r for r in drc_rules if r.rule_type == 'clearance' and r.enabled]
         print(f"DEBUG: run_drc: Found {len(clearance_rules)} enabled clearance rules: {[r.name for r in clearance_rules]}")
         
+        # IMPORTANT: Fanout rules are intentionally not executed by Python DRC.
+        # Altium's fanout behavior depends on rule scopes and routing intent that are
+        # not fully represented in our exported geometry, causing large false positives.
+        # Keep visibility in logs but skip execution for result parity.
+        fanout_rules = [
+            r for r in drc_rules
+            if "fanout" in r.rule_type.lower() or r.name.lower().startswith("fanout")
+        ]
+        if fanout_rules:
+            print(
+                f"DEBUG: Skipping {len(fanout_rules)} fanout rule(s) in Python DRC "
+                f"(unsupported parity with Altium): {[r.name for r in fanout_rules]}"
+            )
+        
+        # CRITICAL: Track which rules we've already processed to avoid duplicate checking
+        # Altium processes each rule only once, even if there are multiple rules of the same type
+        processed_rule_names = set()
+        
         for rule in drc_rules:
             if not rule.enabled:
                 continue
+            
+            # Skip if we've already processed a rule with the same name
+            # This prevents duplicate rule processing from export issues
+            if rule.name in processed_rule_names:
+                print(f"DEBUG: Skipping duplicate rule '{rule.name}' - already processed")
+                continue
+            processed_rule_names.add(rule.name)
             
             if rule.rule_type == 'clearance':
                 print(f"DEBUG: run_drc: Checking clearance rule '{rule.name}', track_to_poly={rule.track_to_poly_clearance_mm}mm")
@@ -339,17 +364,36 @@ class PythonDRCEngine:
                 self._check_routing_priority(rule, nets, tracks)
             elif rule.rule_type == 'plane_connect':
                 self._check_plane_connect(rule, pads, vias, polygons)
+            elif "fanout" in rule.rule_type.lower() or rule.name.lower().startswith("fanout"):
+                # Intentionally skipped; see note above for parity reason.
+                continue
+        
+        # CRITICAL: Deduplicate violations to prevent counting the same physical issue multiple times
+        # Altium reports each violation only once, even if multiple rules could apply
+        # Deduplicate based on location, type, and involved objects
+        print(f"DEBUG: Before deduplication: {len(self.violations)} violations")
+        unique_violations = self._deduplicate_violations(self.violations)
+        self.violations = unique_violations
+        print(f"DEBUG: After deduplication: {len(self.violations)} violations")
         
         # DEBUG: Log all violations found for analysis
         if len(self.violations) > 0:
             print(f"DEBUG: Found {len(self.violations)} violations total")
             # Count violations by type for debugging
             violations_by_type_debug = {}
+            violations_by_rule_name = {}
             for v in self.violations:
                 violations_by_type_debug[v.rule_type] = violations_by_type_debug.get(v.rule_type, 0) + 1
+                violations_by_rule_name[v.rule_name] = violations_by_rule_name.get(v.rule_name, 0) + 1
             print(f"DEBUG: Violations by type: {violations_by_type_debug}")
-            for i, v in enumerate(self.violations[:10]):  # Show first 10
-                print(f"DEBUG: Violation {i+1} ({v.rule_type}): {v.message[:100]}...")
+            print(f"DEBUG: Violations by rule name: {violations_by_rule_name}")
+            
+            # Show sample violations for each type
+            for rule_type in violations_by_type_debug.keys():
+                type_violations = [v for v in self.violations if v.rule_type == rule_type]
+                print(f"DEBUG: {rule_type} violations ({len(type_violations)} total):")
+                for i, v in enumerate(type_violations[:3]):  # Show first 3 of each type
+                    print(f"  [{i+1}] {v.rule_name}: {v.message[:80]}...")
         
         # Build summary
         violations_by_type = {}
@@ -432,6 +476,8 @@ class PythonDRCEngine:
                 rule_type = 'plane_clearance'
             elif 'unpouredpolygon' in rule_name_lower or 'modifiedpolygon' in rule_name_lower:
                 rule_type = 'modified_polygon'
+            elif rule_name_lower.startswith('fanout'):
+                rule_type = 'fanout'
             elif rule_name_lower.startswith('componentclearance'):
                 rule_type = 'clearance'
             elif rule_name_lower in ('clearance',) or rule_name_lower.startswith('clearance'):
@@ -571,6 +617,45 @@ class PythonDRCEngine:
         min_clearance = rule.min_clearance_mm
         violations_before = len(self.violations)
         
+        # CRITICAL FIX: Only check the main "Clearance" rule (exact name match)
+        # Skip all other clearance rules (ComponentClearance, fanout rules, etc.)
+        # This prevents duplicate violation reporting and false positives.
+        rule_name_lower = rule.name.lower().strip()
+        
+        # Only process rules with exact name "Clearance" or "Clearance Constraint"
+        # Skip ComponentClearance, fanout rules, and all other specialized clearance rules
+        is_main_clearance_rule = (
+            rule_name_lower == 'clearance' or 
+            rule_name_lower == 'clearance constraint' or
+            (rule_name_lower.startswith('clearance') and 'component' not in rule_name_lower)
+        )
+        
+        # Skip ComponentClearance and all specialized rules
+        if 'componentclearance' in rule_name_lower or 'component clearance' in rule_name_lower:
+            print(f"DEBUG: Skipping ComponentClearance rule '{rule.name}' - pad-to-pad clearance handled separately")
+            return
+        
+        specialized_rule_prefixes = [
+            'fanout_',           # Fanout rules (BGA, SOIC, etc.)
+            'assembly',          # Assembly test point rules
+            'fabrication',       # Fabrication test point rules
+            'pastemask',         # Paste mask expansion
+            'soldermask',        # Solder mask expansion
+            'layerpairs',        # Layer pair rules
+            'plane',             # Plane clearance/connect rules
+            'polygon',           # Polygon-specific rules
+        ]
+        
+        is_specialized_rule = any(rule_name_lower.startswith(prefix) for prefix in specialized_rule_prefixes)
+        
+        if is_specialized_rule:
+            print(f"DEBUG: Skipping specialized clearance rule '{rule.name}' - needs proper scope information")
+            return
+        
+        if not is_main_clearance_rule:
+            print(f"DEBUG: Skipping clearance rule '{rule.name}' - not the main Clearance rule")
+            return
+        
         # CRITICAL: Check rule scope before applying
         # Rules with complex scope expressions like InNamedPolygon('LB') should only apply
         # to objects within that polygon. Since we can't evaluate polygon containment for
@@ -597,133 +682,17 @@ class PythonDRCEngine:
         # Clearance detection: Check spacing between objects on different nets, same layer
         skip_standard_checks = (min_clearance <= 0)
         
+        if skip_standard_checks:
+            # Skip this rule - clearance is 0 or negative (invalid)
+            print(f"DEBUG: _check_clearance: Skipping rule '{rule.name}' - clearance is {min_clearance}mm (must be > 0)")
+            return
+        
         # CRITICAL: In Altium, the general Clearance rule does NOT check pad-to-pad clearance.
         # Pad-to-pad clearance is handled by the ComponentClearance rule (separate rule type).
-        # The general Clearance rule checks: track-to-track, track-to-pad, track-to-via,
-        # track-to-pour, via-to-pad, via-to-via, pad-to-pour clearance.
-        # Checking pad-to-pad here generates false positives that Altium doesn't report.
-        is_component_clearance_rule = (rule.name.lower().startswith('componentclearance') or 
-                                       'componentclearance' in rule.name.lower().replace(' ', ''))
-        
-        # Only check pad-to-pad if this IS a ComponentClearance rule
-        if not skip_standard_checks and is_component_clearance_rule:
-            for i, pad1 in enumerate(pads):
-                loc1 = self._safe_get_location(pad1)
-                x1 = loc1.get('x_mm', 0)
-                y1 = loc1.get('y_mm', 0)
-                net1 = pad1.get('net', '').strip()
-                layer1 = pad1.get('layer', '').strip().lower()
-                size1 = max(pad1.get('size_x_mm', 0), pad1.get('size_y_mm', 0)) / 2
-                
-                # Skip pads without valid location, net, or layer
-                if not net1 or (x1 == 0 and y1 == 0) or not layer1:
-                    continue
-                
-                for pad2 in pads[i+1:]:
-                    net2 = pad2.get('net', '').strip()
-                    layer2 = pad2.get('layer', '').strip().lower()
-                    
-                    # CRITICAL: Skip if same net (no clearance violation possible)
-                    if not net2 or net1 == net2:
-                        continue
-                    
-                    # Layer compatibility check:
-                    # - Same layer → check clearance
-                    # - Multi Layer vs specific layer → they share that layer, check
-                    # - Multi Layer vs Multi Layer → they share all layers, check
-                    # - Different specific layers → skip (no overlap)
-                    if not layer2:
-                        continue
-                    layers_share = (layer1 == layer2 or 
-                                    'multi' in layer1 or 'multi' in layer2)
-                    if not layers_share:
-                        continue
-                    
-                    loc2 = self._safe_get_location(pad2)
-                    x2 = loc2.get('x_mm', 0)
-                    y2 = loc2.get('y_mm', 0)
-                    size2 = max(pad2.get('size_x_mm', 0), pad2.get('size_y_mm', 0)) / 2
-                    
-                    if x2 == 0 and y2 == 0:
-                        continue
-                    
-                    # Calculate edge-to-edge clearance based on pad shapes
-                    # CRITICAL: Use circular distance for round pads, rectangular for rectangular pads
-                    # Using rectangular distance for round pads creates FALSE POSITIVES because
-                    # the rectangular bounding box extends beyond the actual circular pad copper
-                    size_x1 = pad1.get('size_x_mm', 0) or 1.0
-                    size_y1 = pad1.get('size_y_mm', 0) or 1.0
-                    size_x2 = pad2.get('size_x_mm', 0) or 1.0
-                    size_y2 = pad2.get('size_y_mm', 0) or 1.0
-                    
-                    shape1 = pad1.get('shape', 'Round').lower()
-                    shape2 = pad2.get('shape', 'Round').lower()
-                    
-                    center_dist = math.sqrt((x2 - x1)**2 + (y2 - y1)**2)
-                    
-                    # Determine if pads are round (including square pads which are actually round in Altium)
-                    is_round1 = 'round' in shape1 or abs(size_x1 - size_y1) < 0.01
-                    is_round2 = 'round' in shape2 or abs(size_x2 - size_y2) < 0.01
-                    
-                    if is_round1 and is_round2:
-                        # Both round: use circular distance (center-to-center minus both radii)
-                        radius1 = max(size_x1, size_y1) / 2
-                        radius2 = max(size_x2, size_y2) / 2
-                        clearance = center_dist - radius1 - radius2
-                    else:
-                        # At least one rectangular: use rectangular edge-to-edge distance
-                        pad1_left = x1 - size_x1 / 2
-                        pad1_right = x1 + size_x1 / 2
-                        pad1_bottom = y1 - size_y1 / 2
-                        pad1_top = y1 + size_y1 / 2
-                        
-                        pad2_left = x2 - size_x2 / 2
-                        pad2_right = x2 + size_x2 / 2
-                        pad2_bottom = y2 - size_y2 / 2
-                        pad2_top = y2 + size_y2 / 2
-                        
-                        # Check if pads overlap
-                        overlap_x = (pad1_right > pad2_left) and (pad2_right > pad1_left)
-                        overlap_y = (pad1_top > pad2_bottom) and (pad2_top > pad1_bottom)
-                        if overlap_x and overlap_y:
-                            continue  # Pads overlap - short-circuit, not clearance
-                        
-                        if pad1_right <= pad2_left:
-                            dx = pad2_left - pad1_right
-                        elif pad2_right <= pad1_left:
-                            dx = pad1_left - pad2_right
-                        else:
-                            dx = 0
-                        
-                        if pad1_top <= pad2_bottom:
-                            dy = pad2_bottom - pad1_top
-                        elif pad2_top <= pad1_bottom:
-                            dy = pad1_bottom - pad2_top
-                        else:
-                            dy = 0
-                        
-                        clearance = math.sqrt(dx**2 + dy**2) if (dx > 0 or dy > 0) else 0
-                    
-                    # Only flag if clearance is positive (pads don't overlap) but less than required
-                    if clearance > 0 and clearance < min_clearance:
-                        # DEBUG: Print first few violations
-                        violations_count = sum(1 for v in self.violations if v.rule_type == 'clearance')
-                        if violations_count < 5:
-                            print(f"DEBUG: Clearance violation {violations_count + 1}:")
-                            print(f"  Pad1: {pad1.get('designator', 'unknown')} net={net1} layer={layer1} size={size1*2:.3f} pos=({x1:.3f},{y1:.3f})")
-                            print(f"  Pad2: {pad2.get('designator', 'unknown')} net={net2} layer={layer2} size={size2*2:.3f} pos=({x2:.3f},{y2:.3f})")
-                            print(f"  Distance: {distance:.3f}mm, Clearance: {clearance:.3f}mm (required: {min_clearance}mm)")
-                        
-                        self.violations.append(DRCViolation(
-                            rule_name=rule.name,
-                            rule_type="clearance",
-                            severity="error",
-                            message=f"Clearance violation: {clearance:.3f}mm < {min_clearance}mm between pads",
-                            location={"x_mm": (x1 + x2) / 2, "y_mm": (y1 + y2) / 2},
-                            actual_value=round(clearance, 3),
-                            required_value=min_clearance,
-                            objects=[pad1.get('name', 'pad1'), pad2.get('name', 'pad2')]
-                        ))
+        # The general Clearance rule checks: track-to-pad, track-to-via, track-to-track,
+        # via-to-pad, via-to-via clearance.
+        # We've already filtered out ComponentClearance rules above, so skip pad-to-pad checks entirely.
+        # DO NOT check pad-to-pad for the main Clearance rule - it causes false positives.
         
         # Check via-to-pad clearance (only if min_clearance is valid)
         # CRITICAL: Vias span multiple layers, so we check clearance on each layer the via touches
@@ -788,12 +757,262 @@ class PythonDRCEngine:
                     # TODO: Implement when layer stackup data is available in the export.
                     continue
         
-        # Check track-to-copper clearance using ACTUAL POURED COPPER REGIONS only
-        # CRITICAL: Do NOT use polygon outlines as fallback!
-        # Polygon outlines represent the POUR AREA BOUNDARY, not actual copper.
-        # Altium pours copper within the outline but creates relief cutouts around 
-        # tracks/pads/vias. So the actual copper edge is much further from tracks
-        # than the polygon outline. Using outlines generates massive false positives.
+        # Check track-to-pad clearance (CRITICAL: This is the main clearance check!)
+        # This is what Altium's general Clearance rule primarily checks
+        if not skip_standard_checks:
+            for track in tracks:
+                # Only check tracks on signal/copper layers
+                track_layer = track.get('layer', '').strip().lower()
+                if not self._is_signal_layer(track_layer):
+                    continue
+                
+                track_net = track.get('net', '').strip()
+                if not track_net:
+                    continue
+                
+                # Get track geometry
+                x1 = track.get('x1_mm', 0)
+                y1 = track.get('y1_mm', 0)
+                x2 = track.get('x2_mm', 0)
+                y2 = track.get('y2_mm', 0)
+                track_width = track.get('width_mm', 0.254)
+                track_radius = track_width / 2
+                
+                if x1 == 0 and y1 == 0 and x2 == 0 and y2 == 0:
+                    continue
+                
+                # Check against all pads on different nets
+                for pad in pads:
+                    pad_net = pad.get('net', '').strip()
+                    if not pad_net or pad_net == track_net:
+                        continue  # Same net or no net - no clearance check needed
+                    
+                    pad_layer = pad.get('layer', '').strip().lower()
+                    # Check layer compatibility
+                    if not self._layers_can_connect(track_layer, pad_layer):
+                        continue
+                    
+                    loc = self._safe_get_location(pad)
+                    pad_x = loc.get('x_mm', 0)
+                    pad_y = loc.get('y_mm', 0)
+                    if pad_x == 0 and pad_y == 0:
+                        continue
+                    
+                    pad_size_x = pad.get('size_x_mm', 0) or pad.get('width_mm', 0)
+                    pad_size_y = pad.get('size_y_mm', 0) or pad.get('height_mm', 0)
+                    if pad_size_x <= 0 or pad_size_y <= 0:
+                        # Missing pad geometry -> cannot evaluate accurately
+                        continue
+                    # Conservative effective radius to reduce rectangle-overestimation false positives
+                    pad_radius = min(pad_size_x, pad_size_y) / 2
+                    
+                    # Calculate distance from pad center to track line segment
+                    dist_to_track = point_to_line_distance(pad_x, pad_y, x1, y1, x2, y2)
+                    clearance = dist_to_track - track_radius - pad_radius
+                    
+                    # Only report clearance violations when objects are close but NOT overlapping
+                    # Negative clearance = overlap = short circuit (different violation type)
+                    # Clearance violation = positive clearance less than required minimum
+                    if 0 < clearance < min_clearance:
+                        self.violations.append(DRCViolation(
+                            rule_name=rule.name,
+                            rule_type="clearance",
+                            severity="error",
+                            message=f"Clearance Constraint: ({clearance:.3f}mm < {min_clearance}mm) Between Track ({x1:.3f}mm,{y1:.3f}mm)({x2:.3f}mm,{y2:.3f}mm) on {track_layer} And Pad {pad.get('designator', 'Unknown')} on {pad_layer}",
+                            location={"x_mm": (x1 + x2) / 2, "y_mm": (y1 + y2) / 2},
+                            actual_value=round(clearance, 3),
+                            required_value=min_clearance,
+                            objects=[f"Track on {track_net}", f"Pad {pad.get('designator', 'Unknown')} on {pad_net}"],
+                            net_name=f"{track_net}/{pad_net}"
+                        ))
+        
+        # Check track-to-track clearance
+        if not skip_standard_checks:
+            for i, track1 in enumerate(tracks):
+                # Only check tracks on signal/copper layers
+                layer1 = track1.get('layer', '').strip().lower()
+                if not self._is_signal_layer(layer1):
+                    continue
+                
+                net1 = track1.get('net', '').strip()
+                if not net1:
+                    continue
+                
+                x1_1 = track1.get('x1_mm', 0)
+                y1_1 = track1.get('y1_mm', 0)
+                x2_1 = track1.get('x2_mm', 0)
+                y2_1 = track1.get('y2_mm', 0)
+                width1 = track1.get('width_mm', 0.254)
+                radius1 = width1 / 2
+                
+                if x1_1 == 0 and y1_1 == 0 and x2_1 == 0 and y2_1 == 0:
+                    continue
+                
+                for track2 in tracks[i+1:]:
+                    layer2 = track2.get('layer', '').strip().lower()
+                    if not self._is_signal_layer(layer2):
+                        continue
+                    
+                    # Must be on same layer
+                    if layer1 != layer2:
+                        continue
+                    
+                    net2 = track2.get('net', '').strip()
+                    if not net2 or net1 == net2:
+                        continue  # Same net or no net
+                    
+                    x1_2 = track2.get('x1_mm', 0)
+                    y1_2 = track2.get('y1_mm', 0)
+                    x2_2 = track2.get('x2_mm', 0)
+                    y2_2 = track2.get('y2_mm', 0)
+                    width2 = track2.get('width_mm', 0.254)
+                    radius2 = width2 / 2
+                    
+                    if x1_2 == 0 and y1_2 == 0 and x2_2 == 0 and y2_2 == 0:
+                        continue
+                    
+                    # Calculate minimum distance between two line segments
+                    min_dist = segment_to_segment_distance(
+                        (x1_1, y1_1), (x2_1, y2_1),
+                        (x1_2, y1_2), (x2_2, y2_2)
+                    )
+                    clearance = min_dist - radius1 - radius2
+                    
+                    # Only report clearance violations when objects are close but NOT overlapping
+                    if 0 < clearance < min_clearance:
+                        self.violations.append(DRCViolation(
+                            rule_name=rule.name,
+                            rule_type="clearance",
+                            severity="error",
+                            message=f"Clearance Constraint: ({clearance:.3f}mm < {min_clearance}mm) Between Track ({x1_1:.3f}mm,{y1_1:.3f}mm)({x2_1:.3f}mm,{y2_1:.3f}mm) on {layer1} And Track ({x1_2:.3f}mm,{y1_2:.3f}mm)({x2_2:.3f}mm,{y2_2:.3f}mm) on {layer2}",
+                            location={"x_mm": (x1_1 + x2_1) / 4 + (x1_2 + x2_2) / 4, "y_mm": (y1_1 + y2_1) / 4 + (y1_2 + y2_2) / 4},
+                            actual_value=round(clearance, 3),
+                            required_value=min_clearance,
+                            objects=[f"Track on {net1}", f"Track on {net2}"],
+                            net_name=f"{net1}/{net2}"
+                        ))
+        
+        # Check track-to-via clearance
+        if not skip_standard_checks:
+            for track in tracks:
+                # Only check tracks on signal/copper layers
+                track_layer = track.get('layer', '').strip().lower()
+                if not self._is_signal_layer(track_layer):
+                    continue
+                
+                track_net = track.get('net', '').strip()
+                if not track_net:
+                    continue
+                
+                x1 = track.get('x1_mm', 0)
+                y1 = track.get('y1_mm', 0)
+                x2 = track.get('x2_mm', 0)
+                y2 = track.get('y2_mm', 0)
+                track_width = track.get('width_mm', 0.254)
+                track_radius = track_width / 2
+                
+                if x1 == 0 and y1 == 0 and x2 == 0 and y2 == 0:
+                    continue
+                
+                for via in vias:
+                    via_net = via.get('net', '').strip()
+                    if not via_net or via_net == track_net:
+                        continue  # Same net or no net
+                    
+                    # Check if via and track share a layer
+                    via_low = via.get('low_layer', '').strip().lower()
+                    via_high = via.get('high_layer', '').strip().lower()
+                    
+                    # Through-hole vias connect all layers
+                    via_on_track_layer = False
+                    if ('top' in via_low and 'bottom' in via_high) or ('bottom' in via_low and 'top' in via_high):
+                        via_on_track_layer = True  # Through-hole via
+                    elif track_layer == via_low or track_layer == via_high:
+                        via_on_track_layer = True
+                    
+                    if not via_on_track_layer:
+                        continue
+                    
+                    via_loc = self._safe_get_location(via)
+                    via_x = via_loc.get('x_mm', 0)
+                    via_y = via_loc.get('y_mm', 0)
+                    via_diameter = via.get('diameter_mm', 0)
+                    if via_diameter <= 0:
+                        continue
+                    via_radius = via_diameter / 2
+                    
+                    if via_x == 0 and via_y == 0:
+                        continue
+                    
+                    # Calculate distance from via center to track line segment
+                    dist_to_track = point_to_line_distance(via_x, via_y, x1, y1, x2, y2)
+                    clearance = dist_to_track - track_radius - via_radius
+                    
+                    # Only report clearance violations when objects are close but NOT overlapping
+                    if 0 < clearance < min_clearance:
+                        self.violations.append(DRCViolation(
+                            rule_name=rule.name,
+                            rule_type="clearance",
+                            severity="error",
+                            message=f"Clearance Constraint: ({clearance:.3f}mm < {min_clearance}mm) Between Track ({x1:.3f}mm,{y1:.3f}mm)({x2:.3f}mm,{y2:.3f}mm) on {track_layer} And Via at ({via_x:.3f}mm,{via_y:.3f}mm)",
+                            location={"x_mm": (x1 + x2) / 2, "y_mm": (y1 + y2) / 2},
+                            actual_value=round(clearance, 3),
+                            required_value=min_clearance,
+                            objects=[f"Track on {track_net}", f"Via on {via_net}"],
+                            net_name=f"{track_net}/{via_net}"
+                        ))
+        
+        # Check via-to-via clearance
+        if not skip_standard_checks:
+            for i, via1 in enumerate(vias):
+                net1 = via1.get('net', '').strip()
+                if not net1:
+                    continue
+                
+                loc1 = self._safe_get_location(via1)
+                x1 = loc1.get('x_mm', 0)
+                y1 = loc1.get('y_mm', 0)
+                diameter1 = via1.get('diameter_mm', 0)
+                if diameter1 <= 0:
+                    continue
+                radius1 = diameter1 / 2
+                
+                if x1 == 0 and y1 == 0:
+                    continue
+                
+                for via2 in vias[i+1:]:
+                    net2 = via2.get('net', '').strip()
+                    if not net2 or net1 == net2:
+                        continue  # Same net or no net
+                    
+                    loc2 = self._safe_get_location(via2)
+                    x2 = loc2.get('x_mm', 0)
+                    y2 = loc2.get('y_mm', 0)
+                    diameter2 = via2.get('diameter_mm', 0)
+                    if diameter2 <= 0:
+                        continue
+                    radius2 = diameter2 / 2
+                    
+                    if x2 == 0 and y2 == 0:
+                        continue
+                    
+                    # Calculate center-to-center distance
+                    distance = math.sqrt((x2 - x1)**2 + (y2 - y1)**2)
+                    clearance = distance - radius1 - radius2
+                    
+                    # Only report clearance violations when objects are close but NOT overlapping
+                    if 0 < clearance < min_clearance:
+                        self.violations.append(DRCViolation(
+                            rule_name=rule.name,
+                            rule_type="clearance",
+                            severity="error",
+                            message=f"Clearance Constraint: ({clearance:.3f}mm < {min_clearance}mm) Between Via at ({x1:.3f}mm,{y1:.3f}mm) And Via at ({x2:.3f}mm,{y2:.3f}mm)",
+                            location={"x_mm": (x1 + x2) / 2, "y_mm": (y1 + y2) / 2},
+                            actual_value=round(clearance, 3),
+                            required_value=min_clearance,
+                            objects=[f"Via on {net1}", f"Via on {net2}"],
+                            net_name=f"{net1}/{net2}"
+                        ))
         
         # Track-to-polygon/copper clearance: DISABLED
         # Our "copper regions" are polygon bounding boxes from ExportActualCopperPrimitives,
@@ -1177,10 +1396,12 @@ class PythonDRCEngine:
             y2 = loc2.get('y_mm', 0)
             
             # Get pad sizes
-            size_x1 = pad1.get('size_x_mm', 0) or pad1.get('width_mm', 0) or 1.0
-            size_y1 = pad1.get('size_y_mm', 0) or pad1.get('height_mm', 0) or 1.0
-            size_x2 = pad2.get('size_x_mm', 0) or pad2.get('width_mm', 0) or 1.0
-            size_y2 = pad2.get('size_y_mm', 0) or pad2.get('height_mm', 0) or 1.0
+            size_x1 = pad1.get('size_x_mm', 0) or pad1.get('width_mm', 0)
+            size_y1 = pad1.get('size_y_mm', 0) or pad1.get('height_mm', 0)
+            size_x2 = pad2.get('size_x_mm', 0) or pad2.get('width_mm', 0)
+            size_y2 = pad2.get('size_y_mm', 0) or pad2.get('height_mm', 0)
+            if size_x1 <= 0 or size_y1 <= 0 or size_x2 <= 0 or size_y2 <= 0:
+                return False
             
             # Calculate bounding boxes (accounting for pad rotation if needed)
             # For now, assume pads are axis-aligned (rotation handling would require rotation matrix)
@@ -1226,8 +1447,10 @@ class PythonDRCEngine:
                 continue
             
             # Get pad size for spatial filtering
-            size_x1 = pad1.get('size_x_mm', 0) or pad1.get('width_mm', 0) or 1.0
-            size_y1 = pad1.get('size_y_mm', 0) or pad1.get('height_mm', 0) or 1.0
+            size_x1 = pad1.get('size_x_mm', 0) or pad1.get('width_mm', 0)
+            size_y1 = pad1.get('size_y_mm', 0) or pad1.get('height_mm', 0)
+            if size_x1 <= 0 or size_y1 <= 0:
+                continue
             max_size1 = max(size_x1, size_y1)
             
             for pad2 in pads[i+1:]:
@@ -1252,13 +1475,18 @@ class PythonDRCEngine:
                     continue
                 
                 # CRITICAL: Pads on different layers cannot short!
+                # EXCEPTION: Multi Layer pads can short with pads on any layer
                 # Normalize layer names for comparison (case-insensitive, strip whitespace)
                 layer1_normalized = layer1.strip().lower() if layer1 else ''
                 layer2_normalized = layer2.strip().lower() if layer2 else ''
                 
-                # If both have layer info and they're different, skip
+                # Check if either pad is Multi Layer
+                pad1_is_multilayer = 'multi' in layer1_normalized or pad1.get('layer', '').strip().lower() == 'multi layer'
+                pad2_is_multilayer = 'multi' in layer2_normalized or pad2.get('layer', '').strip().lower() == 'multi layer'
+                
+                # If both have layer info and they're different, skip (unless one is Multi Layer)
                 if layer1_normalized and layer2_normalized:
-                    if layer1_normalized != layer2_normalized:
+                    if layer1_normalized != layer2_normalized and not pad1_is_multilayer and not pad2_is_multilayer:
                         skipped_different_layers += 1
                         continue
                 elif not layer1_normalized and not layer2_normalized:
@@ -1279,8 +1507,10 @@ class PythonDRCEngine:
                 
                 # Quick distance check first (spatial filtering)
                 distance = math.sqrt((x2 - x1)**2 + (y2 - y1)**2)
-                size_x2 = pad2.get('size_x_mm', 0) or pad2.get('width_mm', 0) or 1.0
-                size_y2 = pad2.get('size_y_mm', 0) or pad2.get('height_mm', 0) or 1.0
+                size_x2 = pad2.get('size_x_mm', 0) or pad2.get('width_mm', 0)
+                size_y2 = pad2.get('size_y_mm', 0) or pad2.get('height_mm', 0)
+                if size_x2 <= 0 or size_y2 <= 0:
+                    continue
                 max_size2 = max(size_x2, size_y2)
                 
                 # Skip if pads are too far apart to possibly overlap
@@ -1313,7 +1543,122 @@ class PythonDRCEngine:
                         net_name=f"{net1}/{net2}"
                     ))
         
-        print(f"DEBUG: Short-circuit check: checked {checked_pairs} pad pairs, found {short_circuit_count} violations")
+        # Check pad-to-track overlaps (different nets, same layer)
+        # CRITICAL: Altium reports short-circuits when pads and tracks on different nets overlap
+        pad_to_track_checked = 0
+        pad_to_track_short_circuits = 0
+
+        def segment_intersects_rect(x1, y1, x2, y2, left, right, bottom, top):
+            """Liang-Barsky line clipping: True if segment intersects axis-aligned rectangle."""
+            dx = x2 - x1
+            dy = y2 - y1
+            p = [-dx, dx, -dy, dy]
+            q = [x1 - left, right - x1, y1 - bottom, top - y1]
+            u1, u2 = 0.0, 1.0
+
+            for pi, qi in zip(p, q):
+                if pi == 0:
+                    if qi < 0:
+                        return False
+                    continue
+                t = qi / pi
+                if pi < 0:
+                    if t > u2:
+                        return False
+                    if t > u1:
+                        u1 = t
+                else:
+                    if t < u1:
+                        return False
+                    if t < u2:
+                        u2 = t
+            return True
+        
+        for pad in pads:
+            pad_loc = self._safe_get_location(pad)
+            pad_x = pad_loc.get('x_mm', 0)
+            pad_y = pad_loc.get('y_mm', 0)
+            pad_net = pad.get('net', '').strip()
+            pad_layer = pad.get('layer', '').strip().lower()
+            
+            if not pad_net or (pad_x == 0 and pad_y == 0) or not pad_layer:
+                continue
+            
+            pad_size_x = pad.get('size_x_mm', 0) or pad.get('width_mm', 0)
+            pad_size_y = pad.get('size_y_mm', 0) or pad.get('height_mm', 0)
+            if pad_size_x <= 0 or pad_size_y <= 0:
+                continue
+            pad_half_x = pad_size_x / 2
+            pad_half_y = pad_size_y / 2
+            
+            for track in tracks:
+                track_net = track.get('net', '').strip()
+                track_layer = track.get('layer', '').strip().lower()
+                
+                # Skip if same net or no net
+                if not track_net or track_net == pad_net:
+                    continue
+                
+                # Must be on same layer (or pad is Multi Layer)
+                if not self._layers_can_connect(pad_layer, track_layer):
+                    continue
+                
+                # Get track geometry
+                x1 = track.get('x1_mm', 0)
+                y1 = track.get('y1_mm', 0)
+                x2 = track.get('x2_mm', 0)
+                y2 = track.get('y2_mm', 0)
+                track_width = track.get('width_mm', 0.254)
+                track_radius = track_width / 2
+                
+                if x1 == 0 and y1 == 0 and x2 == 0 and y2 == 0:
+                    continue
+                
+                # Conservative geometric test:
+                # Treat the track centerline intersecting the pad rectangle expanded by track half-width.
+                # This avoids circular-pad approximation false positives for rectangular/oval pads.
+                expand = track_radius + 0.001  # small numeric tolerance
+                rect_left = pad_x - pad_half_x - expand
+                rect_right = pad_x + pad_half_x + expand
+                rect_bottom = pad_y - pad_half_y - expand
+                rect_top = pad_y + pad_half_y + expand
+
+                if segment_intersects_rect(x1, y1, x2, y2, rect_left, rect_right, rect_bottom, rect_top):
+                    pad_to_track_checked += 1
+                    pad_to_track_short_circuits += 1
+                    
+                    # Calculate overlap location (closest point on track to pad center)
+                    dx = x2 - x1
+                    dy = y2 - y1
+                    line_len_sq = dx * dx + dy * dy
+                    
+                    if line_len_sq == 0:
+                        overlap_x, overlap_y = x1, y1
+                    else:
+                        t = max(0, min(1, ((pad_x - x1) * dx + (pad_y - y1) * dy) / line_len_sq))
+                        overlap_x = x1 + t * dx
+                        overlap_y = y1 + t * dy
+                    
+                    if pad_to_track_short_circuits <= 5:
+                        dist_to_track = point_to_line_distance(pad_x, pad_y, x1, y1, x2, y2)
+                        print(f"DEBUG: Pad-to-track short-circuit {pad_to_track_short_circuits}:")
+                        print(f"  Pad: {pad.get('designator', 'unknown')} net={pad_net} layer={pad_layer} pos=({pad_x:.3f},{pad_y:.3f})")
+                        print(f"  Track: net={track_net} layer={track_layer} ({x1:.3f},{y1:.3f}) to ({x2:.3f},{y2:.3f})")
+                        print(f"  Distance: {dist_to_track:.3f}mm, Rect half-size: ({pad_half_x:.3f}, {pad_half_y:.3f}), track_radius: {track_radius:.3f}mm")
+                    
+                    self.violations.append(DRCViolation(
+                        rule_name=rule.name,
+                        rule_type="short_circuit",
+                        severity="error",
+                        message=f"Short-Circuit Constraint: Between Pad {pad.get('designator', 'Unknown')}({pad_x:.3f}mm,{pad_y:.3f}mm) on {pad_layer} And Track ({x1:.3f}mm,{y1:.3f}mm)({x2:.3f}mm,{y2:.3f}mm) on {track_layer} Location: [X = {overlap_x:.3f}mm][Y = {overlap_y:.3f}mm]",
+                        location={"x_mm": overlap_x, "y_mm": overlap_y},
+                        objects=[pad.get('designator', pad.get('name', 'pad')), 
+                                f"Track on {track_net}"],
+                        net_name=f"{pad_net}/{track_net}"
+                    ))
+        
+        print(f"DEBUG: Short-circuit check: checked {checked_pairs} pad pairs, found {short_circuit_count} pad-to-pad violations")
+        print(f"DEBUG:   Checked {pad_to_track_checked} pad-to-track pairs, found {pad_to_track_short_circuits} pad-to-track violations")
         print(f"DEBUG:   Skipped {skipped_different_layers} pairs (different layers), {skipped_no_layer_info} pairs (no layer info), {skipped_too_far} pairs (too far)")
     
     def _check_unrouted_nets(self, rule: DRCRule, nets: List[Dict], tracks: List[Dict], 
@@ -1506,8 +1851,10 @@ class PythonDRCEngine:
         """
         l1 = layer1.strip().lower() if layer1 else ''
         l2 = layer2.strip().lower() if layer2 else ''
+        # Conservative for parity: if layer is unknown, do not assume connectivity.
+        # Assuming connectivity on unknown layers causes many false positives.
         if not l1 or not l2:
-            return True  # Unknown layers - assume can connect
+            return False
         if l1 == l2:
             return True
         if 'multi' in l1 or 'multi' in l2:
@@ -2770,6 +3117,214 @@ class PythonDRCEngine:
         # 
         # Note: Full implementation would require checking actual connection geometry
         # and comparing against rule.plane_connect_style, rule.plane_expansion_mm, etc.
+    
+    def _check_fanout(self, rule: DRCRule, components: List[Dict], pads: List[Dict], 
+                      vias: List[Dict], tracks: List[Dict], all_fanout_rules: List[DRCRule] = None):
+        """
+        Check fanout rules - verify that component pads have proper via fanout.
+        
+        CRITICAL: Fanout rules have priority - more specific rules (BGA, SOIC, LCC, Small) 
+        take precedence over Fanout_Default. Fanout_Default only applies to components
+        that don't match any other fanout rule scope.
+        
+        Different fanout rules apply to different component types:
+        - Fanout_Small: Components with < 5 pins
+        - Fanout_BGA: BGA components
+        - Fanout_SOIC: SOIC components
+        - Fanout_LCC: LCC components
+        - Fanout_Default: All other components (only if no other rule matches)
+        """
+        rule_name_lower = rule.name.lower()
+        
+        # Determine component filter based on rule name
+        if 'small' in rule_name_lower:
+            # Fanout_Small: Check components with < 5 pins
+            target_components = [c for c in components 
+                               if isinstance(c, dict) and c.get('pin_count', 0) < 5]
+        elif 'bga' in rule_name_lower:
+            # Fanout_BGA: Check BGA components
+            target_components = [c for c in components 
+                               if isinstance(c, dict) and 'bga' in c.get('type', '').lower()]
+        elif 'soic' in rule_name_lower:
+            # Fanout_SOIC: Check SOIC components
+            target_components = [c for c in components 
+                               if isinstance(c, dict) and 'soic' in c.get('type', '').lower()]
+        elif 'lcc' in rule_name_lower:
+            # Fanout_LCC: Check LCC components
+            target_components = [c for c in components 
+                               if isinstance(c, dict) and 'lcc' in c.get('type', '').lower()]
+        elif 'default' in rule_name_lower:
+            # Fanout_Default: Only check components that don't match other fanout rules
+            # Get all other fanout rules to determine which components are excluded
+            excluded_components = set()
+            if all_fanout_rules:
+                for other_rule in all_fanout_rules:
+                    if other_rule.name == rule.name:
+                        continue  # Skip self
+                    other_name_lower = other_rule.name.lower()
+                    if 'small' in other_name_lower:
+                        # Exclude components with < 5 pins
+                        for c in components:
+                            if isinstance(c, dict) and c.get('pin_count', 0) < 5:
+                                excluded_components.add(c.get('designator', ''))
+                    elif 'bga' in other_name_lower:
+                        # Exclude BGA components
+                        for c in components:
+                            if isinstance(c, dict) and 'bga' in c.get('type', '').lower():
+                                excluded_components.add(c.get('designator', ''))
+                    elif 'soic' in other_name_lower:
+                        # Exclude SOIC components
+                        for c in components:
+                            if isinstance(c, dict) and 'soic' in c.get('type', '').lower():
+                                excluded_components.add(c.get('designator', ''))
+                    elif 'lcc' in other_name_lower:
+                        # Exclude LCC components
+                        for c in components:
+                            if isinstance(c, dict) and 'lcc' in c.get('type', '').lower():
+                                excluded_components.add(c.get('designator', ''))
+            
+            # Fanout_Default: Only components NOT excluded by other rules
+            target_components = [c for c in components 
+                               if isinstance(c, dict) and c.get('designator', '') not in excluded_components]
+            print(f"DEBUG: Fanout_Default: Excluding {len(excluded_components)} components matched by other fanout rules")
+        else:
+            # Unknown fanout rule - skip to avoid false positives
+            print(f"DEBUG: Unknown fanout rule type '{rule.name}' - skipping")
+            return
+        
+        # Build pad-to-via mapping for quick lookup
+        # A pad has fanout if there's a via within its radius
+        pad_via_map = {}  # pad_designator -> has_via
+        FANOUT_TOLERANCE_MM = 0.5  # Via must be within 0.5mm of pad center
+        
+        for pad in pads:
+            pad_designator = pad.get('designator', '')
+            if not pad_designator:
+                continue
+            
+            pad_loc = self._safe_get_location(pad)
+            pad_x = pad_loc.get('x_mm', 0)
+            pad_y = pad_loc.get('y_mm', 0)
+            
+            if pad_x == 0 and pad_y == 0:
+                continue
+            
+            # Check if there's a via near this pad
+            has_via = False
+            for via in vias:
+                via_loc = self._safe_get_location(via)
+                via_x = via_loc.get('x_mm', 0)
+                via_y = via_loc.get('y_mm', 0)
+                
+                if via_x == 0 and via_y == 0:
+                    continue
+                
+                distance = math.sqrt((via_x - pad_x)**2 + (via_y - pad_y)**2)
+                if distance <= FANOUT_TOLERANCE_MM:
+                    has_via = True
+                    break
+            
+            pad_via_map[pad_designator] = has_via
+        
+        # Check each target component's pads
+        for component in target_components:
+            comp_designator = component.get('designator', '')
+            if not comp_designator:
+                continue
+            
+            # Get all pads for this component
+            comp_pads = [p for p in pads 
+                        if isinstance(p, dict) and p.get('component_designator', '') == comp_designator]
+            
+            # Check if pads have fanout (vias)
+            pads_without_fanout = []
+            for pad in comp_pads:
+                pad_designator = pad.get('designator', '')
+                if pad_designator and not pad_via_map.get(pad_designator, False):
+                    pads_without_fanout.append(pad_designator)
+            
+            # Report violation if component has pads without fanout
+            if pads_without_fanout:
+                pad_list = ', '.join(pads_without_fanout[:3])
+                if len(pads_without_fanout) > 3:
+                    pad_list += f' (and {len(pads_without_fanout) - 3} more)'
+                
+                pad_loc = self._safe_get_location(comp_pads[0]) if comp_pads else {}
+                self.violations.append(DRCViolation(
+                    rule_name=rule.name,
+                    rule_type="fanout",
+                    severity="error",
+                    message=f"Fanout violation: Component {comp_designator} has pads without via fanout: {pad_list}",
+                    location={"x_mm": pad_loc.get('x_mm', 0), "y_mm": pad_loc.get('y_mm', 0)},
+                    component_name=comp_designator,
+                    objects=pads_without_fanout
+                ))
+    
+    def _deduplicate_violations(self, violations: List[DRCViolation]) -> List[DRCViolation]:
+        """
+        Deduplicate violations to prevent counting the same physical issue multiple times.
+        
+        Altium reports each violation only once, even if multiple rules could apply.
+        We deduplicate based on:
+        - Location (x, y coordinates within tolerance)
+        - Rule type (same type violations at same location are duplicates)
+        - Objects involved (same objects = same violation)
+        """
+        if not violations:
+            return []
+        
+        # Tolerance for location matching (0.1mm - violations within this distance are considered the same)
+        LOCATION_TOLERANCE_MM = 0.1
+        
+        unique_violations = []
+        seen_keys = set()
+        
+        for v in violations:
+            # Create a unique key for this violation
+            loc = v.location or {}
+            x = loc.get('x_mm', 0)
+            y = loc.get('y_mm', 0)
+            layer = loc.get('layer', '')
+            
+            # Round location to tolerance to group nearby violations
+            x_rounded = round(x / LOCATION_TOLERANCE_MM) * LOCATION_TOLERANCE_MM
+            y_rounded = round(y / LOCATION_TOLERANCE_MM) * LOCATION_TOLERANCE_MM
+            
+            # Create key from: type, rounded location, layer, and objects
+            objects_str = ','.join(sorted(v.objects or []))
+            net_str = v.net_name or ''
+            
+            # For short-circuit: deduplicate by pad/net/location instead of raw message hash.
+            # Altium groups contiguous track fragments that represent the same electrical collision.
+            if v.rule_type == "short_circuit":
+                # Coarser location bucketing for short-circuit only to merge segment-fragment duplicates.
+                sc_tolerance = 0.25  # mm
+                sc_x = round(x / sc_tolerance) * sc_tolerance
+                sc_y = round(y / sc_tolerance) * sc_tolerance
+
+                # For pad-to-track events, objects[0] is pad designator and net_name is "padNet/trackNet".
+                # Keep pad/net identity so different actual shorts are still counted separately.
+                pad_obj = ""
+                if isinstance(v.objects, list) and len(v.objects) > 0:
+                    pad_obj = str(v.objects[0])
+                key = (v.rule_type, pad_obj, net_str, layer, sc_x, sc_y)
+            elif v.rule_type == 'clearance':
+                # For clearance, use objects to identify duplicates
+                key = (v.rule_type, x_rounded, y_rounded, layer, objects_str)
+            elif v.rule_type == 'unrouted_net':
+                key = (v.rule_type, net_str)
+            else:
+                # For other types, use location and type
+                key = (v.rule_type, x_rounded, y_rounded, layer)
+            
+            if key not in seen_keys:
+                seen_keys.add(key)
+                unique_violations.append(v)
+            else:
+                # This is a duplicate - log for debugging
+                print(f"DEBUG: Deduplicated violation: {v.rule_type} at ({x:.3f}, {y:.3f}) - already seen")
+        
+        return unique_violations
     
     def _violation_to_dict(self, violation: DRCViolation) -> Dict[str, Any]:
         """Convert DRCViolation to dictionary"""

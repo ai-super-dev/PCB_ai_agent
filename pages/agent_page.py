@@ -1314,6 +1314,8 @@ Chat with me to:
                         violations = data.get("violations", [])
                         warnings = data.get("warnings", [])
                         violations_by_rule = data.get("violations_by_rule", {})
+                        drc_source = data.get("source", "python_fallback")
+                        native_details_available = data.get("native_details_available", True)
                         
                         # Get additional data
                         all_rules = data.get("all_rules_checked", [])
@@ -1326,6 +1328,9 @@ Chat with me to:
                         
                         # Filename with emphasis
                         msg += f"**PCB File:** `{filename}`\n\n"
+                        msg += f"**DRC Source:** `{drc_source}`\n\n"
+                        if drc_source == "hybrid_native_counts_python_details":
+                            msg += "*Counts come from native Altium DRC. Detailed rows are computed by Python DRC geometry checks.*\n\n"
                         msg += "---\n\n"
                         
                         # Summary section with visual emphasis
@@ -1378,7 +1383,7 @@ Chat with me to:
                         
                         msg += "---\n\n"
                         
-                        if python_checked_rules:
+                        if drc_source != "altium_native_drc" and python_checked_rules:
                             msg += "### 📋 Rules Currently Checked\n\n"
                             
                             # Group by rule type
@@ -1430,42 +1435,45 @@ Chat with me to:
                                 msg += f"| {label} | **{count}** | {rules_display} |\n"
                             
                             msg += "\n"
-                        else:
+                        elif drc_source != "altium_native_drc":
                             msg += "> ⚠️ **Note:** No rules were found in the PCB file. Using default rules for checking.\n\n"
+                        else:
+                            msg += "> ✅ **Native Altium DRC source in use.** Rule table above is from Altium export.\n\n"
                         
-                        msg += "---\n\n"
-                        msg += "### ✅ **Engine Capabilities**\n\n"
-                        msg += "The Python DRC engine performs comprehensive validation including:\n\n"
-                        
-                        # Use a cleaner two-column format for capabilities
-                        capabilities = [
-                            ("🔍 Clearance violations", "Pad-to-pad, via-to-pad spacing"),
-                            ("📏 Track width constraints", "Min/max width validation"),
-                            ("🔘 Via & hole size", "Diameter and drill size checks"),
-                            ("⚡ Short-circuit detection", "Overlap detection between nets"),
-                            ("🔌 Unrouted net detection", "With polygon connectivity support"),
-                            ("📐 Hole-to-hole clearance", "Edge-to-edge distance validation"),
-                            ("🛡️ Solder mask sliver", "Mask gap detection"),
-                            ("🎨 Silk screen clearance", "Silk-to-silk and silk-to-mask"),
-                            ("📏 Component height", "Height constraint validation"),
-                            ("🔷 Modified polygon", "Polygon modification checks"),
-                            ("📡 Net antennae", "Stub trace detection"),
-                            ("⚖️ Differential pairs", "Width and gap validation"),
-                            ("🌐 Routing topology", "Topology pattern validation"),
-                            ("🔧 Via style", "Via dimension constraints"),
-                            ("📐 Routing corners", "Corner angle validation"),
-                            ("📚 Routing layers", "Layer restriction checks"),
-                            ("⭐ Routing priority", "Priority-based validation"),
-                            ("🔌 Power plane connect", "Plane connection style")
-                        ]
-                        
-                        # Display in a clean two-column table
-                        msg += "| **Feature** | **Description** |\n"
-                        msg += "|:------------|:-----------------|\n"
-                        for feature, desc in capabilities:
-                            msg += f"| {feature} | {desc} |\n"
-                        
-                        msg += "\n"
+                        if drc_source != "altium_native_drc":
+                            msg += "---\n\n"
+                            msg += "### ✅ **Engine Capabilities**\n\n"
+                            msg += "The Python DRC engine performs comprehensive validation including:\n\n"
+                            
+                            # Use a cleaner two-column format for capabilities
+                            capabilities = [
+                                ("🔍 Clearance violations", "Pad-to-pad, via-to-pad spacing"),
+                                ("📏 Track width constraints", "Min/max width validation"),
+                                ("🔘 Via & hole size", "Diameter and drill size checks"),
+                                ("⚡ Short-circuit detection", "Overlap detection between nets"),
+                                ("🔌 Unrouted net detection", "With polygon connectivity support"),
+                                ("📐 Hole-to-hole clearance", "Edge-to-edge distance validation"),
+                                ("🛡️ Solder mask sliver", "Mask gap detection"),
+                                ("🎨 Silk screen clearance", "Silk-to-silk and silk-to-mask"),
+                                ("📏 Component height", "Height constraint validation"),
+                                ("🔷 Modified polygon", "Polygon modification checks"),
+                                ("📡 Net antennae", "Stub trace detection"),
+                                ("⚖️ Differential pairs", "Width and gap validation"),
+                                ("🌐 Routing topology", "Topology pattern validation"),
+                                ("🔧 Via style", "Via dimension constraints"),
+                                ("📐 Routing corners", "Corner angle validation"),
+                                ("📚 Routing layers", "Layer restriction checks"),
+                                ("⭐ Routing priority", "Priority-based validation"),
+                                ("🔌 Power plane connect", "Plane connection style")
+                            ]
+                            
+                            # Display in a clean two-column table
+                            msg += "| **Feature** | **Description** |\n"
+                            msg += "|:------------|:-----------------|\n"
+                            for feature, desc in capabilities:
+                                msg += f"| {feature} | {desc} |\n"
+                            
+                            msg += "\n"
                         
                         if summary.get("passed", False):
                             msg += "✅ **All checks passed!** No violations or warnings detected.\n\n"
@@ -1498,6 +1506,11 @@ Chat with me to:
                             if len(violations) > 10:
                                 msg += f"---\n\n"
                                 msg += f"*... and **{len(violations) - 10}** more violation(s).*\n\n"
+                        elif drc_source == "altium_native_drc" and not native_details_available:
+                            msg += "---\n\n"
+                            msg += "## 🔍 Detailed Violations\n\n"
+                            msg += "*Native Altium DRC details are not exposed by this Altium scripting API build.*\n"
+                            msg += "*Rule counts above are exact from Altium; only per-violation message/coordinates are unavailable.*\n\n"
                         
                         # Get suggestions if violations exist
                         suggestions = []
@@ -1576,6 +1589,39 @@ Chat with me to:
             location = violation.get("location", {})
             
             print(f"DEBUG: Violation {i+1}: {message}")
+            
+            # Handle unrouted net violations
+            if "unrouted" in v_type.lower():
+                net_name = violation.get("net_name", "")
+                x = location.get("x_mm", 0)
+                y = location.get("y_mm", 0)
+                
+                if net_name:
+                    suggestions.append({
+                        "type": "route_net",
+                        "net": net_name,
+                        "x": x,
+                        "y": y,
+                        "message": f"Route net '{net_name}' — add tracks to connect all pads on this net",
+                        "reason": f"Un-Routed Net: {net_name}"
+                    })
+                continue
+            
+            # Handle net antennae violations
+            if "antennae" in v_type.lower() or "antenna" in v_type.lower():
+                net_name = violation.get("net_name", "")
+                x = location.get("x_mm", 0)
+                y = location.get("y_mm", 0)
+                
+                suggestions.append({
+                    "type": "fix_antenna",
+                    "net": net_name,
+                    "x": x,
+                    "y": y,
+                    "message": f"Fix dead-end track on net '{net_name}' at ({x:.1f}, {y:.1f}) — extend to nearest pad or remove stub",
+                    "reason": f"Net Antennae: dead-end track on {net_name}"
+                })
+                continue
             
             # Parse clearance violations more intelligently
             if "clearance" in v_type.lower() or "clearance" in message.lower():
@@ -1806,7 +1852,59 @@ Chat with me to:
             print(f"Error in _add_drc_fix_buttons: {e}")
     
     def _handle_drc_fix_show_approach(self):
-        """Handle Fix button click - show fix approach first"""
+        """Handle Fix button — show fix plan, then Apply/Cancel."""
+        self.add_message("🔧 Analyzing violations and creating fix plan...", is_user=False)
+        
+        if not hasattr(self, 'current_drc_suggestions') or not self.current_drc_suggestions:
+            self.add_message("❌ No violations to fix.", is_user=False)
+            return
+        
+        # Build fix plan from the suggestions
+        plan_msg = "### 🔧 Fix Plan\n\n"
+        
+        antenna_fixes = [s for s in self.current_drc_suggestions if s.get('type') == 'fix_antenna']
+        route_fixes = [s for s in self.current_drc_suggestions if s.get('type') == 'route_net']
+        clearance_fixes = [s for s in self.current_drc_suggestions if s.get('type') in ('adjust_copper_pour_clearance', 'move_component')]
+        
+        step = 1
+        if antenna_fixes:
+            plan_msg += f"**Step {step}: Delete dead-end tracks ({len(antenna_fixes)} antenna tracks)**\n"
+            for fix in antenna_fixes:
+                net = fix.get('net', 'Unknown')
+                x, y = fix.get('x', 0), fix.get('y', 0)
+                plan_msg += f"  • Delete stub track on net **{net}** at ({x:.1f}, {y:.1f})\n"
+            plan_msg += "\n"
+            step += 1
+        
+        if route_fixes:
+            plan_msg += f"**Step {step}: Route unconnected nets ({len(route_fixes)} nets)**\n"
+            for fix in route_fixes:
+                net = fix.get('net', 'Unknown')
+                plan_msg += f"  • Add track to connect net **{net}**\n"
+            plan_msg += "\n"
+            step += 1
+        
+        if clearance_fixes:
+            plan_msg += f"**Step {step}: Fix clearance violations ({len(clearance_fixes)} objects)**\n"
+            for fix in clearance_fixes:
+                plan_msg += f"  • {fix.get('message', 'Adjust clearance')}\n"
+            plan_msg += "\n"
+            step += 1
+        
+        if not antenna_fixes and not route_fixes and not clearance_fixes:
+            plan_msg += "No automatic fixes available for these violations.\n"
+            plan_msg += "They require manual work in Altium Designer.\n"
+            self.add_message(plan_msg, is_user=False)
+            return
+        
+        plan_msg += "**Click Apply to execute these fixes, or Cancel to skip.**"
+        self.add_message(plan_msg, is_user=False)
+        
+        # Show Apply / Cancel buttons
+        self._add_apply_cancel_buttons()
+    
+    def _handle_drc_fix_show_approach_OLD(self):
+        """OLD: Handle Fix button click - show fix approach first (DEPRECATED)"""
         self.add_message("Analyzing violations and determining fix approach...", is_user=False)
         self.set_status("Analyzing fixes...", "warning")
         
@@ -1825,6 +1923,23 @@ Chat with me to:
                 copper_pour_fixes = [s for s in self.current_drc_suggestions if s.get("type") == "adjust_copper_pour_clearance"]
                 component_fixes = [s for s in self.current_drc_suggestions if s.get("type") == "move_component"]
                 manual_fixes = [s for s in self.current_drc_suggestions if s.get("type") == "manual_fix_needed"]
+                route_fixes = [s for s in self.current_drc_suggestions if s.get("type") == "route_net"]
+                antenna_fixes = [s for s in self.current_drc_suggestions if s.get("type") == "fix_antenna"]
+                
+                if route_fixes:
+                    approach_msg += f"**⚠️ Unrouted Nets ({len(route_fixes)} nets) — Manual routing required:**\n"
+                    for i, fix in enumerate(route_fixes, 1):
+                        net = fix.get('net', 'Unknown')
+                        approach_msg += f"{i}. Net **{net}** — use Altium's interactive router to connect pads\n"
+                    approach_msg += "\n"
+                
+                if antenna_fixes:
+                    approach_msg += f"**⚠️ Net Antennae ({len(antenna_fixes)} tracks) — Manual fix required:**\n"
+                    for i, fix in enumerate(antenna_fixes, 1):
+                        net = fix.get('net', 'Unknown')
+                        x, y = fix.get('x', 0), fix.get('y', 0)
+                        approach_msg += f"{i}. Dead-end track on net **{net}** at ({x:.1f}, {y:.1f}) — extend to nearest pad or delete stub\n"
+                    approach_msg += "\n"
                 
                 if copper_pour_fixes:
                     approach_msg += f"**Automatic Copper Pour Clearance Adjustments ({len(copper_pour_fixes)} violations):**\n"
@@ -2092,176 +2207,109 @@ Chat with me to:
                 self._safe_after(0, lambda: self.set_status("Error", "error"))
         
         threading.Thread(target=apply_fixes, daemon=True).start()
+    
+    def _add_apply_cancel_buttons(self):
+        """Add Apply/Cancel buttons after showing fix plan."""
+        try:
+            btn_container = ctk.CTkFrame(
+                self.chat_frame, fg_color=self.colors["bg_card"],
+                corner_radius=12, border_width=1, border_color=self.colors["border"]
+            )
+            btn_container.grid(row=len(self.messages), column=0, sticky="ew", padx=20, pady=12)
+            btn_container.grid_columnconfigure(0, weight=1)
+            btn_container.grid_columnconfigure(1, weight=1)
+            self.messages.append(btn_container)
+            
+            apply_btn = ctk.CTkButton(
+                btn_container, text="✅ Apply", font=ctk.CTkFont(size=13, weight="bold"),
+                height=42, corner_radius=10, fg_color=self.colors["success"],
+                hover_color="#059669", text_color="#ffffff",
+                command=self._handle_apply_fixes, border_width=0
+            )
+            apply_btn.grid(row=0, column=0, padx=(16, 8), pady=16, sticky="ew")
+            
+            cancel_btn = ctk.CTkButton(
+                btn_container, text="❌ Cancel", font=ctk.CTkFont(size=13, weight="bold"),
+                height=42, corner_radius=10, fg_color=self.colors["text_dim"],
+                hover_color="#475569", text_color="#ffffff",
+                command=self._handle_cancel_fixes, border_width=0
+            )
+            cancel_btn.grid(row=0, column=1, padx=(8, 16), pady=16, sticky="ew")
+            
+            self.chat_frame.update()
+            self.chat_frame._parent_canvas.yview_moveto(1.0)
+        except Exception as e:
+            print(f"Error adding apply/cancel buttons: {e}")
+    
+    def _handle_apply_fixes(self):
+        """Execute the fix plan via auto-fix engine."""
+        self.add_message("🔧 Applying fixes...", is_user=False)
+        self.set_status("Applying fixes...", "warning")
+        self.set_loading(True)
         
-        def apply_fixes():
+        def execute_fixes():
             try:
-                # First, let's see what components actually exist in the PCB
-                try:
-                    pcb_info = self.mcp_client.get_pcb_info()
-                    if pcb_info and not pcb_info.get("error"):
-                        components = pcb_info.get("components", [])
-                        component_names = []
-                        for comp in components[:10]:  # Show first 10 components
-                            if isinstance(comp, dict):
-                                comp_name = comp.get("designator") or comp.get("name") or comp.get("Name")
-                                if comp_name:
-                                    component_names.append(comp_name)
-                        
-                        if component_names:
-                            self._safe_after(0, lambda: self.add_message(
-                                f"Found {len(components)} components in PCB. Sample: {', '.join(component_names[:5])}{'...' if len(component_names) > 5 else ''}",
-                                is_user=False
-                            ))
-                        else:
-                            self._safe_after(0, lambda: self.add_message(
-                                "⚠️ No component names found in PCB data. This may cause fixes to fail.",
-                                is_user=False
-                            ))
-                    else:
-                        self._safe_after(0, lambda: self.add_message(
-                            "⚠️ Could not load PCB component data. Fixes may target non-existent components.",
-                            is_user=False
-                        ))
-                except Exception as e:
-                    print(f"DEBUG: Error checking PCB components: {e}")
+                result = self.mcp_client.session.get(
+                    "http://localhost:8765/drc/auto-fix", timeout=120
+                )
                 
-                if not hasattr(self, 'current_drc_suggestions') or not self.current_drc_suggestions:
-                    self._safe_after(0, lambda: self.add_message(
-                        "❌ No actionable suggestions available. These violations may require manual design changes.",
-                        is_user=False
-                    ))
-                    self._safe_after(0, lambda: self.set_loading(False))
-                    return
-                
-                # Separate manual fixes from actionable fixes
-                actionable_suggestions = [s for s in self.current_drc_suggestions if s.get("type") != "manual_fix_needed"]
-                manual_suggestions = [s for s in self.current_drc_suggestions if s.get("type") == "manual_fix_needed"]
-                
-                if manual_suggestions and not actionable_suggestions:
-                    # All suggestions require manual work
-                    self._safe_after(0, lambda: self.add_message(
-                        "🔧 **Manual Fixes Required**\n\n"
-                        "These violations cannot be fixed automatically by moving components.\n"
-                        "They require manual design changes in Altium Designer:",
-                        is_user=False
-                    ))
+                if result.status_code == 200:
+                    data = result.json()
+                    log = data.get('log', [])
                     
-                    for suggestion in manual_suggestions:
-                        msg = f"\n**{suggestion.get('message', 'Manual fix needed')}**\n"
-                        msg += f"Details: {suggestion.get('details', 'N/A')}\n"
-                        msg += f"Reason: {suggestion.get('reason', 'N/A')}\n"
-                        
-                        if 'recommendations' in suggestion:
-                            msg += "\nRecommended steps:\n"
-                            for rec in suggestion['recommendations']:
-                                msg += f"• {rec}\n"
-                        
-                        self._safe_after(0, lambda m=msg: self.add_message(m, is_user=False))
+                    # Show log
+                    if log:
+                        log_msg = "### 📋 Fix Log\n\n"
+                        for entry in log:
+                            log_msg += f"• {entry}\n"
+                        self._safe_after(0, lambda m=log_msg: self.add_message(m, is_user=False))
                     
-                    self._safe_after(0, lambda: self.set_loading(False))
-                    self._safe_after(0, lambda: self.set_status("Manual Fixes Needed", "warning"))
-                    return
-                
-                if not actionable_suggestions:
-                    self._safe_after(0, lambda: self.add_message(
-                        "❌ No automatic fixes available for these violations.",
-                        is_user=False
-                    ))
-                    self._safe_after(0, lambda: self.set_loading(False))
-                    return
-                
-                # Apply fixes one by one and track actual results
-                fixes_attempted = 0
-                fixes_successful = 0
-                fix_details = []
-                errors = []
-                
-                self._safe_after(0, lambda: self.add_message(
-                    f"Attempting to fix {len(actionable_suggestions)} violation(s)...",
-                    is_user=False
-                ))
-                
-                for i, suggestion in enumerate(actionable_suggestions):
-                    try:
-                        fixes_attempted += 1
-                        self._safe_after(0, lambda i=i: self.add_message(
-                            f"Fix {i+1}: {suggestion.get('message', 'Applying fix...')}",
-                            is_user=False
+                    fixed = data.get('violations_fixed', 0)
+                    failed = data.get('total_failed', 0)
+                    
+                    if fixed > 0:
+                        summary = f"### ✅ Fixes Applied\n\n"
+                        summary += f"**Fixed:** {fixed} violation(s)\n"
+                        if failed > 0:
+                            summary += f"**Could not fix:** {failed} violation(s) — manual work needed in Altium\n"
+                        self._safe_after(0, lambda m=summary: self.add_message(m, is_user=False))
+                        
+                        # Auto re-run DRC to verify
+                        self._safe_after(500, lambda: self.add_message(
+                            "🔄 Re-running DRC to verify fixes...", is_user=False
                         ))
-                        
-                        fix_result = self._apply_single_suggestion(suggestion)
-                        
-                        if fix_result.get("success"):
-                            fixes_successful += 1
-                            fix_details.append(f"✅ {fix_result.get('message', 'Fix applied')}")
-                            self._safe_after(0, lambda msg=fix_result.get('message'): self.add_message(
-                                f"✅ {msg}",
-                                is_user=False
-                            ))
-                        else:
-                            error_msg = fix_result.get("error", "Unknown error")
-                            errors.append(error_msg)
-                            fix_details.append(f"❌ {error_msg}")
-                            self._safe_after(0, lambda msg=error_msg: self.add_message(
-                                f"❌ {msg}",
-                                is_user=False
-                            ))
-                        
-                        # Longer delay between fixes to prevent file locking issues
-                        # This gives Altium script server time to fully process each command
                         import time
-                        time.sleep(2.0)  # Increased from 0.5s to 2.0s
-                        
-                    except Exception as e:
-                        error_msg = f"Error applying fix {i+1}: {str(e)}"
-                        errors.append(error_msg)
-                        self._safe_after(0, lambda msg=error_msg: self.add_message(
-                            f"❌ {msg}",
-                            is_user=False
-                        ))
-                
-                # Report final results honestly
-                if fixes_successful > 0:
-                    self._safe_after(0, lambda: self.add_message(
-                        f"Applied {fixes_successful} out of {fixes_attempted} attempted fixes.",
-                        is_user=False
-                    ))
-                    
-                    # Wait longer for Altium to update, then re-run DRC
-                    import time
-                    time.sleep(3)  # Give Altium more time to process changes
-                    self._safe_after(0, lambda: self._rerun_drc_after_fixes())
+                        time.sleep(3)  # Let Altium process changes
+                        self._safe_after(0, lambda: self._rerun_drc_after_fixes())
+                        return  # _rerun_drc_after_fixes handles loading state
+                    else:
+                        summary = f"### ⚠️ Could not auto-fix\n\n"
+                        summary += f"The violations require manual work in Altium Designer.\n"
+                        summary += f"Please check that Altium's StartServer is running.\n"
+                        self._safe_after(0, lambda m=summary: self.add_message(m, is_user=False))
                 else:
-                    error_summary = "❌ No fixes could be applied successfully.\n\n"
-                    if errors:
-                        error_summary += "Issues encountered:\n"
-                        for error in errors[:3]:
-                            error_summary += f"• {error}\n"
-                        if len(errors) > 3:
-                            error_summary += f"• ... and {len(errors) - 3} more errors\n"
-                    
-                    error_summary += "\nThese violations may require:\n"
-                    error_summary += "• Different component placement strategies\n"
-                    error_summary += "• Design rule adjustments\n"
-                    error_summary += "• Manual design changes"
-                    
-                    self._safe_after(0, lambda m=error_summary: self.add_message(m, is_user=False))
-                    self._safe_after(0, lambda: self.set_loading(False))
-                    self._safe_after(0, lambda: self.set_status("Fixes Failed", "error"))
-                
-            except Exception as e:
-                self._safe_after(0, lambda: self.add_message(
-                    f"❌ Error during fix process: {str(e)}",
-                    is_user=False
+                    self._safe_after(0, lambda: self.add_message(
+                        f"❌ Fix failed: server error", is_user=False
+                    ))
+            except Exception as ex:
+                err_msg = str(ex)
+                self._safe_after(0, lambda m=err_msg: self.add_message(
+                    f"❌ Fix error: {m}", is_user=False
                 ))
+            finally:
                 self._safe_after(0, lambda: self.set_loading(False))
-                self._safe_after(0, lambda: self.set_status("Error", "error"))
+                self._safe_after(0, lambda: self.set_status("Ready", "success"))
         
-        threading.Thread(target=apply_fixes, daemon=True).start()
+        threading.Thread(target=execute_fixes, daemon=True).start()
+    
+    def _handle_cancel_fixes(self):
+        """Cancel fix plan — do nothing."""
+        self.add_message("Fix cancelled. You can ask me other questions or run DRC again.", is_user=False)
+        self.set_status("Ready", "success")
     
     def _handle_drc_fix_ignore(self):
-        """Handle Ignore button click - do nothing"""
-        self.add_message("Ignoring automatic fixes. You can ask me other questions or run DRC again later.", is_user=False)
+        """Handle Ignore button click."""
+        self.add_message("Ignoring violations. You can ask me other questions or run DRC again later.", is_user=False)
         self.set_status("Ready", "success")
     
     def _apply_single_suggestion(self, suggestion: dict) -> dict:
@@ -2275,6 +2323,24 @@ Chat with me to:
                 return {
                     "success": False, 
                     "error": f"Manual fix required: {message}"
+                }
+            
+            # Handle unrouted net — requires manual routing in Altium
+            if suggestion_type == "route_net":
+                net_name = suggestion.get("net", "")
+                return {
+                    "success": False,
+                    "error": f"Unrouted net '{net_name}': Open Altium Designer → select net → use interactive router (Route > Interactive Routing) to connect all pads."
+                }
+            
+            # Handle net antennae — suggest extending or removing stub
+            if suggestion_type == "fix_antenna":
+                net_name = suggestion.get("net", "")
+                x = suggestion.get("x", 0)
+                y = suggestion.get("y", 0)
+                return {
+                    "success": False, 
+                    "error": f"Net Antennae on '{net_name}' at ({x:.1f}, {y:.1f}): In Altium Designer, either extend this dead-end track to the nearest pad, or delete the stub track."
                 }
             
             # Handle copper pour clearance adjustments

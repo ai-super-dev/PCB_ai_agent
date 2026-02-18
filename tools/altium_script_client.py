@@ -216,9 +216,10 @@ class AltiumScriptClient:
                     # Final attempt failed
                     return {"success": False, "error": f"Failed to write command file after {max_write_attempts} attempts: {str(e)}"}
         
-        # Verify command file was actually created
+        # Do NOT fail if command file is missing here.
+        # Altium may consume/delete it immediately after we write it, which is expected.
         if not self.command_file.exists():
-            return {"success": False, "error": "Command file was not created successfully"}
+            print(f"  Note: command file for '{action}' is already gone (likely consumed by Altium)")
         
         # STEP 2b: Double-check no stale result appeared between our clear and command write
         if self.result_file.exists():
