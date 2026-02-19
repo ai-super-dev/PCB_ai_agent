@@ -1329,8 +1329,10 @@ Chat with me to:
                         # Filename with emphasis
                         msg += f"**PCB File:** `{filename}`\n\n"
                         msg += f"**DRC Source:** `{drc_source}`\n\n"
-                        if drc_source == "hybrid_native_counts_python_details":
-                            msg += "*Counts come from native Altium DRC. Detailed rows are computed by Python DRC geometry checks.*\n\n"
+                        if drc_source == "altium_native_counts_report_details":
+                            msg += "*Counts and detailed rows come from native Altium sources (DRC export + report parser).*\\n\\n"
+                        elif drc_source == "altium_native_counts_only":
+                            msg += "*Counts come from native Altium DRC. Detailed rows are unavailable from current Altium scripting/report export.*\n\n"
                         msg += "---\n\n"
                         
                         # Summary section with visual emphasis

@@ -1375,9 +1375,19 @@ class AltiumMCPServer:
                                 violations_by_type[rule_type] = violations_by_type.get(rule_type, 0) + 1
                                 violations_by_rule[rule_name] = violations_by_rule.get(rule_name, 0) + 1
 
+                                msg_norm = message.strip().lower()
+                                # Treat generic native placeholders as "details unavailable".
+                                # Examples: "ShortCircuit violation", "Clearance violation",
+                                # "DRC violation (details unavailable in this Altium API)".
+                                generic_placeholder_msg = (
+                                    (not msg_norm)
+                                    or (msg_norm in ("unknown violation",))
+                                    or msg_norm.endswith(" violation")
+                                    or ("details unavailable" in msg_norm)
+                                )
                                 details_unavailable = (
                                     (x_mm is None and y_mm is None)
-                                    and (not message.strip() or message.strip().lower() in ("unknown violation",))
+                                    and generic_placeholder_msg
                                 )
                                 if details_unavailable:
                                     native_details_unavailable_count += 1
@@ -1437,15 +1447,57 @@ class AltiumMCPServer:
                                 }
 
                             # Native API has exact counts but not enough per-violation detail.
-                            # Continue to Python DRC and use it for detailed rows only.
+                            # Try Altium HTML report parser for exact detail text before any fallback.
+                            native_report_violations = []
+                            try:
+                                from tools.drc_report_parser import AltiumDRCReportParser
+                                parser = AltiumDRCReportParser()
+                                report_path = parser.find_latest_report(str(base_path / "PCB_Project"))
+                                if report_path:
+                                    parsed = parser.parse_report(report_path)
+                                    report_details = parsed.get("detailed_violations", [])
+                                    if isinstance(report_details, list):
+                                        for rv in report_details:
+                                            if not isinstance(rv, dict):
+                                                continue
+                                            rtype = str(rv.get("type", "other")).lower()
+                                            if rtype in ("trace_width", "width"):
+                                                rtype = "width"
+                                            elif rtype in ("short", "shortcircuit"):
+                                                rtype = "short_circuit"
+                                            elif rtype in ("unrouted", "un-routed"):
+                                                rtype = "unrouted_net"
+                                            elif rtype == "clearance":
+                                                rtype = "clearance"
+                                            loc = rv.get("location", {}) if isinstance(rv.get("location"), dict) else {}
+                                            native_report_violations.append({
+                                                "rule_name": str(rv.get("rule", rv.get("title", "Unknown Rule"))),
+                                                "type": rtype,
+                                                "severity": str(rv.get("severity", "error")),
+                                                "message": str(rv.get("message", rv.get("title", ""))),
+                                                "location": {
+                                                    "x_mm": loc.get("x_mm"),
+                                                    "y_mm": loc.get("y_mm"),
+                                                    "layer": loc.get("layer", ""),
+                                                },
+                                                "actual_value": None,
+                                                "required_value": None,
+                                                "objects": [],
+                                                "net_name": str(rv.get("net", "")),
+                                                "component_name": str(rv.get("component", "")) or None,
+                                            })
+                            except Exception as report_exc:
+                                print(f"[INFO] Could not parse Altium HTML DRC report: {report_exc}")
+
                             native_counts_bundle = {
                                 "violations_by_type": violations_by_type,
                                 "violations_by_rule": violations_by_rule,
                                 "all_rules_checked": all_rules_checked,
                                 "total_violations": len(formatted_violations),
                                 "native_file": str(altium_file),
+                                "report_violations": native_report_violations,
                             }
-                            print("[INFO] Native Altium DRC details unavailable; enriching details from Python DRC.")
+                            print("[INFO] Native Altium DRC details unavailable from API; attempting report-based details.")
                         else:
                             print("[WARNING] Native Altium DRC run succeeded, but altium_drc_violations.json was not found. Falling back to Python DRC.")
                             if message_text:
@@ -1886,31 +1938,12 @@ class AltiumMCPServer:
                         "sample": rule_violations[0] if rule_violations else None
                     })
             
-            # If native counts exist but details were unavailable, keep native counts
-            # and use Python only for detailed violation rows.
+            # If native counts exist but native API detail was unavailable,
+            # use Altium report details (if available). Do NOT inject Python-picked
+            # rows here because that can misrepresent which exact violations Altium reported.
             if native_counts_bundle:
-                python_by_type = {}
-                for v in violations:
-                    if isinstance(v, dict):
-                        t = v.get("type", "other")
-                        python_by_type.setdefault(t, []).append(v)
-
-                target_counts = native_counts_bundle.get("violations_by_type", {})
-                enriched_violations = []
-                used_ids = set()
-
-                for rule_type, target_n in target_counts.items():
-                    if target_n <= 0:
-                        continue
-                    candidates = python_by_type.get(rule_type, [])
-                    for v in candidates:
-                        if len([e for e in enriched_violations if e.get("type") == rule_type]) >= target_n:
-                            break
-                        vid = id(v)
-                        if vid in used_ids:
-                            continue
-                        used_ids.add(vid)
-                        enriched_violations.append(v)
+                report_violations = native_counts_bundle.get("report_violations", [])
+                use_report_details = isinstance(report_violations, list) and len(report_violations) > 0
 
                 return {
                     "success": True,
@@ -1923,19 +1956,19 @@ class AltiumMCPServer:
                     "violations_by_type": native_counts_bundle["violations_by_type"],
                     "violations_by_rule": native_counts_bundle["violations_by_rule"],
                     "all_rules_checked": native_counts_bundle["all_rules_checked"],
-                    "violations": enriched_violations,
+                    "violations": report_violations if use_report_details else [],
                     "warnings": warnings,
-                    "detailed_violations": enriched_violations,
+                    "detailed_violations": report_violations if use_report_details else [],
                     "total_violations": native_counts_bundle["total_violations"],
                     "total_warnings": actual_warning_count,
                     "diagnostic_summary": diagnostic_summary,
-                    "message": "DRC check completed using native Altium counts + Python detail enrichment",
+                    "message": "DRC check completed using native Altium counts" + (" + Altium report details" if use_report_details else " (details unavailable from Altium API)"),
                     "filename": Path(self.current_pcb_path).name if self.current_pcb_path else "Unknown",
                     "python_checked_rules": python_checked_rules,
                     "total_rules": len(native_counts_bundle["all_rules_checked"]),
                     "rules_checked_count": len(python_checked_rules),
-                    "source": "hybrid_native_counts_python_details",
-                    "native_details_available": False,
+                    "source": "altium_native_counts_report_details" if use_report_details else "altium_native_counts_only",
+                    "native_details_available": use_report_details,
                     "native_file": native_counts_bundle.get("native_file", "")
                 }
 
