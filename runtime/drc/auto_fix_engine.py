@@ -37,6 +37,13 @@ class AutoFixEngine:
         self.fix_log = []
         total_fixed = 0
         total_failed = 0
+        # Track nets with explicit unrouted violations; antennae on these nets
+        # should be resolved by routing, not by deleting copper.
+        self._unrouted_nets = {
+            str(v.get('net_name', '')).strip()
+            for v in violations
+            if str(v.get('type', '')).lower() == 'unrouted_net' and str(v.get('net_name', '')).strip()
+        }
         
         self._log(f"Auto-fix: Processing {len(violations)} violations")
         
@@ -74,11 +81,13 @@ class AutoFixEngine:
         v_type = violation.get('type', '').lower()
         
         if 'antennae' in v_type or 'antenna' in v_type:
-            # DON'T delete antenna tracks — they're part of incomplete routes.
-            # Deleting them creates NEW antennae on adjacent tracks (cascading).
-            # Instead, the unrouted net fix will complete the route, which fixes both.
-            net = violation.get('net_name', '')
-            return {'success': False, 'error': f'Antenna on {net} — will be resolved when net is routed'}
+            net = str(violation.get('net_name', '')).strip()
+            if net and net in getattr(self, '_unrouted_nets', set()):
+                # For unrouted nets, route completion is safer than deleting antenna stubs.
+                return {'success': False, 'error': f'Antenna on {net} — will be resolved when net is routed'}
+            # For routed nets (no explicit UnRoutedNet on same net), delete the
+            # dead-end segment directly.
+            return self._fix_net_antennae(violation, pcb_data)
         elif 'unrouted' in v_type:
             return self._fix_unrouted_net(violation, pcb_data)
         elif 'clearance' in v_type:

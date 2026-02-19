@@ -1259,6 +1259,79 @@ class PythonDRCEngine:
             print(f"DEBUG: _check_clearance: Skipping track-to-copper clearance (exported copper regions lack cutout geometry)")
         
         # Summary for this rule
+        # Fallback: floating pad embedded in opposing-net polygon (region-like clearance).
+        fallback_nets = set(getattr(self, '_fallback_unrouted_nets', set()) or set())
+        if fallback_nets and polygons:
+            for pad in pads:
+                pad_net = pad.get('net', '').strip()
+                if pad_net not in fallback_nets:
+                    continue
+                pad_layer = pad.get('layer', '').strip().lower()
+                loc = self._safe_get_location(pad)
+                px = loc.get('x_mm', 0)
+                py = loc.get('y_mm', 0)
+                if (px == 0 and py == 0) or not pad_layer:
+                    continue
+                # Skip if touched by same-net track.
+                # Use copper-touch threshold (pad copper reach + track half-width),
+                # not a fixed centerline distance, to be robust across pad offsets/rotation export variance.
+                touched = False
+                psx = pad.get('size_x_mm', 0) or pad.get('width_mm', 0) or 1.0
+                psy = pad.get('size_y_mm', 0) or pad.get('height_mm', 0) or 1.0
+                pad_reach = max(psx, psy) / 2
+                for tr in tracks:
+                    if tr.get('net', '').strip() != pad_net:
+                        continue
+                    if not self._layers_can_connect(pad_layer, tr.get('layer', '').strip().lower()):
+                        continue
+                    x1 = tr.get('x1_mm', 0); y1 = tr.get('y1_mm', 0)
+                    x2 = tr.get('x2_mm', 0); y2 = tr.get('y2_mm', 0)
+                    if x1 == 0 and y1 == 0 and x2 == 0 and y2 == 0:
+                        continue
+                    tr_reach = (tr.get('width_mm', 0.254) or 0.254) / 2
+                    if point_to_line_distance(px, py, x1, y1, x2, y2) <= (pad_reach + tr_reach + 0.05):
+                        touched = True
+                        break
+                if touched:
+                    continue
+
+                for poly in polygons:
+                    pnet = poly.get('net', '').strip()
+                    player = poly.get('layer', '').strip().lower()
+                    if not pnet or pnet == pad_net:
+                        continue
+                    if not self._layers_can_connect(pad_layer, player):
+                        continue
+                    inside = False
+                    verts = poly.get('vertices', []) or []
+                    vt = [(v[0], v[1]) for v in verts if isinstance(v, (list, tuple)) and len(v) >= 2]
+                    if len(vt) >= 3:
+                        inside = point_in_polygon(px, py, vt)
+                    else:
+                        cx = poly.get('x_mm', 0); cy = poly.get('y_mm', 0)
+                        sx = poly.get('size_x_mm', 0) / 2; sy = poly.get('size_y_mm', 0) / 2
+                        if sx > 0 and sy > 0:
+                            inside = (cx - sx <= px <= cx + sx and cy - sy <= py <= cy + sy)
+                    if not inside:
+                        continue
+
+                    self.violations.append(DRCViolation(
+                        rule_name=rule.name,
+                        rule_type="clearance",
+                        severity="error",
+                        message=(
+                            f"Clearance Constraint: (Collision < {min_clearance}mm) Between Pad "
+                            f"{pad.get('designator', 'Unknown')}({px:.3f}mm,{py:.3f}mm) on {pad_layer} "
+                            f"And Region (0 hole(s)) {player}"
+                        ),
+                        location={"x_mm": px, "y_mm": py},
+                        actual_value=-0.001,
+                        required_value=min_clearance,
+                        objects=[f"Pad {pad.get('designator', 'Unknown')} on {pad_net}", "Region"],
+                        net_name=f"{pad_net}/{pnet}"
+                    ))
+                    break
+
         violations_count = len(self.violations) - violations_before
         print(f"DEBUG: _check_clearance: Rule '{rule.name}' found {violations_count} new violations (total: {len(self.violations)})")
     
@@ -1904,6 +1977,78 @@ class PythonDRCEngine:
                                 f"Track on {track_net}"],
                         net_name=f"{pad_net}/{track_net}"
                     ))
+
+        # Fallback: floating pad embedded in opposing-net polygon (region-like short).
+        fallback_nets = set(getattr(self, '_fallback_unrouted_nets', set()) or set())
+        if fallback_nets:
+            polygons = [p for p in (getattr(self, '_current_polygons', []) or []) if isinstance(p, dict)]
+            for pad in pads:
+                pad_net = pad.get('net', '').strip()
+                if pad_net not in fallback_nets:
+                    continue
+                pad_layer = pad.get('layer', '').strip().lower()
+                loc = self._safe_get_location(pad)
+                px = loc.get('x_mm', 0)
+                py = loc.get('y_mm', 0)
+                if (px == 0 and py == 0) or not pad_layer:
+                    continue
+
+                # Skip if already touched by any same-net track.
+                # Use copper-touch threshold (pad copper reach + track half-width),
+                # not a fixed centerline distance, to be robust across pad offsets/rotation export variance.
+                touched = False
+                psx = pad.get('size_x_mm', 0) or pad.get('width_mm', 0) or 1.0
+                psy = pad.get('size_y_mm', 0) or pad.get('height_mm', 0) or 1.0
+                pad_reach = max(psx, psy) / 2
+                for tr in tracks:
+                    if tr.get('net', '').strip() != pad_net:
+                        continue
+                    if not self._layers_can_connect(pad_layer, tr.get('layer', '').strip().lower()):
+                        continue
+                    x1 = tr.get('x1_mm', 0); y1 = tr.get('y1_mm', 0)
+                    x2 = tr.get('x2_mm', 0); y2 = tr.get('y2_mm', 0)
+                    if x1 == 0 and y1 == 0 and x2 == 0 and y2 == 0:
+                        continue
+                    tr_reach = (tr.get('width_mm', 0.254) or 0.254) / 2
+                    if point_to_line_distance(px, py, x1, y1, x2, y2) <= (pad_reach + tr_reach + 0.05):
+                        touched = True
+                        break
+                if touched:
+                    continue
+
+                for poly in polygons:
+                    pnet = poly.get('net', '').strip()
+                    player = poly.get('layer', '').strip().lower()
+                    if not pnet or pnet == pad_net:
+                        continue
+                    if not self._layers_can_connect(pad_layer, player):
+                        continue
+                    inside = False
+                    verts = poly.get('vertices', []) or []
+                    vt = [(v[0], v[1]) for v in verts if isinstance(v, (list, tuple)) and len(v) >= 2]
+                    if len(vt) >= 3:
+                        inside = point_in_polygon(px, py, vt)
+                    else:
+                        cx = poly.get('x_mm', 0); cy = poly.get('y_mm', 0)
+                        sx = poly.get('size_x_mm', 0) / 2; sy = poly.get('size_y_mm', 0) / 2
+                        if sx > 0 and sy > 0:
+                            inside = (cx - sx <= px <= cx + sx and cy - sy <= py <= cy + sy)
+                    if not inside:
+                        continue
+
+                    self.violations.append(DRCViolation(
+                        rule_name=rule.name,
+                        rule_type="short_circuit",
+                        severity="error",
+                        message=(
+                            f"Short-Circuit Constraint: Between Pad {pad.get('designator', 'Unknown')}"
+                            f"({px:.3f}mm,{py:.3f}mm) on {pad_layer} And Region (0 hole(s)) {player}"
+                        ),
+                        location={"x_mm": px, "y_mm": py},
+                        objects=[pad.get('designator', 'Unknown'), "Region"],
+                        net_name=f"{pad_net}/{pnet}"
+                    ))
+                    break
         
         print(f"DEBUG: Short-circuit check: checked {checked_pairs} pad pairs, found {short_circuit_count} pad-to-pad violations")
         print(f"DEBUG:   Checked {pad_to_track_checked} pad-to-track pairs, found {pad_to_track_short_circuits} pad-to-track violations")
@@ -2816,11 +2961,11 @@ class PythonDRCEngine:
         
         Key: uses physical copper overlap for connection detection, not center-to-center.
         """
-        # Without connection objects (ratsnest), antennae inference from geometry alone
-        # tends to over-report due hidden connectivity through pours/planes.
-        if not hasattr(self, '_current_connections') or not self._current_connections:
-            print("DEBUG: Net Antennae: skipping check (no connection objects exported)")
-            return
+        # If connection objects are missing, still run geometry-based antenna detection.
+        # We mitigate false positives by considering same-net polygon/fill containment as connectivity.
+        has_connection_objects = bool(getattr(self, '_current_connections', []) or [])
+        if not has_connection_objects:
+            print("DEBUG: Net Antennae: no connection objects exported, using conservative geometry-only detection")
 
         # Collect pad data: (x, y, half_radius)
         # Use max(sx, sy) as radius to handle pad rotation — a rotated pad's
@@ -2940,10 +3085,12 @@ class PythonDRCEngine:
                     if cn:
                         nets_with_unrouted.add(cn)
         
-        # Candidate nets: explicit connection nets + limited unrouted fallback nets.
+        # Candidate nets:
+        # - with connection data: limit to unrouted + fallback nets
+        # - without connection data: check all nets conservatively
         candidate_nets = set(nets_with_unrouted)
         candidate_nets.update(getattr(self, '_fallback_unrouted_nets', set()) or set())
-        if candidate_nets:
+        if has_connection_objects and candidate_nets:
             print(f"DEBUG: Net Antennae: Only checking tracks on {len(candidate_nets)} candidate nets: {candidate_nets}")
         
         # Check each track's endpoints
@@ -2951,10 +3098,11 @@ class PythonDRCEngine:
         # Count antennae per floating endpoint to better reflect Altium reporting.
         
         for idx, x1, y1, x2, y2, net, layer, width in valid_tracks:
-            if candidate_nets and net not in candidate_nets:
+            if has_connection_objects and candidate_nets and net not in candidate_nets:
                 continue
             
             half_w = width / 2  # Track copper extends this far from centerline
+            floating_points = []
             
             for px, py in [(x1, y1), (x2, y2)]:
                 connected = False
@@ -3016,8 +3164,38 @@ class PythonDRCEngine:
                 if connected:
                     continue
                 
-                # NOTE: Do not use polygon/fill pseudo-connectivity for antennae.
-                # Exported pours/fills are often coarse and can hide true dangling copper.
+                # 4. Same-net polygon containment (conservative anti-false-positive check)
+                if not connected:
+                    for pnet, player, pcx, pcy, psx, psy, pverts in polygon_data:
+                        if pnet != net:
+                            continue
+                        if layer and player and (not self._layers_can_connect(layer, player)):
+                            continue
+                        inside_poly = False
+                        if pverts and len(pverts) >= 3:
+                            try:
+                                verts = [(v[0], v[1]) for v in pverts if isinstance(v, (list, tuple)) and len(v) >= 2]
+                                if len(verts) >= 3:
+                                    inside_poly = point_in_polygon(px, py, verts)
+                            except Exception:
+                                inside_poly = False
+                        if not inside_poly and psx > 0 and psy > 0:
+                            inside_poly = (pcx - psx <= px <= pcx + psx and pcy - psy <= py <= pcy + psy)
+                        if inside_poly:
+                            connected = True
+                            break
+
+                # 5. Same-net fill containment (rectangle copper)
+                if not connected:
+                    for fx1, fy1, fx2, fy2, fnet, flayer in fill_list:
+                        if fnet != net:
+                            continue
+                        if layer and flayer and (not self._layers_can_connect(layer, flayer)):
+                            continue
+                        if (fx1 - half_w - CONN_TOL) <= px <= (fx2 + half_w + CONN_TOL) and \
+                           (fy1 - half_w - CONN_TOL) <= py <= (fy2 + half_w + CONN_TOL):
+                            connected = True
+                            break
                 
                 if not connected:
                     # 6. Arc check: endpoint near an arc endpoint
@@ -3046,8 +3224,29 @@ class PythonDRCEngine:
                             connected = False
 
                 if not connected:
+                    floating_points.append((px, py))
+
+            # With connection objects: keep endpoint-level reporting (more Altium-like detail).
+            if has_connection_objects:
+                for px, py in floating_points:
                     antennae_count += 1
-                    
+                    layer_display = layer if layer else 'Unknown Layer'
+                    self.violations.append(DRCViolation(
+                        rule_name=rule.name,
+                        rule_type="net_antennae",
+                        severity="error",
+                        message=f"Net Antennae: Track ({x1:.3f}mm,{y1:.3f}mm)({x2:.3f}mm,{y2:.3f}mm) on {layer_display}",
+                        location={"x_mm": px, "y_mm": py},
+                        net_name=net
+                    ))
+            else:
+                # Without ratsnest, only high-confidence stubs:
+                # exactly one floating endpoint on a track (other endpoint connected).
+                track_len = math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
+                min_stub_len = max(2.0, 6.0 * width)  # conservative: avoid short neck-down fragments
+                if len(floating_points) == 1 and track_len >= min_stub_len:
+                    px, py = floating_points[0]
+                    antennae_count += 1
                     layer_display = layer if layer else 'Unknown Layer'
                     self.violations.append(DRCViolation(
                         rule_name=rule.name,
@@ -3059,11 +3258,15 @@ class PythonDRCEngine:
                     ))
 
         # Via antennae: dangling via barrels on candidate nets.
+        if not has_connection_objects:
+            print("DEBUG: Net Antennae: skipping via-antenna inference without connection objects")
+            print(f"DEBUG: Net Antennae check: {antennae_count} violations found from {len(valid_tracks)} tracks")
+            return
         for via in vias:
             vnet = via.get('net', '').strip()
             if not vnet:
                 continue
-            if candidate_nets and vnet not in candidate_nets:
+            if has_connection_objects and candidate_nets and vnet not in candidate_nets:
                 continue
             vloc = self._safe_get_location(via)
             vx = vloc.get('x_mm', 0)
@@ -3137,6 +3340,53 @@ class PythonDRCEngine:
                 location={"x_mm": vx, "y_mm": vy},
                 net_name=vnet
             ))
+
+        # Fallback dangling-component antenna for strict unrouted nets.
+        # For under-exported 2-pad unrouted nets, emit one representative track antenna
+        # when the routed fragment is anchored at only one pad/via.
+        for net in (getattr(self, '_fallback_unrouted_nets', set()) or set()):
+            net_tracks = [t for t in tracks if t.get('net', '').strip() == net]
+            if not net_tracks:
+                continue
+            net_pads = [p for p in pads if p.get('net', '').strip() == net]
+            net_vias = [v for v in vias if v.get('net', '').strip() == net]
+            anchor_count = 0
+            for p in net_pads:
+                pl = self._safe_get_location(p)
+                px = pl.get('x_mm', 0); py = pl.get('y_mm', 0)
+                if px == 0 and py == 0:
+                    continue
+                psx = p.get('size_x_mm', 0) or 1.0
+                psy = p.get('size_y_mm', 0) or 1.0
+                pr = max(psx, psy) / 2
+                touched = False
+                for tr in net_tracks:
+                    x1 = tr.get('x1_mm', 0); y1 = tr.get('y1_mm', 0)
+                    x2 = tr.get('x2_mm', 0); y2 = tr.get('y2_mm', 0)
+                    tw = tr.get('width_mm', 0.254) / 2
+                    if point_to_line_distance(px, py, x1, y1, x2, y2) <= (pr + tw):
+                        touched = True
+                        break
+                if touched:
+                    anchor_count += 1
+            if anchor_count <= 1 and net_tracks:
+                best = max(
+                    net_tracks,
+                    key=lambda tr: math.sqrt((tr.get('x2_mm', 0) - tr.get('x1_mm', 0)) ** 2 +
+                                             (tr.get('y2_mm', 0) - tr.get('y1_mm', 0)) ** 2)
+                )
+                x1 = best.get('x1_mm', 0); y1 = best.get('y1_mm', 0)
+                x2 = best.get('x2_mm', 0); y2 = best.get('y2_mm', 0)
+                layer = best.get('layer', 'Unknown Layer')
+                self.violations.append(DRCViolation(
+                    rule_name=rule.name,
+                    rule_type="net_antennae",
+                    severity="error",
+                    message=f"Net Antennae: Track ({x1:.3f}mm,{y1:.3f}mm)({x2:.3f}mm,{y2:.3f}mm) on {layer}",
+                    location={"x_mm": (x1 + x2) / 2, "y_mm": (y1 + y2) / 2},
+                    net_name=net
+                ))
+                antennae_count += 1
         
         print(f"DEBUG: Net Antennae check: {antennae_count} violations found from {len(valid_tracks)} tracks")
     
