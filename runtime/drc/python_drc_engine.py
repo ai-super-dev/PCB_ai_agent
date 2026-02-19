@@ -1106,10 +1106,12 @@ class PythonDRCEngine:
                             net_name=f"{net1}/{net2}"
                         ))
 
-        # Area-fill rectangle checks are disabled for now.
+        # Area-fill rectangle checks: enabled for component-to-GND detection.
         # Exported fills are coarse bounding rectangles and do not include relief/cutout
-        # geometry, which can produce false collisions against pads/tracks/vias.
-        if False and not skip_standard_checks and copper_regions and hasattr(self, '_current_fills'):
+        # geometry, which can produce false collisions. However, we enable this for
+        # detecting component overlaps with GND net fills, which is critical for DRC.
+        # We use conservative clearance calculation to reduce false positives.
+        if not skip_standard_checks and copper_regions and hasattr(self, '_current_fills'):
             fills = [f for f in (self._current_fills or []) if isinstance(f, dict)]
 
             def segment_intersects_rect(tx1, ty1, tx2, ty2, left, right, bottom, top):

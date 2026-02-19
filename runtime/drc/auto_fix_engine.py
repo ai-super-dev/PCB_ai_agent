@@ -49,15 +49,57 @@ class AutoFixEngine:
         
         self._log(f"Auto-fix: Processing {len(violations)} violations")
         
-        # Sort violations: antennae first (safest), then unrouted, then others
-        sorted_violations = sorted(violations, key=lambda v: {
+        # EFFICIENT FIX STRATEGY: Group clearance violations by component
+        # Move the component that appears in the most violations (e.g., if C12 has violations
+        # with L1, L5, and R5, move C12 instead of moving all three other components)
+        clearance_violations = [v for v in violations if v.get('type', '').lower() == 'clearance']
+        other_violations = [v for v in violations if v.get('type', '').lower() != 'clearance']
+        
+        # Group clearance violations by component designator
+        component_violation_count = {}  # {component_designator: [list of violations]}
+        for violation in clearance_violations:
+            # Extract component designator from violation message or objects
+            comp_designator = self._extract_component_from_violation(violation, pcb_data)
+            if comp_designator:
+                if comp_designator not in component_violation_count:
+                    component_violation_count[comp_designator] = []
+                component_violation_count[comp_designator].append(violation)
+        
+        # Sort components by violation count (most violations first)
+        sorted_components = sorted(
+            component_violation_count.items(),
+            key=lambda x: len(x[1]),
+            reverse=True
+        )
+        
+        # Process clearance violations: move each component once (starting with most violations)
+        moved_components = set()
+        for comp_designator, comp_violations in sorted_components:
+            if comp_designator in moved_components:
+                continue  # Already moved this component
+            
+            # Move the component that appears in the most violations
+            # This fixes all violations involving this component in one move
+            result = self._fix_clearance_by_component(comp_designator, comp_violations, pcb_data)
+            
+            if result['success']:
+                total_fixed += len(comp_violations)  # Count all violations fixed by this move
+                moved_components.add(comp_designator)
+                self._log(f"✅ {result['message']} (fixed {len(comp_violations)} violations)")
+            else:
+                total_failed += len(comp_violations)
+                self._log(f"⚠️ {result['error']}")
+            
+            time.sleep(1.5)
+        
+        # Process other violation types (antennae, unrouted, width) normally
+        sorted_other = sorted(other_violations, key=lambda v: {
             'net_antennae': 0,
             'unrouted_net': 1, 
-            'clearance': 2,
             'width': 3
         }.get(v.get('type', '').lower(), 9))
         
-        for violation in sorted_violations:
+        for violation in sorted_other:
             result = self._fix_single_violation(violation, pcb_data)
             
             if result['success']:
@@ -67,7 +109,6 @@ class AutoFixEngine:
                 total_failed += 1
                 self._log(f"⚠️ {result['error']}")
             
-            # Delay between commands to let Altium process
             time.sleep(1.5)
         
         return {
@@ -303,8 +344,113 @@ class AutoFixEngine:
     # =========================================================================
     # CLEARANCE FIX
     # =========================================================================
+    def _extract_component_from_violation(self, violation: Dict, pcb_data: Dict) -> Optional[str]:
+        """Extract component designator from violation message or objects."""
+        # Try to extract from objects field
+        objects = violation.get('objects', [])
+        if isinstance(objects, list):
+            for obj in objects:
+                if isinstance(obj, str):
+                    # Look for "Pad C12" or "C12" pattern
+                    match = re.search(r'\b([A-Z]\d+)\b', obj)
+                    if match:
+                        comp_designator = match.group(1)
+                        # Verify it's a real component
+                        for comp in pcb_data.get('components', []):
+                            if isinstance(comp, dict) and comp.get('designator', '') == comp_designator:
+                                return comp_designator
+        
+        # Try to extract from message
+        message = violation.get('message', '')
+        if message:
+            # Look for "Pad C12" or "Component C12" pattern
+            match = re.search(r'(?:Pad|Component)\s+([A-Z]\d+)', message, re.IGNORECASE)
+            if match:
+                comp_designator = match.group(1)
+                # Verify it's a real component
+                for comp in pcb_data.get('components', []):
+                    if isinstance(comp, dict) and comp.get('designator', '') == comp_designator:
+                        return comp_designator
+        
+        # Fallback: find nearest component to violation location
+        location = violation.get('location', {})
+        x = location.get('x_mm', 0)
+        y = location.get('y_mm', 0)
+        if x != 0 or y != 0:
+            nearest = self._find_nearest_component(x, y, pcb_data)
+            if nearest:
+                return nearest.get('designator', '')
+        
+        return None
+    
+    def _fix_clearance_by_component(self, comp_designator: str, violations: List[Dict], pcb_data: Dict) -> Dict:
+        """Fix multiple clearance violations by moving a single component.
+        
+        This is more efficient than moving each component individually.
+        For example, if C12 has violations with L1, L5, and R5, moving C12 once
+        fixes all three violations.
+        """
+        if not self.script_client:
+            return {'success': False, 'error': 'No Altium connection'}
+        
+        # Find the component
+        component = None
+        for comp in pcb_data.get('components', []):
+            if isinstance(comp, dict) and comp.get('designator', '') == comp_designator:
+                component = comp
+                break
+        
+        if not component:
+            return {'success': False, 'error': f'Component {comp_designator} not found'}
+        
+        comp_x = component.get('x_mm', 0)
+        comp_y = component.get('y_mm', 0)
+        
+        # Calculate the best move direction and distance based on all violations
+        # Strategy: move away from the average violation location
+        violation_locations = []
+        max_move_dist = 0.0
+        
+        for violation in violations:
+            location = violation.get('location', {})
+            x = location.get('x_mm', 0)
+            y = location.get('y_mm', 0)
+            if x != 0 or y != 0:
+                violation_locations.append((x, y))
+            
+            actual = violation.get('actual_value', 0)
+            required = violation.get('required_value', 0)
+            move_dist = max((required - actual) + 0.1, 0.5)
+            max_move_dist = max(max_move_dist, move_dist)
+        
+        if not violation_locations:
+            return {'success': False, 'error': f'No valid violation locations for {comp_designator}'}
+        
+        # Calculate average violation location
+        avg_x = sum(x for x, y in violation_locations) / len(violation_locations)
+        avg_y = sum(y for x, y in violation_locations) / len(violation_locations)
+        
+        # Move component away from average violation location
+        dx = comp_x - avg_x
+        dy = comp_y - avg_y
+        dist = math.sqrt(dx*dx + dy*dy) if (dx != 0 or dy != 0) else 1.0
+        
+        # Use maximum required move distance to ensure all violations are fixed
+        new_x = comp_x + (dx / dist) * max_move_dist
+        new_y = comp_y + (dy / dist) * max_move_dist
+        
+        result = self.script_client._send_command({
+            'action': 'move_component',
+            'designator': comp_designator,
+            'x': str(new_x), 'y': str(new_y)
+        })
+        
+        if result.get('success'):
+            return {'success': True, 'message': f'Moved {comp_designator} by {max_move_dist:.2f}mm (fixed {len(violations)} violations)'}
+        return {'success': False, 'error': f'Failed to move {comp_designator}'}
+    
     def _fix_clearance(self, violation: Dict, pcb_data: Dict) -> Dict:
-        """Fix clearance by moving the nearest component."""
+        """Fix clearance by moving the nearest component (legacy method for single violations)."""
         location = violation.get('location', {})
         x = location.get('x_mm', 0)
         y = location.get('y_mm', 0)
