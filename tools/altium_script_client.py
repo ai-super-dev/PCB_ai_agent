@@ -92,9 +92,12 @@ class AltiumScriptClient:
         action = command.get("action", "unknown")
         
         # Determine timeout based on action
+        # Exporting full PCB JSON can be heavy on large boards.
+        if action == "export_pcb_info":
+            timeout = max(self.timeout, 120)
         # Rule creation/update/delete can take longer due to SavePCBFile + ExportPCBInfo
-        if action in ("create_rule", "update_rule", "delete_rule", "export_pcb_info"):
-            timeout = max(self.timeout, 30)  # At least 30 seconds for heavy operations
+        elif action in ("create_rule", "update_rule", "delete_rule"):
+            timeout = max(self.timeout, 45)
         else:
             timeout = self.timeout
         

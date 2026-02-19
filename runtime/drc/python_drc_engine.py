@@ -694,6 +694,54 @@ class PythonDRCEngine:
             # Skip this rule - clearance is 0 or negative (invalid)
             print(f"DEBUG: _check_clearance: Skipping rule '{rule.name}' - clearance is {min_clearance}mm (must be > 0)")
             return
+
+        def _point_to_rect_distance(px, py, left, right, bottom, top):
+            dx = 0.0
+            if px < left:
+                dx = left - px
+            elif px > right:
+                dx = px - right
+            dy = 0.0
+            if py < bottom:
+                dy = bottom - py
+            elif py > top:
+                dy = py - top
+            return math.sqrt(dx * dx + dy * dy)
+
+        def _segment_intersects_rect(x1, y1, x2, y2, left, right, bottom, top):
+            dx = x2 - x1
+            dy = y2 - y1
+            p = [-dx, dx, -dy, dy]
+            q = [x1 - left, right - x1, y1 - bottom, top - y1]
+            u1, u2 = 0.0, 1.0
+            for pi, qi in zip(p, q):
+                if pi == 0:
+                    if qi < 0:
+                        return False
+                    continue
+                t = qi / pi
+                if pi < 0:
+                    if t > u2:
+                        return False
+                    if t > u1:
+                        u1 = t
+                else:
+                    if t < u1:
+                        return False
+                    if t < u2:
+                        u2 = t
+            return True
+
+        def _segment_to_rect_distance(x1, y1, x2, y2, left, right, bottom, top):
+            if _segment_intersects_rect(x1, y1, x2, y2, left, right, bottom, top):
+                return 0.0
+            d = min(
+                _point_to_rect_distance(x1, y1, left, right, bottom, top),
+                _point_to_rect_distance(x2, y2, left, right, bottom, top),
+            )
+            for cx, cy in ((left, bottom), (left, top), (right, bottom), (right, top)):
+                d = min(d, point_to_line_distance(cx, cy, x1, y1, x2, y2))
+            return d
         
         # CRITICAL: In Altium, the general Clearance rule does NOT check pad-to-pad clearance.
         # Pad-to-pad clearance is handled by the ComponentClearance rule (separate rule type).
@@ -824,14 +872,20 @@ class PythonDRCEngine:
                     if pad_size_x <= 0 or pad_size_y <= 0:
                         # Missing pad geometry -> cannot evaluate accurately
                         continue
-                    # Conservative effective radius to reduce rectangle-overestimation false positives
-                    # Conservative effective radius to reduce rectangle-overestimation false positives
-                    # Conservative effective radius to reduce rectangle-overestimation false positives
-                    pad_radius = min(pad_size_x, pad_size_y) / 2
-                    
-                    # Calculate distance from pad center to track line segment
-                    dist_to_track = point_to_line_distance(pad_x, pad_y, x1, y1, x2, y2)
-                    clearance = dist_to_track - track_radius - pad_radius
+                    pad_half_x = pad_size_x / 2
+                    pad_half_y = pad_size_y / 2
+                    try:
+                        pad_rot = float(pad.get('rotation', 0)) % 180.0
+                        if 45.0 <= pad_rot <= 135.0:
+                            pad_half_x, pad_half_y = pad_half_y, pad_half_x
+                    except Exception:
+                        pass
+                    left = pad_x - pad_half_x
+                    right = pad_x + pad_half_x
+                    bottom = pad_y - pad_half_y
+                    top = pad_y + pad_half_y
+                    centerline_to_pad = _segment_to_rect_distance(x1, y1, x2, y2, left, right, bottom, top)
+                    clearance = centerline_to_pad - track_radius
                     
                     # Only report clearance violations when objects are close but NOT overlapping
                     # Negative clearance = overlap = short circuit (different violation type)
@@ -926,9 +980,9 @@ class PythonDRCEngine:
                                 ),
                                 location={"x_mm": (x1_1 + x2_1) / 4 + (x1_2 + x2_2) / 4,
                                           "y_mm": (y1_1 + y2_1) / 4 + (y1_2 + y2_2) / 4},
-                                objects=[f"Track on {net1}", f"Track on {net2}"],
-                                net_name=f"{net1}/{net2}"
-                            ))
+                            objects=[f"Track on {net1}", f"Track on {net2}"],
+                            net_name=f"{net1}/{net2}"
+                        ))
         
         # Check track-to-via clearance
         if not skip_standard_checks:
@@ -1885,6 +1939,35 @@ class PythonDRCEngine:
                         u2 = t
             return True
 
+        def point_to_rect_distance(px, py, left, right, bottom, top):
+            dx = 0.0
+            if px < left:
+                dx = left - px
+            elif px > right:
+                dx = px - right
+            dy = 0.0
+            if py < bottom:
+                dy = bottom - py
+            elif py > top:
+                dy = py - top
+            return math.sqrt(dx * dx + dy * dy)
+
+        def segment_to_rect_distance(x1, y1, x2, y2, left, right, bottom, top):
+            # Exact 0 if segment intersects rectangle.
+            if segment_intersects_rect(x1, y1, x2, y2, left, right, bottom, top):
+                return 0.0
+            # Otherwise, minimum of endpoint->rect and corner->segment distances.
+            d = min(
+                point_to_rect_distance(x1, y1, left, right, bottom, top),
+                point_to_rect_distance(x2, y2, left, right, bottom, top),
+            )
+            corners = [
+                (left, bottom), (left, top), (right, bottom), (right, top)
+            ]
+            for cx, cy in corners:
+                d = min(d, point_to_line_distance(cx, cy, x1, y1, x2, y2))
+            return d
+
         
         for pad in pads:
             pad_loc = self._safe_get_location(pad)
@@ -1935,16 +2018,18 @@ class PythonDRCEngine:
                 if x1 == 0 and y1 == 0 and x2 == 0 and y2 == 0:
                     continue
                 
-                # Conservative geometric test:
-                # Treat the track centerline intersecting the pad rectangle expanded by track half-width.
-                # This avoids circular-pad approximation false positives for rectangular/oval pads.
-                expand = track_radius + 0.001  # small numeric tolerance
-                rect_left = pad_x - pad_half_x - expand
-                rect_right = pad_x + pad_half_x + expand
-                rect_bottom = pad_y - pad_half_y - expand
-                rect_top = pad_y + pad_half_y + expand
-
-                if segment_intersects_rect(x1, y1, x2, y2, rect_left, rect_right, rect_bottom, rect_top):
+                rect_left = pad_x - pad_half_x
+                rect_right = pad_x + pad_half_x
+                rect_bottom = pad_y - pad_half_y
+                rect_top = pad_y + pad_half_y
+                line_to_pad_rect = segment_to_rect_distance(
+                    x1, y1, x2, y2, rect_left, rect_right, rect_bottom, rect_top
+                )
+                est_clearance = line_to_pad_rect - track_radius
+                # Only true copper overlap is short-circuit. Positive gap belongs to clearance.
+                if est_clearance <= 0.0:
+                    # Boundary guard: if estimated copper gap is still positive,
+                    # classify as clearance (handled elsewhere), not short-circuit.
                     pad_to_track_checked += 1
                     pad_to_track_short_circuits += 1
                     
@@ -1961,11 +2046,10 @@ class PythonDRCEngine:
                         overlap_y = y1 + t * dy
                     
                     if pad_to_track_short_circuits <= 5:
-                        dist_to_track = point_to_line_distance(pad_x, pad_y, x1, y1, x2, y2)
                         print(f"DEBUG: Pad-to-track short-circuit {pad_to_track_short_circuits}:")
                         print(f"  Pad: {pad.get('designator', 'unknown')} net={pad_net} layer={pad_layer} pos=({pad_x:.3f},{pad_y:.3f})")
                         print(f"  Track: net={track_net} layer={track_layer} ({x1:.3f},{y1:.3f}) to ({x2:.3f},{y2:.3f})")
-                        print(f"  Distance: {dist_to_track:.3f}mm, Rect half-size: ({pad_half_x:.3f}, {pad_half_y:.3f}), track_radius: {track_radius:.3f}mm")
+                        print(f"  Clearance_est: {est_clearance:.3f}mm, Rect half-size: ({pad_half_x:.3f}, {pad_half_y:.3f}), track_radius: {track_radius:.3f}mm")
                     
                     self.violations.append(DRCViolation(
                         rule_name=rule.name,
@@ -2122,7 +2206,7 @@ class PythonDRCEngine:
                         continue
                     seen_connections.add(seg_key)
                     unrouted_count += 1
-
+                    
                     if net_pads:
                         pad_list = ', '.join([p.get('designator', 'Unknown') for p in net_pads[:4]])
                         if len(net_pads) > 4:
@@ -2145,11 +2229,6 @@ class PythonDRCEngine:
                     ))
             
             print(f"DEBUG: Total unrouted nets found (from ratsnest): {unrouted_count}")
-            # Mark explicit unrouted nets for downstream Net Antennae scoping.
-            try:
-                self._fallback_unrouted_nets.update(unrouted_nets.keys())
-            except Exception:
-                pass
             # Strict supplemental fallback for under-exported connection objects:
             # only two-pad, lightly-routed nets that are still disconnected.
             conn_nets = set(unrouted_nets.keys())
@@ -2229,8 +2308,302 @@ class PythonDRCEngine:
 
         # Without connection objects, fallback graph inference over-reports on boards
         # with planes/pours/internal connectivity not fully represented in the export.
-        print("DEBUG: No connection objects exported; skipping unrouted-net fallback to avoid false positives")
+        # CRITICAL: Disable fallback entirely when connections are missing to avoid false positives.
+        # The exported PCB data lacks sufficient detail to reliably infer unrouted connections.
+        print("DEBUG: No connection objects exported; skipping unrouted net detection to avoid false positives")
+        print("DEBUG: To enable accurate unrouted net detection, ensure Altium exports connection objects (ratsnest data)")
         return
+
+        # Very conservative fallback:
+        # report when a pad has no same-net copper touch and there is a nearby same-net via
+        # that is not demonstrably connected by same-net poured copper on the pad's layer.
+        #
+        # NOTE: we intentionally do NOT require nearby foreign-net conflict evidence here.
+        # That gate suppresses real pad<->via unrouted cases on otherwise clean local geometry.
+        # We keep this safe by requiring strict local conditions and one-candidate-per-net.
+        def _share_same_net_fill_region(net_name: str, layer_name: str,
+                                        x1: float, y1: float, x2: float, y2: float) -> bool:
+            """
+            Conservative pour-connectivity evidence for no-ratsnest fallback:
+            only treat pad/via as connected by pour if BOTH points are inside the
+            SAME exported same-net fill region on a connectable layer.
+            """
+            layer_l = (layer_name or '').strip().lower()
+            if (x1 == 0 and y1 == 0) or (x2 == 0 and y2 == 0):
+                return False
+            for fill in (getattr(self, '_current_fills', []) or []):
+                if not isinstance(fill, dict):
+                    continue
+                fnet = fill.get('net', '').strip()
+                if fnet != net_name:
+                    continue
+                flayer = fill.get('layer', '').strip().lower()
+                if layer_l and flayer and (not self._layers_can_connect(layer_l, flayer)):
+                    continue
+                fx1 = float(fill.get('x1_mm', 0) or 0)
+                fy1 = float(fill.get('y1_mm', 0) or 0)
+                fx2 = float(fill.get('x2_mm', 0) or 0)
+                fy2 = float(fill.get('y2_mm', 0) or 0)
+                left, right = (fx1, fx2) if fx1 <= fx2 else (fx2, fx1)
+                bottom, top = (fy1, fy2) if fy1 <= fy2 else (fy2, fy1)
+                p1_inside = (left <= x1 <= right and bottom <= y1 <= top)
+                p2_inside = (left <= x2 <= right and bottom <= y2 <= top)
+                if p1_inside and p2_inside:
+                    return True
+            return False
+
+        added = 0
+        best_candidate_by_net = {}
+        net_pad_count = {}
+        for p in pads:
+            n = p.get('net', '').strip()
+            if n and n != 'No Net':
+                net_pad_count[n] = net_pad_count.get(n, 0) + 1
+        for pad in pads:
+            net_name = pad.get('net', '').strip()
+            if not net_name or net_name == 'No Net':
+                continue
+            # No-ratsnest fallback requires at least two pads on the net.
+            # Single-pad nets are ambiguous in this mode and commonly false-positive.
+            if net_pad_count.get(net_name, 0) < 2:
+                continue
+            ploc = self._safe_get_location(pad)
+            px = ploc.get('x_mm', 0)
+            py = ploc.get('y_mm', 0)
+            player = pad.get('layer', '').strip().lower()
+            if (px == 0 and py == 0) or not player:
+                continue
+
+            psx = pad.get('size_x_mm', 0) or pad.get('width_mm', 0) or 1.0
+            psy = pad.get('size_y_mm', 0) or pad.get('height_mm', 0) or 1.0
+            pad_r = max(psx, psy) / 2
+            hole_size = float(pad.get('hole_size_mm', 0) or 0)
+
+            # Low-confidence exclusion for no-ratsnest fallback:
+            # through-hole / multi-layer pads are frequently connected by internal
+            # structures not represented in this inference path.
+            if ('multi' in player) or (hole_size > 0):
+                continue
+
+            # Connected to own-net track?
+            own_connected = False
+            for tr in tracks:
+                if tr.get('net', '').strip() != net_name:
+                    continue
+                if not self._layers_can_connect(player, tr.get('layer', '').strip().lower()):
+                    continue
+                x1 = tr.get('x1_mm', 0); y1 = tr.get('y1_mm', 0)
+                x2 = tr.get('x2_mm', 0); y2 = tr.get('y2_mm', 0)
+                if x1 == 0 and y1 == 0 and x2 == 0 and y2 == 0:
+                    continue
+                tr_r = (tr.get('width_mm', 0.254) or 0.254) / 2
+                if point_to_line_distance(px, py, x1, y1, x2, y2) <= (pad_r + tr_r + 0.03):
+                    own_connected = True
+                    break
+            if own_connected:
+                continue
+
+            # Nearest same-net via on connectable layer stack.
+            nearest_via = None
+            nearest_d = None
+            for via in vias:
+                if via.get('net', '').strip() != net_name:
+                    continue
+                vloc = self._safe_get_location(via)
+                vx = vloc.get('x_mm', 0); vy = vloc.get('y_mm', 0)
+                if vx == 0 and vy == 0:
+                    continue
+                d = math.sqrt((px - vx) ** 2 + (py - vy) ** 2)
+                if nearest_d is None or d < nearest_d:
+                    nearest_d = d
+                    nearest_via = via
+            if nearest_via is None or nearest_d is None or nearest_d > 8.0:
+                continue
+
+            vloc = self._safe_get_location(nearest_via)
+            vx = vloc.get('x_mm', 0); vy = vloc.get('y_mm', 0)
+            via_d = nearest_via.get('diameter_mm', 0) or 0.5
+            via_r = via_d / 2
+            # If pad and via copper already touch directly, treat as connected.
+            if nearest_d <= (pad_r + via_r + 0.03):
+                continue
+
+            # If both pad and via are inside the same exported same-net fill region,
+            # treat as connected-by-pour and do not report unrouted.
+            if _share_same_net_fill_region(net_name, player, px, py, vx, vy):
+                continue
+
+            # Keep one strongest local candidate (nearest pad->via pair) per net.
+            cand = {
+                "pad": pad,
+                "px": px,
+                "py": py,
+                "vx": vx,
+                "vy": vy,
+                "score": nearest_d,
+            }
+            cur = best_candidate_by_net.get(net_name)
+            if cur is None or cand["score"] < cur["score"]:
+                best_candidate_by_net[net_name] = cand
+
+        # Refine no-ratsnest candidates using net connectivity graph:
+        # only report pad<->via pairs rooted in disconnected pad components.
+        def _nearest_valid_via_for_pad(net_name: str, pad_obj: Dict) -> Optional[Dict]:
+            ploc = self._safe_get_location(pad_obj)
+            px = ploc.get('x_mm', 0); py = ploc.get('y_mm', 0)
+            player = pad_obj.get('layer', '').strip().lower()
+            if (px == 0 and py == 0) or not player:
+                return None
+
+            psx = pad_obj.get('size_x_mm', 0) or pad_obj.get('width_mm', 0) or 1.0
+            psy = pad_obj.get('size_y_mm', 0) or pad_obj.get('height_mm', 0) or 1.0
+            pad_r = max(psx, psy) / 2
+
+            def _via_is_anchored(via_obj: Dict) -> bool:
+                vloc2 = self._safe_get_location(via_obj)
+                vxx = vloc2.get('x_mm', 0); vyy = vloc2.get('y_mm', 0)
+                if vxx == 0 and vyy == 0:
+                    return False
+                vdia2 = via_obj.get('diameter_mm', 0) or 0.5
+                vr2 = vdia2 / 2
+                # Anchored if any same-net track endpoint/body overlaps the via copper.
+                for tr in tracks:
+                    if tr.get('net', '').strip() != net_name:
+                        continue
+                    tl = tr.get('layer', '').strip().lower()
+                    if player and tl and (not self._layers_can_connect(player, tl)):
+                        continue
+                    x1 = tr.get('x1_mm', 0); y1 = tr.get('y1_mm', 0)
+                    x2 = tr.get('x2_mm', 0); y2 = tr.get('y2_mm', 0)
+                    if x1 == 0 and y1 == 0 and x2 == 0 and y2 == 0:
+                        continue
+                    trr = (tr.get('width_mm', 0.254) or 0.254) / 2
+                    if point_to_line_distance(vxx, vyy, x1, y1, x2, y2) <= (vr2 + trr + 0.03):
+                        return True
+                return False
+
+            best = None
+            for via in vias:
+                if via.get('net', '').strip() != net_name:
+                    continue
+                vloc = self._safe_get_location(via)
+                vx = vloc.get('x_mm', 0); vy = vloc.get('y_mm', 0)
+                if vx == 0 and vy == 0:
+                    continue
+                if not _via_is_anchored(via):
+                    continue
+                d = math.sqrt((px - vx) ** 2 + (py - vy) ** 2)
+                if d > 8.0:
+                    continue
+                via_d = via.get('diameter_mm', 0) or 0.5
+                via_r = via_d / 2
+                if d <= (pad_r + via_r + 0.03):
+                    continue
+                if _share_same_net_fill_region(net_name, player, px, py, vx, vy):
+                    continue
+                cand = {"pad": pad_obj, "px": px, "py": py, "vx": vx, "vy": vy, "score": d}
+                if best is None or cand["score"] < best["score"]:
+                    best = cand
+            return best
+
+        refined_candidates = {}
+        all_net_names = set(best_candidate_by_net.keys())
+        for net_obj in (nets or []):
+            if not isinstance(net_obj, dict):
+                continue
+            nname = net_obj.get('name', '').strip()
+            if nname:
+                all_net_names.add(nname)
+
+        for net_name in all_net_names:
+            net_pads_raw = [p for p in pads if p.get('net', '').strip() == net_name]
+            if len(net_pads_raw) <= 1:
+                continue
+
+            net_tracks = [t for t in tracks if t.get('net', '').strip() == net_name]
+            net_vias = [v for v in vias if v.get('net', '').strip() == net_name]
+            # In no-ratsnest mode, polygon outlines are not reliable connectivity evidence.
+            # However, we can use fill regions (copper rectangles) for connectivity.
+            # Convert fills to polygon-like structures for connectivity check.
+            net_polygons = []
+            fills_for_net = [f for f in (getattr(self, '_current_fills', []) or []) 
+                           if isinstance(f, dict) and f.get('net', '').strip() == net_name]
+            # Treat fills as simple rectangular polygons for connectivity
+            for fill in fills_for_net:
+                fx1 = float(fill.get('x1_mm', 0) or 0)
+                fy1 = float(fill.get('y1_mm', 0) or 0)
+                fx2 = float(fill.get('x2_mm', 0) or 0)
+                fy2 = float(fill.get('y2_mm', 0) or 0)
+                if fx1 != fx2 or fy1 != fy2:
+                    # Create a simple rectangular polygon representation
+                    net_polygons.append({
+                        'net': net_name,
+                        'layer': fill.get('layer', ''),
+                        'vertices': [(fx1, fy1), (fx2, fy1), (fx2, fy2), (fx1, fy2)],
+                        'x_mm': (fx1 + fx2) / 2,
+                        'y_mm': (fy1 + fy2) / 2,
+                        'size_x_mm': abs(fx2 - fx1),
+                        'size_y_mm': abs(fy2 - fy1)
+                    })
+
+            # If net is connected by geometry graph (including fills), suppress strict fallback candidate.
+            try:
+                is_connected = self._check_net_connectivity(net_name, net_pads_raw, net_tracks, net_vias, net_polygons)
+            except Exception:
+                is_connected = False
+            if is_connected:
+                continue
+
+            # Prefer endpoints from disconnected pads.
+            disconnected = []
+            try:
+                disconnected = self._find_disconnected_pads(net_name, net_pads_raw, net_tracks, net_vias, net_polygons)
+            except Exception:
+                disconnected = []
+
+            best_from_disconnected = None
+            for dp in disconnected or []:
+                c = _nearest_valid_via_for_pad(net_name, dp)
+                if c is None:
+                    continue
+                # Additional safety: verify this specific pad-via pair is not connected through fills
+                pad_obj = c["pad"]
+                ploc = self._safe_get_location(pad_obj)
+                px = ploc.get('x_mm', 0); py = ploc.get('y_mm', 0)
+                player = pad_obj.get('layer', '').strip().lower()
+                vx = c["vx"]; vy = c["vy"]
+                # If both are in same fill region, they're connected - skip this candidate
+                if _share_same_net_fill_region(net_name, player, px, py, vx, vy):
+                    continue
+                if best_from_disconnected is None or c["score"] < best_from_disconnected["score"]:
+                    best_from_disconnected = c
+
+            # CRITICAL: Only report if net is disconnected AND we found a valid disconnected pad->via pair.
+            # Do NOT fall back to local candidates when graph says net is connected - that causes false positives.
+            if best_from_disconnected is not None:
+                refined_candidates[net_name] = best_from_disconnected
+
+        for net_name, cand in refined_candidates.items():
+            pad = cand["pad"]
+            px = cand["px"]; py = cand["py"]
+            vx = cand["vx"]; vy = cand["vy"]
+            self.violations.append(DRCViolation(
+                rule_name=rule.name,
+                rule_type="unrouted_net",
+                severity="error",
+                message=(
+                    f"Un-Routed Net Constraint: Net {net_name} Between Pad "
+                    f"{pad.get('designator', 'Unknown')}({px:.3f}mm,{py:.3f}mm) on "
+                    f"{pad.get('layer', 'Unknown')} And Via ({vx:.3f}mm,{vy:.3f}mm)"
+                ),
+                location={"x_mm": (px + vx) / 2, "y_mm": (py + vy) / 2},
+                net_name=net_name
+            ))
+            added += 1
+            
+        if added:
+            print(f"DEBUG: Added {added} strict isolated pad->via unrouted fallback violation(s)")
+            return
         
         # =====================================================================
         # MODE 2: Fallback - build connectivity graph (less accurate)
@@ -2984,8 +3357,9 @@ class PythonDRCEngine:
         # Collect via data: (x, y, radius)
         via_list = []
         for via in vias:
-            x = via.get('x_mm', 0)
-            y = via.get('y_mm', 0)
+            vloc = self._safe_get_location(via)
+            x = vloc.get('x_mm', 0)
+            y = vloc.get('y_mm', 0)
             vnet = via.get('net', '').strip()
             diameter = via.get('diameter_mm', 0) or 0.5
             if (x != 0 or y != 0) and vnet:
@@ -3058,6 +3432,7 @@ class PythonDRCEngine:
         # If an endpoint coincides with an explicit unrouted connection endpoint,
         # classify it as UnRoutedNet (not NetAntennae) to avoid double-reporting.
         conn_endpoints_by_net = {}
+        conn_segments_by_net = {}  # Track connection segments to check if track spans a connection
         for conn in (self._current_connections or []):
             if not isinstance(conn, dict):
                 continue
@@ -3070,6 +3445,8 @@ class PythonDRCEngine:
             ty = conn.get('to_y_mm', 0)
             conn_endpoints_by_net.setdefault(cn, []).append((fx, fy))
             conn_endpoints_by_net.setdefault(cn, []).append((tx, ty))
+            # Store connection segment for track-spanning check
+            conn_segments_by_net.setdefault(cn, []).append(((fx, fy), (tx, ty)))
         
         # Determine which nets have unrouted connections (from ratsnest data)
         # Key insight: Net Antennae can ONLY occur on nets with incomplete routing.
@@ -3101,21 +3478,36 @@ class PythonDRCEngine:
             if has_connection_objects and candidate_nets and net not in candidate_nets:
                 continue
             
-            half_w = width / 2  # Track copper extends this far from centerline
+            # First check if this track actually forms part of a connection path
+            # If so, skip entire track (both endpoints) - it's part of routing, not an antenna
+            conn_segs = conn_segments_by_net.get(net, [])
+            track_forms_connection = False
+            half_w = width / 2
+            for (cfx, cfy), (ctx, cty) in conn_segs:
+                dist1_to_from = math.sqrt((x1 - cfx) ** 2 + (y1 - cfy) ** 2)
+                dist1_to_to = math.sqrt((x1 - ctx) ** 2 + (y1 - cty) ** 2)
+                dist2_to_from = math.sqrt((x2 - cfx) ** 2 + (y2 - cfy) ** 2)
+                dist2_to_to = math.sqrt((x2 - ctx) ** 2 + (y2 - cty) ** 2)
+                
+                # Track forms connection if: (endpoint1 near from, endpoint2 near to) OR (endpoint1 near to, endpoint2 near from)
+                # Use track width + small tolerance for "near"
+                tol = half_w + 0.1
+                if (dist1_to_from <= tol and dist2_to_to <= tol) or (dist1_to_to <= tol and dist2_to_from <= tol):
+                    track_forms_connection = True
+                    break
+            
+            if track_forms_connection:
+                # This track actually forms part of the connection path - skip antenna detection for entire track
+                continue  # Skip to next track
+            
+            # Track doesn't form a connection - check each endpoint individually for connectivity
             floating_points = []
+            CONN_TOL = max(0.0, float(rule.net_antennae_tolerance_mm or 0.0))
             
             for px, py in [(x1, y1), (x2, y2)]:
                 connected = False
                 
-                # Connection tolerance: adaptive to track geometry
-                # A track endpoint's copper is a semicircle of radius = half_width.
-                # Use the track's own half-width as extra tolerance — this accounts for
-                # the physical copper reach beyond the centerline endpoint coordinate.
-                # This is NOT hard-coded — it adapts to each track's actual width.
-                CONN_TOL = max(0.0, float(rule.net_antennae_tolerance_mm or 0.0))
-                
                 # 1. Pad check: track copper overlaps pad copper
-                #    Uses circular distance with max pad dimension (handles rotation)
                 for pad_x, pad_y, pad_half_r, pnet in pad_list:
                     if pnet != net:
                         continue
@@ -3147,7 +3539,7 @@ class PythonDRCEngine:
                     if layer and tlayer and (not self._layers_can_connect(layer, tlayer)):
                         continue
                     other_half_w = twidth / 2
-                    # Endpoint-to-endpoint
+                    # Endpoint-to-endpoint: tracks must actually touch (copper overlap)
                     ep_tol = half_w + other_half_w + CONN_TOL
                     if math.sqrt((px - tx1)**2 + (py - ty1)**2) <= ep_tol:
                         connected = True
@@ -3155,16 +3547,20 @@ class PythonDRCEngine:
                     if math.sqrt((px - tx2)**2 + (py - ty2)**2) <= ep_tol:
                         connected = True
                         break
-                    # Endpoint-to-body (T-junction)
+                    # Endpoint-to-body (T-junction): endpoint must be within track body
                     dist = point_to_line_distance(px, py, tx1, ty1, tx2, ty2)
-                    if dist <= half_w + other_half_w + CONN_TOL:
-                        connected = True
-                        break
+                    seg_len = math.sqrt((tx2 - tx1)**2 + (ty2 - ty1)**2)
+                    if seg_len > 0:
+                        t = ((px - tx1) * (tx2 - tx1) + (py - ty1) * (ty2 - ty1)) / (seg_len * seg_len)
+                        if 0 <= t <= 1:  # Within segment bounds
+                            if dist <= half_w + other_half_w + CONN_TOL:
+                                connected = True
+                                break
                 
                 if connected:
                     continue
                 
-                # 4. Same-net polygon containment (conservative anti-false-positive check)
+                # 4. Same-net polygon containment
                 if not connected:
                     for pnet, player, pcx, pcy, psx, psy, pverts in polygon_data:
                         if pnet != net:
@@ -3184,8 +3580,8 @@ class PythonDRCEngine:
                         if inside_poly:
                             connected = True
                             break
-
-                # 5. Same-net fill containment (rectangle copper)
+                
+                # 5. Same-net fill containment
                 if not connected:
                     for fx1, fy1, fx2, fy2, fnet, flayer in fill_list:
                         if fnet != net:
@@ -3197,48 +3593,36 @@ class PythonDRCEngine:
                             connected = True
                             break
                 
+                # 6. Arc check
                 if not connected:
-                    # 6. Arc check: endpoint near an arc endpoint
                     for ax, ay, ahw in arc_endpoints:
                         if math.sqrt((px - ax)**2 + (py - ay)**2) <= half_w + ahw + CONN_TOL:
                             connected = True
                             break
-                
-                if not connected:
-                    # If this endpoint is explicitly present in unrouted connection objects
-                    # and is not at a same-net pad, keep it as a floating candidate.
-                    conn_pts = conn_endpoints_by_net.get(net, [])
-                    is_conn_endpoint = any(
-                        math.sqrt((px - cx) ** 2 + (py - cy) ** 2) <= max(0.1, half_w)
-                        for cx, cy in conn_pts
-                    )
-                    if is_conn_endpoint:
-                        at_same_net_pad = False
-                        for pad_x, pad_y, pad_half_r, pnet in pad_list:
-                            if pnet != net:
-                                continue
-                            if math.sqrt((px - pad_x) ** 2 + (py - pad_y) ** 2) <= (pad_half_r + half_w):
-                                at_same_net_pad = True
-                                break
-                        if not at_same_net_pad:
-                            connected = False
 
                 if not connected:
                     floating_points.append((px, py))
 
             # With connection objects: keep endpoint-level reporting (more Altium-like detail).
+            # CRITICAL: Only report if at least one endpoint is truly floating (not connected to anything)
             if has_connection_objects:
-                for px, py in floating_points:
-                    antennae_count += 1
-                    layer_display = layer if layer else 'Unknown Layer'
-                    self.violations.append(DRCViolation(
-                        rule_name=rule.name,
-                        rule_type="net_antennae",
-                        severity="error",
-                        message=f"Net Antennae: Track ({x1:.3f}mm,{y1:.3f}mm)({x2:.3f}mm,{y2:.3f}mm) on {layer_display}",
-                        location={"x_mm": px, "y_mm": py},
-                        net_name=net
-                    ))
+                if floating_points:
+                    # Report each floating endpoint as a separate antenna violation
+                    for px, py in floating_points:
+                        antennae_count += 1
+                        layer_display = layer if layer else 'Unknown Layer'
+                        self.violations.append(DRCViolation(
+                            rule_name=rule.name,
+                            rule_type="net_antennae",
+                            severity="error",
+                            message=f"Net Antennae: Track ({x1:.3f}mm,{y1:.3f}mm)({x2:.3f}mm,{y2:.3f}mm) on {layer_display}",
+                            location={"x_mm": px, "y_mm": py},
+                            net_name=net
+                        ))
+                elif len(floating_points) == 0:
+                    # Debug: track has no floating endpoints, but let's verify why
+                    # This shouldn't happen if the track is truly an antenna
+                    pass
             else:
                 # Without ratsnest, only high-confidence stubs:
                 # exactly one floating endpoint on a track (other endpoint connected).

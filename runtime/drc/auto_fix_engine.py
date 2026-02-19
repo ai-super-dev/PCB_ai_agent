@@ -17,6 +17,7 @@ import math
 import time
 import re
 from typing import List, Dict, Any, Optional, Tuple
+from runtime.drc.python_drc_engine import point_to_line_distance
 
 
 class AutoFixEngine:
@@ -37,6 +38,7 @@ class AutoFixEngine:
         self.fix_log = []
         total_fixed = 0
         total_failed = 0
+        self._min_clearance_guard = self._extract_min_clearance_mm(rules)
         # Track nets with explicit unrouted violations; antennae on these nets
         # should be resolved by routing, not by deleting copper.
         self._unrouted_nets = {
@@ -139,7 +141,18 @@ class AutoFixEngine:
                        if isinstance(c, dict) and c.get('net', '').strip() == net_name]
         
         if not connections:
-            return {'success': False, 'error': f'No ratsnest data for net {net_name} — manual routing needed'}
+            # Fallback: use coordinates embedded in Python DRC violation message.
+            # This keeps the flow fully automated even when connection objects are not exported.
+            endpoints = self._parse_unrouted_endpoints(violation.get('message', ''))
+            if endpoints:
+                fx, fy, tx, ty = endpoints
+                connections = [{
+                    'net': net_name,
+                    'from_x_mm': fx, 'from_y_mm': fy,
+                    'to_x_mm': tx, 'to_y_mm': ty
+                }]
+            else:
+                return {'success': False, 'error': f'No routable endpoints for net {net_name}'}
         
         # Get existing track width for this net
         net_tracks = [t for t in pcb_data.get('tracks', [])
@@ -171,18 +184,19 @@ class AutoFixEngine:
             
             if from_x == 0 and from_y == 0:
                 continue
-            
-            # Add a direct track between the ratsnest endpoints
-            result = self.script_client._send_command({
-                'action': 'add_track',
-                'net': net_name,
-                'layer': layer_name,
-                'x1': str(from_x), 'y1': str(from_y),
-                'x2': str(to_x), 'y2': str(to_y),
-                'width': str(track_width)
-            })
-            
-            if result.get('success'):
+            if to_x == 0 and to_y == 0:
+                continue
+
+            if self._route_connection_with_fallback(
+                net_name=net_name,
+                x1=from_x,
+                y1=from_y,
+                x2=to_x,
+                y2=to_y,
+                width_mm=track_width,
+                layer_name=layer_name,
+                pcb_data=pcb_data,
+            ):
                 routes_added += 1
             
             time.sleep(0.5)
@@ -190,7 +204,101 @@ class AutoFixEngine:
         if routes_added > 0:
             return {'success': True, 'message': f'Added {routes_added} track(s) for net {net_name}'}
         else:
-            return {'success': False, 'error': f'Could not route net {net_name} — manual routing needed'}
+            return {'success': False, 'error': f'Could not route net {net_name} with safe patterns'}
+
+    def _route_connection_with_fallback(self, net_name: str, x1: float, y1: float, x2: float, y2: float,
+                                        width_mm: float, layer_name: str, pcb_data: Dict) -> bool:
+        """Route one connection: direct segment first, then safe L-shape alternatives."""
+        if self._is_direct_route_safe(net_name, x1, y1, x2, y2, width_mm, pcb_data):
+            return self._add_track(net_name, layer_name, x1, y1, x2, y2, width_mm)
+
+        pivots = [
+            (x1, y2),
+            (x2, y1),
+            ((x1 + x2) / 2.0, y1),
+            ((x1 + x2) / 2.0, y2),
+            (x1, (y1 + y2) / 2.0),
+            (x2, (y1 + y2) / 2.0),
+        ]
+        for px, py in pivots:
+            if (abs(px - x1) < 1e-6 and abs(py - y1) < 1e-6) or (abs(px - x2) < 1e-6 and abs(py - y2) < 1e-6):
+                continue
+            if not self._is_direct_route_safe(net_name, x1, y1, px, py, width_mm, pcb_data):
+                continue
+            if not self._is_direct_route_safe(net_name, px, py, x2, y2, width_mm, pcb_data):
+                continue
+
+            if not self._add_track(net_name, layer_name, x1, y1, px, py, width_mm):
+                continue
+            if self._add_track(net_name, layer_name, px, py, x2, y2, width_mm):
+                return True
+            # rollback first segment if second fails
+            self.script_client._send_command({
+                'action': 'delete_track',
+                'x1': str(x1), 'y1': str(y1),
+                'x2': str(px), 'y2': str(py)
+            })
+        return False
+
+    def _add_track(self, net_name: str, layer_name: str, x1: float, y1: float, x2: float, y2: float, width_mm: float) -> bool:
+        result = self.script_client._send_command({
+            'action': 'add_track',
+            'net': net_name,
+            'layer': layer_name,
+            'x1': str(x1), 'y1': str(y1),
+            'x2': str(x2), 'y2': str(y2),
+            'width': str(width_mm)
+        })
+        return bool(result.get('success'))
+
+    def _extract_min_clearance_mm(self, rules: List[Dict]) -> float:
+        """Get a conservative global clearance guard from enabled clearance rules."""
+        vals = []
+        for r in rules or []:
+            if not isinstance(r, dict):
+                continue
+            rtype = str(r.get('type', '')).strip().lower()
+            if rtype != 'clearance':
+                continue
+            if r.get('enabled', True) is False:
+                continue
+            v = r.get('clearance_mm', r.get('min_clearance_mm', None))
+            try:
+                if v is not None:
+                    fv = float(v)
+                    if fv > 0:
+                        vals.append(fv)
+            except Exception:
+                continue
+        if vals:
+            return min(vals)
+        return 0.2
+
+    def _is_direct_route_safe(self, net_name: str, x1: float, y1: float, x2: float, y2: float,
+                              width_mm: float, pcb_data: Dict) -> bool:
+        """Conservative pre-check for direct auto-route safety against foreign-net pads."""
+        half_w = max(float(width_mm or 0.254) / 2.0, 0.05)
+        guard = max(float(getattr(self, '_min_clearance_guard', 0.2) or 0.2), 0.05)
+
+        for pad in pcb_data.get('pads', []) or []:
+            if not isinstance(pad, dict):
+                continue
+            pnet = str(pad.get('net', '')).strip()
+            if not pnet or pnet == net_name:
+                continue
+            px = float(pad.get('x_mm', 0) or 0)
+            py = float(pad.get('y_mm', 0) or 0)
+            if px == 0 and py == 0:
+                continue
+            sx = float(pad.get('size_x_mm', 0) or pad.get('width_mm', 0) or 1.0)
+            sy = float(pad.get('size_y_mm', 0) or pad.get('height_mm', 0) or 1.0)
+            pad_r = max(sx, sy) / 2.0
+
+            dist = point_to_line_distance(px, py, x1, y1, x2, y2)
+            if dist <= (pad_r + half_w + guard):
+                return False
+
+        return True
     
     # =========================================================================
     # CLEARANCE FIX
@@ -248,6 +356,25 @@ class AutoFixEngine:
         if match:
             return (float(match.group(1)), float(match.group(2)),
                     float(match.group(3)), float(match.group(4)))
+        return None
+
+    def _parse_unrouted_endpoints(self, message: str) -> Optional[Tuple[float, float, float, float]]:
+        """Parse endpoints from unrouted message text."""
+        if not message:
+            return None
+        m = re.search(
+            r'Between\s*\(([0-9.]+)mm,([0-9.]+)mm\)\s*And\s*\(([0-9.]+)mm,([0-9.]+)mm\)',
+            message
+        )
+        if m:
+            return (float(m.group(1)), float(m.group(2)), float(m.group(3)), float(m.group(4)))
+
+        m2 = re.search(
+            r'Between\s+Pad\s+.+?\(([0-9.]+)mm,([0-9.]+)mm\).+?\bAnd\s+Via\s*\(([0-9.]+)mm,([0-9.]+)mm\)',
+            message
+        )
+        if m2:
+            return (float(m2.group(1)), float(m2.group(2)), float(m2.group(3)), float(m2.group(4)))
         return None
     
     def _find_nearest_component(self, x, y, pcb_data) -> Optional[Dict]:

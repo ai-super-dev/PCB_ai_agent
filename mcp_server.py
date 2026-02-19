@@ -100,7 +100,7 @@ class AltiumMCPServer:
             
             if 'error' in raw_data:
                 return {"error": raw_data['error']}
-            
+
             # Create G-IR
             gir = self.importer.import_pcb_direct(pcb_path)
             
@@ -1526,6 +1526,8 @@ class AltiumMCPServer:
             
             # STEP 2: Export actual copper primitives (CRITICAL for accurate DRC)
             copper_primitives_available = False
+            pcb_export_succeeded = False
+            pcb_export_error = ""
             if SCRIPT_CLIENT_AVAILABLE and self.script_client:
                 try:
                     # First repour all polygons to get fresh copper
@@ -1545,12 +1547,30 @@ class AltiumMCPServer:
                     else:
                         print(f"[WARNING] Copper primitives export failed: {export_result.get('error', 'Unknown error')}")
                     
-                    # Also export updated PCB info
-                    pcb_export_result = self.script_client.export_pcb_info()
-                    if pcb_export_result.get("success"):
-                        print("[OK] PCB info exported with updated data")
+                    # Also export updated PCB info (retry because large boards can be slow)
+                    for attempt in range(1, 4):
+                        pcb_export_result = self.script_client.export_pcb_info()
+                        if pcb_export_result.get("success"):
+                            print("[OK] PCB info exported with updated data")
+                            pcb_export_succeeded = True
+                            break
+                        pcb_export_error = str(pcb_export_result.get("error", "unknown export error"))
+                        print(f"[WARNING] export_pcb_info attempt {attempt}/3 failed: {pcb_export_error}")
+                        time.sleep(1.0)
                 except Exception as e:
                     print(f"[WARNING] Could not export copper primitives: {e}")
+                    pcb_export_error = str(e)
+
+            # If we have a live PcbDoc but cannot produce a fresh export,
+            # abort instead of returning misleading DRC from partial OLE geometry.
+            if (not pcb_export_succeeded) and (not self.current_pcb_is_json) and self.current_pcb_path and str(self.current_pcb_path).lower().endswith(".pcbdoc"):
+                return {
+                    "error": (
+                        "Accurate Python DRC requires fresh PCB export, but export_pcb_info failed. "
+                        f"Last error: {pcb_export_error or 'unknown'}. "
+                        "DRC run aborted to avoid stale/incomplete results."
+                    )
+                }
             
             # STEP 3: Load actual copper primitives if available
             copper_regions = []
@@ -1593,27 +1613,26 @@ class AltiumMCPServer:
             if not altium_export.exists():
                 altium_export = base_path / "altium_pcb_info.json"
             
-            if altium_export.exists():
-                # Use JSON export (has polygon geometry!)
-                print(f"DEBUG: Using JSON export for DRC: {altium_export}")
-                # Try multiple encodings - Altium might export with different encoding
+            if pcb_export_succeeded and altium_export.exists():
+                # Use freshly exported JSON only when this run actually exported it.
+                print(f"DEBUG: Using fresh JSON export for DRC: {altium_export}")
                 try:
                     with open(altium_export, 'r', encoding='utf-8') as f:
                         raw_data = json.load(f)
                 except UnicodeDecodeError:
-                    # Try latin-1 (ISO-8859-1) which can decode any byte
                     print(f"DEBUG: UTF-8 failed, trying latin-1 encoding")
                     with open(altium_export, 'r', encoding='latin-1') as f:
                         raw_data = json.load(f)
                 except Exception as e:
-                    return {"error": f"Failed to read JSON export: {str(e)}"}
+                    return {"error": f"Failed to read fresh JSON export: {str(e)}"}
             elif self.current_pcb_is_json or str(self.current_pcb_path).lower().endswith('.json'):
                 # Load JSON directly instead of trying to read as OLE
                 with open(self.current_pcb_path, 'r', encoding='utf-8') as f:
                     raw_data = json.load(f)
             else:
-                # Get full PCB data from OLE file (no polygon geometry!)
-                print(f"WARNING: Using OLE file - polygons will have no geometry. Use JSON export for accurate DRC.")
+                # No fresh JSON export available: read currently loaded PcbDoc directly.
+                # This avoids stale altium_pcb_info.json from previous boards/runs.
+                print(f"WARNING: No fresh JSON export; using currently loaded PCB file directly.")
                 raw_data = self.reader.read_pcb(self.current_pcb_path)
             
             if 'error' in raw_data:
@@ -1786,7 +1805,15 @@ class AltiumMCPServer:
             print("[DRC] Running Python DRC engine...")
             
             # Run Python DRC engine
-            drc_engine = PythonDRCEngine()
+            # Hot-reload during long-running server sessions so latest DRC logic is used
+            # without requiring a backend restart after code updates.
+            try:
+                import importlib
+                import runtime.drc.python_drc_engine as _py_drc_module
+                _py_drc_module = importlib.reload(_py_drc_module)
+                drc_engine = _py_drc_module.PythonDRCEngine()
+            except Exception:
+                drc_engine = PythonDRCEngine()
             try:
                 drc_result = drc_engine.run_drc(pcb_data, rules)
                 violations = drc_result.get("violations", [])

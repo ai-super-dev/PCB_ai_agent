@@ -1418,7 +1418,9 @@ Begin
     Try
         Iter := Board.BoardIterator_Create;
         Iter.AddFilter_ObjectSet(MkSet(eConnectionObject));
-        Iter.AddFilter_LayerSet(AllLayers);
+        // Do NOT layer-filter connection objects.
+        // In some Altium builds, unrouted connection/ratsnest objects are not
+        // exposed on physical signal layers, so AllLayers filtering can hide them.
         
         Net := Iter.FirstPCBObject;
         While Net <> Nil Do
