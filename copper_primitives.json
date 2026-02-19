@@ -1,22 +1,8 @@
 {
 "export_source": "altium_designer",
 "export_type": "copper_primitives",
-"export_timestamp": "2/19/2026 8:58:44 AM",
+"export_timestamp": "2/19/2026 9:27:34 PM",
 "copper_regions": [
-{
-"type": "copper_region",
-"layer": "Top Layer",
-"net": "GND",
-"is_poured": true,
-"hatch_style": "solid",
-"clearance_mm": 0.2,
-"x_mm": 4.699,
-"y_mm": 5.207,
-"width_mm": 153.035,
-"height_mm": 81.788,
-"vertices": [
-[4.699, 5.207],[157.734, 5.207],[157.734, 86.995],[4.699, 86.995]
-]},
 {
 "type": "copper_region",
 "layer": "Mid Layer 1",
@@ -48,6 +34,20 @@
 {
 "type": "copper_region",
 "layer": "Bottom Layer",
+"net": "GND",
+"is_poured": true,
+"hatch_style": "solid",
+"clearance_mm": 0.2,
+"x_mm": 4.699,
+"y_mm": 5.207,
+"width_mm": 153.035,
+"height_mm": 81.788,
+"vertices": [
+[4.699, 5.207],[157.734, 5.207],[157.734, 86.995],[4.699, 86.995]
+]},
+{
+"type": "copper_region",
+"layer": "Top Layer",
 "net": "GND",
 "is_poured": true,
 "hatch_style": "solid",

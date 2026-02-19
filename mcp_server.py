@@ -1303,9 +1303,10 @@ class AltiumMCPServer:
         
         try:
             native_counts_bundle = None
-            # FIRST CHOICE: Use Altium's native DRC results when available.
-            # This is the only path that can exactly match Altium counts.
-            if SCRIPT_CLIENT_AVAILABLE and self.script_client:
+            # USER REQUIREMENT: Python-only DRC mode.
+            # Never use native Altium DRC results for violation counts/details.
+            use_native_altium_drc = False
+            if use_native_altium_drc and SCRIPT_CLIENT_AVAILABLE and self.script_client:
                 try:
                     print("[DRC] Running native Altium DRC...")
                     native_result = self.script_client.run_drc()
@@ -1938,12 +1939,13 @@ class AltiumMCPServer:
                         "sample": rule_violations[0] if rule_violations else None
                     })
             
-            # If native counts exist but native API detail was unavailable,
-            # use Altium report details (if available). Do NOT inject Python-picked
-            # rows here because that can misrepresent which exact violations Altium reported.
-            if native_counts_bundle:
+            # Python-only enforcement: ignore any native bundle even if code above changes.
+            if False and native_counts_bundle:
                 report_violations = native_counts_bundle.get("report_violations", [])
                 use_report_details = isinstance(report_violations, list) and len(report_violations) > 0
+                supplemental_python_violations = []
+                if not use_report_details:
+                    supplemental_python_violations = [v for v in violations if isinstance(v, dict)]
 
                 return {
                     "success": True,
@@ -1959,6 +1961,7 @@ class AltiumMCPServer:
                     "violations": report_violations if use_report_details else [],
                     "warnings": warnings,
                     "detailed_violations": report_violations if use_report_details else [],
+                    "supplemental_violations": supplemental_python_violations,
                     "total_violations": native_counts_bundle["total_violations"],
                     "total_warnings": actual_warning_count,
                     "diagnostic_summary": diagnostic_summary,
@@ -1967,7 +1970,7 @@ class AltiumMCPServer:
                     "python_checked_rules": python_checked_rules,
                     "total_rules": len(native_counts_bundle["all_rules_checked"]),
                     "rules_checked_count": len(python_checked_rules),
-                    "source": "altium_native_counts_report_details" if use_report_details else "altium_native_counts_only",
+                    "source": "altium_native_counts_report_details" if use_report_details else "altium_native_counts_with_python_supplemental",
                     "native_details_available": use_report_details,
                     "native_file": native_counts_bundle.get("native_file", "")
                 }

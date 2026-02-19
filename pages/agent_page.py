@@ -1316,6 +1316,8 @@ Chat with me to:
                         violations_by_rule = data.get("violations_by_rule", {})
                         drc_source = data.get("source", "python_fallback")
                         native_details_available = data.get("native_details_available", True)
+                        supplemental_violations = data.get("supplemental_violations", [])
+                        is_native_source = str(drc_source).startswith("altium_native")
                         
                         # Get additional data
                         all_rules = data.get("all_rules_checked", [])
@@ -1331,8 +1333,8 @@ Chat with me to:
                         msg += f"**DRC Source:** `{drc_source}`\n\n"
                         if drc_source == "altium_native_counts_report_details":
                             msg += "*Counts and detailed rows come from native Altium sources (DRC export + report parser).*\\n\\n"
-                        elif drc_source == "altium_native_counts_only":
-                            msg += "*Counts come from native Altium DRC. Detailed rows are unavailable from current Altium scripting/report export.*\n\n"
+                        elif drc_source == "altium_native_counts_with_python_supplemental":
+                            msg += "*Counts come from native Altium DRC. Detailed rows below are supplemental Python DRC geometry details and may not map 1:1 to Altium entries.*\n\n"
                         msg += "---\n\n"
                         
                         # Summary section with visual emphasis
@@ -1385,7 +1387,7 @@ Chat with me to:
                         
                         msg += "---\n\n"
                         
-                        if drc_source != "altium_native_drc" and python_checked_rules:
+                        if (not is_native_source) and python_checked_rules:
                             msg += "### 📋 Rules Currently Checked\n\n"
                             
                             # Group by rule type
@@ -1437,12 +1439,12 @@ Chat with me to:
                                 msg += f"| {label} | **{count}** | {rules_display} |\n"
                             
                             msg += "\n"
-                        elif drc_source != "altium_native_drc":
+                        elif not is_native_source:
                             msg += "> ⚠️ **Note:** No rules were found in the PCB file. Using default rules for checking.\n\n"
                         else:
                             msg += "> ✅ **Native Altium DRC source in use.** Rule table above is from Altium export.\n\n"
                         
-                        if drc_source != "altium_native_drc":
+                        if not is_native_source:
                             msg += "---\n\n"
                             msg += "### ✅ **Engine Capabilities**\n\n"
                             msg += "The Python DRC engine performs comprehensive validation including:\n\n"
@@ -1508,6 +1510,24 @@ Chat with me to:
                             if len(violations) > 10:
                                 msg += f"---\n\n"
                                 msg += f"*... and **{len(violations) - 10}** more violation(s).*\n\n"
+                        elif drc_source == "altium_native_counts_with_python_supplemental" and supplemental_violations:
+                            msg += "---\n\n"
+                            msg += "## 🔍 Supplemental Detail (Python Geometry)\n\n"
+                            msg += "*Native Altium counts are exact. The detailed rows below are supplemental and may differ from Altium’s exact violation listing order/content.*\n\n"
+                            for i, v in enumerate(supplemental_violations[:10], 1):
+                                rule_type = v.get("type", "unknown").replace("_", " ").title()
+                                message = v.get("message", "")
+                                location = v.get("location", {})
+                                msg += f"### **{i}. {rule_type}**\n"
+                                if location.get("x_mm") is not None and location.get("y_mm") is not None:
+                                    msg += f"- **Location:** `({location['x_mm']:.2f}, {location['y_mm']:.2f}) mm`\n"
+                                if location.get("layer"):
+                                    msg += f"- **Layer:** `{location['layer']}`\n"
+                                if v.get("net_name"):
+                                    msg += f"- **Net:** `{v['net_name']}`\n"
+                                msg += f"\n*{message}*\n\n"
+                            if len(supplemental_violations) > 10:
+                                msg += f"*... and **{len(supplemental_violations) - 10}** more supplemental detail rows.*\n\n"
                         elif drc_source == "altium_native_drc" and not native_details_available:
                             msg += "---\n\n"
                             msg += "## 🔍 Detailed Violations\n\n"

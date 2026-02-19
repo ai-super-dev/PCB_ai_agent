@@ -133,13 +133,13 @@ class AltiumDRCReportParser:
         
         # More specific pattern for Altium DRC report format
         # Look for <acronym> tags which contain violation messages
-        acronym_pattern = r'<acronym\s+title="([^"]*)">([^<]+)</acronym>'
+        acronym_pattern = r'<acronym\s+title="([^"]*)">(.*?)</acronym>'
         acronym_matches = re.findall(acronym_pattern, html, re.IGNORECASE)
         
         for title, text in acronym_matches:
-            if 'Constraint:' in title or 'Violation' in title or 'Rule' in title:
-                # Parse the violation message
-                violation = self._parse_violation_message(title, text)
+            text_clean = unescape(re.sub(r'<[^>]+>', '', text)).strip()
+            if self._is_detailed_violation_line(text_clean):
+                violation = self._parse_violation_message(title, text_clean)
                 if violation:
                     violations.append(violation)
         
@@ -154,7 +154,7 @@ class AltiumDRCReportParser:
             if len(cells) >= 3:
                 # Try to identify violation rows
                 cell_text = ' '.join([re.sub(r'<[^>]+>', '', cell).strip() for cell in cells])
-                if any(keyword in cell_text.lower() for keyword in ['violation', 'constraint', 'clearance', 'width', 'via']):
+                if self._is_detailed_violation_line(unescape(cell_text)):
                     violation = {
                         "component": cells[0].strip() if len(cells) > 0 else "",
                         "net": cells[1].strip() if len(cells) > 1 else "",
@@ -174,6 +174,24 @@ class AltiumDRCReportParser:
                 unique_violations.append(v)
         
         return unique_violations[:20]  # Limit to first 20
+
+    def _is_detailed_violation_line(self, text: str) -> bool:
+        """Return True only for real per-violation detail lines, not summary/header rows."""
+        if not text:
+            return False
+
+        t = text.strip()
+        t_lower = t.lower()
+
+        # Must contain the detailed violation marker (e.g. "Short-Circuit Constraint: ...")
+        if "constraint:" not in t_lower:
+            return False
+
+        # Exclude report summary/table labels that are not actual violation instances
+        if any(bad in t_lower for bad in ("rule violations:", "total violations:", "warnings:")):
+            return False
+
+        return True
     
     def _parse_violation_message(self, title: str, text: str) -> Optional[Dict[str, Any]]:
         """Parse a violation message into structured data"""
@@ -201,12 +219,22 @@ class AltiumDRCReportParser:
         
         # Extract location if available
         location = {}
-        loc_match = re.search(r'\(([0-9.]+),\s*([0-9.]+)\)', message)
+        # Prefer explicit Altium location marker if present:
+        # "Location : [X = 144.336mm][Y = 25.609mm]"
+        loc_match = re.search(r'\[X\s*=\s*([0-9.]+)mm\]\[Y\s*=\s*([0-9.]+)mm\]', message, re.IGNORECASE)
         if loc_match:
             location = {
                 "x_mm": float(loc_match.group(1)),
                 "y_mm": float(loc_match.group(2))
             }
+        else:
+            # Fallback to first coordinate tuple in text
+            pair_match = re.search(r'\(([0-9.]+),\s*([0-9.]+)\)', message)
+            if pair_match:
+                location = {
+                    "x_mm": float(pair_match.group(1)),
+                    "y_mm": float(pair_match.group(2))
+                }
         
         return {
             "message": message,
@@ -229,7 +257,7 @@ class AltiumDRCReportParser:
             return "trace_width"
         elif "via" in text_lower:
             return "via"
-        elif "unrouted" in text_lower or "not routed" in text_lower:
+        elif "unrouted" in text_lower or "un-routed" in text_lower or "not routed" in text_lower:
             return "unrouted_net"
         elif "short" in text_lower:
             return "short_circuit"

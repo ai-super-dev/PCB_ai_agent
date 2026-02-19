@@ -3177,48 +3177,19 @@ Begin
     // GET DRC STATUS - Get current DRC violations from Altium
     Else If Act = 'get_drc_status' Then
     Begin
-        // Try to get current DRC status from Altium
-        // This is a placeholder - in practice, we'd need to access Altium's DRC results
-        // For now, return a simulated response based on known violations
-        OK := True;
+        // Disable simulated DRC payloads to avoid any hard-coded result usage.
+        TempFile := BasePath + 'command_result.tmp';
+        ResultFile := BasePath + 'command_result.txt';
         
-        If OK Then
-        Begin
-            TempFile := BasePath + 'command_result.tmp';
-            ResultFile := BasePath + 'command_result.txt';
-            
-            AssignFile(OutputFile, TempFile);
-            Rewrite(OutputFile);
-            WriteLn(OutputFile, '{"success": true, "action": "get_drc_status", "violations": [');
-            WriteLn(OutputFile, '{"rule_name": "Clearance", "rule_type": "clearance", "severity": "error",');
-            WriteLn(OutputFile, ' "message": "Clearance Constraint: (0.127mm < 0.2mm) Between Track and Poured Copper",');
-            WriteLn(OutputFile, ' "location": {"x_mm": 140.0, "y_mm": 34.0}, "actual_value": 0.127, "required_value": 0.2},');
-            WriteLn(OutputFile, '{"rule_name": "Clearance", "rule_type": "clearance", "severity": "error",');
-            WriteLn(OutputFile, ' "message": "Clearance Constraint: (0.150mm < 0.2mm) Between Track and Poured Copper",');
-            WriteLn(OutputFile, ' "location": {"x_mm": 145.0, "y_mm": 30.0}, "actual_value": 0.150, "required_value": 0.2}');
-            WriteLn(OutputFile, ']}');
-            CloseFile(OutputFile);
-            
-            // Atomic rename
-            If FileExists(ResultFile) Then
-                DeleteFile(ResultFile);
-            RenameFile(TempFile, ResultFile);
-        End
-        Else
-        Begin
-            TempFile := BasePath + 'command_result.tmp';
-            ResultFile := BasePath + 'command_result.txt';
-            
-            AssignFile(OutputFile, TempFile);
-            Rewrite(OutputFile);
-            WriteLn(OutputFile, '{"success": false, "action": "get_drc_status", "error": "Could not get DRC status"}');
-            CloseFile(OutputFile);
-            
-            // Atomic rename
-            If FileExists(ResultFile) Then
-                DeleteFile(ResultFile);
-            RenameFile(TempFile, ResultFile);
-        End;
+        AssignFile(OutputFile, TempFile);
+        Rewrite(OutputFile);
+        WriteLn(OutputFile, '{"success": false, "action": "get_drc_status", "error": "get_drc_status is disabled. Use Python DRC engine in MCP run_drc()."}');
+        CloseFile(OutputFile);
+        
+        // Atomic rename
+        If FileExists(ResultFile) Then
+            DeleteFile(ResultFile);
+        RenameFile(TempFile, ResultFile);
     End
     
     // EXPORT ACTUAL COPPER PRIMITIVES - Export poured copper regions

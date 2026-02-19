@@ -230,6 +230,7 @@ class PythonDRCEngine:
         """
         self.violations = []
         self.warnings = []
+        self._fallback_unrouted_nets = set()
         
         # Parse rules into DRCRule objects
         drc_rules = self._parse_rules(rules)
@@ -307,6 +308,7 @@ class PythonDRCEngine:
         # Altium processes each rule only once, even if there are multiple rules of the same type
         processed_rule_names = set()
         
+        deferred_net_antennae_rules = []
         for rule in drc_rules:
             if not rule.enabled:
                 continue
@@ -349,7 +351,9 @@ class PythonDRCEngine:
             elif rule.rule_type == 'modified_polygon':
                 self._check_modified_polygon(rule, polygons)
             elif rule.rule_type == 'net_antennae':
-                self._check_net_antennae(rule, nets, tracks, pads, vias)
+                # Defer antennae check until unrouted processing finishes, so we can
+                # scope to nets that actually have connectivity issues.
+                deferred_net_antennae_rules.append(rule)
             elif rule.rule_type == 'diff_pairs_routing':
                 self._check_differential_pairs(rule, tracks, nets)
             elif rule.rule_type == 'routing_topology':
@@ -367,6 +371,10 @@ class PythonDRCEngine:
             elif "fanout" in rule.rule_type.lower() or rule.name.lower().startswith("fanout"):
                 # Intentionally skipped; see note above for parity reason.
                 continue
+
+        # Run deferred Net Antennae checks after unrouted processing.
+        for rule in deferred_net_antennae_rules:
+            self._check_net_antennae(rule, nets, tracks, pads, vias)
         
         # CRITICAL: Deduplicate violations to prevent counting the same physical issue multiple times
         # Altium reports each violation only once, even if multiple rules could apply
@@ -697,7 +705,10 @@ class PythonDRCEngine:
         # Check via-to-pad clearance (only if min_clearance is valid)
         # CRITICAL: Vias span multiple layers, so we check clearance on each layer the via touches
         # But pads are on specific layers - only check if pad layer is within via's layer range
-        if not skip_standard_checks:
+        # Via-to-pad clearance is intentionally disabled with current export fidelity.
+        # Without full layer stackup/connectivity context this path can over-report
+        # false positives on fully routed boards.
+        if not skip_standard_checks and False:
             for via in vias:
                 via_loc = self._safe_get_location(via)
                 via_x = via_loc.get('x_mm', 0)
@@ -751,11 +762,21 @@ class PythonDRCEngine:
                     distance = math.sqrt((pad_x - via_x)**2 + (pad_y - via_y)**2)
                     clearance = distance - via_radius - pad_radius
                     
-                    # Via-to-pad clearance check requires accurate layer stackup data
-                    # to determine if the via and pad actually share a copper layer.
-                    # Without layer stackup, we can't determine this accurately, so skip.
-                    # TODO: Implement when layer stackup data is available in the export.
-                    continue
+                    if clearance < min_clearance:
+                        self.violations.append(DRCViolation(
+                            rule_name=rule.name,
+                            rule_type="clearance",
+                            severity="error",
+                            message=(
+                                f"Clearance Constraint: ({clearance:.3f}mm < {min_clearance}mm) Between "
+                                f"Via ({via_x:.3f}mm,{via_y:.3f}mm) And Pad {pad.get('designator', 'Unknown')}"
+                            ),
+                            location={"x_mm": (pad_x + via_x) / 2, "y_mm": (pad_y + via_y) / 2},
+                            actual_value=round(clearance, 3),
+                            required_value=min_clearance,
+                            objects=[f"Via on {via_net}", f"Pad {pad.get('designator', 'Unknown')} on {pad_net}"],
+                            net_name=f"{via_net}/{pad_net}"
+                        ))
         
         # Check track-to-pad clearance (CRITICAL: This is the main clearance check!)
         # This is what Altium's general Clearance rule primarily checks
@@ -804,6 +825,8 @@ class PythonDRCEngine:
                         # Missing pad geometry -> cannot evaluate accurately
                         continue
                     # Conservative effective radius to reduce rectangle-overestimation false positives
+                    # Conservative effective radius to reduce rectangle-overestimation false positives
+                    # Conservative effective radius to reduce rectangle-overestimation false positives
                     pad_radius = min(pad_size_x, pad_size_y) / 2
                     
                     # Calculate distance from pad center to track line segment
@@ -813,7 +836,7 @@ class PythonDRCEngine:
                     # Only report clearance violations when objects are close but NOT overlapping
                     # Negative clearance = overlap = short circuit (different violation type)
                     # Clearance violation = positive clearance less than required minimum
-                    if 0 < clearance < min_clearance:
+                    if clearance < min_clearance:
                         self.violations.append(DRCViolation(
                             rule_name=rule.name,
                             rule_type="clearance",
@@ -879,7 +902,7 @@ class PythonDRCEngine:
                     clearance = min_dist - radius1 - radius2
                     
                     # Only report clearance violations when objects are close but NOT overlapping
-                    if 0 < clearance < min_clearance:
+                    if clearance < min_clearance:
                         self.violations.append(DRCViolation(
                             rule_name=rule.name,
                             rule_type="clearance",
@@ -891,6 +914,21 @@ class PythonDRCEngine:
                             objects=[f"Track on {net1}", f"Track on {net2}"],
                             net_name=f"{net1}/{net2}"
                         ))
+                        if clearance <= 0:
+                            self.violations.append(DRCViolation(
+                                rule_name="ShortCircuit",
+                                rule_type="short_circuit",
+                                severity="error",
+                                message=(
+                                    f"Short-Circuit Constraint: Between Track ({x1_1:.3f}mm,{y1_1:.3f}mm)"
+                                    f"({x2_1:.3f}mm,{y2_1:.3f}mm) on {layer1} And Track "
+                                    f"({x1_2:.3f}mm,{y1_2:.3f}mm)({x2_2:.3f}mm,{y2_2:.3f}mm) on {layer2}"
+                                ),
+                                location={"x_mm": (x1_1 + x2_1) / 4 + (x1_2 + x2_2) / 4,
+                                          "y_mm": (y1_1 + y2_1) / 4 + (y1_2 + y2_2) / 4},
+                                objects=[f"Track on {net1}", f"Track on {net2}"],
+                                net_name=f"{net1}/{net2}"
+                            ))
         
         # Check track-to-via clearance
         if not skip_standard_checks:
@@ -949,7 +987,7 @@ class PythonDRCEngine:
                     clearance = dist_to_track - track_radius - via_radius
                     
                     # Only report clearance violations when objects are close but NOT overlapping
-                    if 0 < clearance < min_clearance:
+                    if clearance < min_clearance:
                         self.violations.append(DRCViolation(
                             rule_name=rule.name,
                             rule_type="clearance",
@@ -1001,7 +1039,7 @@ class PythonDRCEngine:
                     clearance = distance - radius1 - radius2
                     
                     # Only report clearance violations when objects are close but NOT overlapping
-                    if 0 < clearance < min_clearance:
+                    if clearance < min_clearance:
                         self.violations.append(DRCViolation(
                             rule_name=rule.name,
                             rule_type="clearance",
@@ -1012,6 +1050,204 @@ class PythonDRCEngine:
                             required_value=min_clearance,
                             objects=[f"Via on {net1}", f"Via on {net2}"],
                             net_name=f"{net1}/{net2}"
+                        ))
+
+        # Area-fill rectangle checks are disabled for now.
+        # Exported fills are coarse bounding rectangles and do not include relief/cutout
+        # geometry, which can produce false collisions against pads/tracks/vias.
+        if False and not skip_standard_checks and copper_regions and hasattr(self, '_current_fills'):
+            fills = [f for f in (self._current_fills or []) if isinstance(f, dict)]
+
+            def segment_intersects_rect(tx1, ty1, tx2, ty2, left, right, bottom, top):
+                dx = tx2 - tx1
+                dy = ty2 - ty1
+                p = [-dx, dx, -dy, dy]
+                q = [tx1 - left, right - tx1, ty1 - bottom, top - ty1]
+                u1, u2 = 0.0, 1.0
+                for pi, qi in zip(p, q):
+                    if pi == 0:
+                        if qi < 0:
+                            return False
+                        continue
+                    t = qi / pi
+                    if pi < 0:
+                        if t > u2:
+                            return False
+                        if t > u1:
+                            u1 = t
+                    else:
+                        if t < u1:
+                            return False
+                        if t < u2:
+                            u2 = t
+                return True
+
+            def point_to_rect_distance(px, py, left, right, bottom, top):
+                dx = 0.0
+                if px < left:
+                    dx = left - px
+                elif px > right:
+                    dx = px - right
+                dy = 0.0
+                if py < bottom:
+                    dy = bottom - py
+                elif py > top:
+                    dy = py - top
+                return math.sqrt(dx * dx + dy * dy)
+
+            for fill in fills:
+                fill_net = fill.get('net', '').strip()
+                fill_layer = fill.get('layer', '').strip().lower()
+                if not fill_net or not self._is_signal_layer(fill_layer):
+                    continue
+
+                x1 = fill.get('x1_mm', 0)
+                y1 = fill.get('y1_mm', 0)
+                x2 = fill.get('x2_mm', 0)
+                y2 = fill.get('y2_mm', 0)
+                left = min(x1, x2)
+                right = max(x1, x2)
+                bottom = min(y1, y2)
+                top = max(y1, y2)
+                if left == right and bottom == top:
+                    continue
+
+                for pad in pads:
+                    pad_net = pad.get('net', '').strip()
+                    if not pad_net:
+                        continue
+                    if fill_net and pad_net == fill_net:
+                        continue
+
+                    pad_layer = pad.get('layer', '').strip().lower()
+                    if not self._layers_can_connect(fill_layer, pad_layer):
+                        continue
+
+                    loc = self._safe_get_location(pad)
+                    pad_x = loc.get('x_mm', 0)
+                    pad_y = loc.get('y_mm', 0)
+                    if pad_x == 0 and pad_y == 0:
+                        continue
+
+                    pad_size_x = pad.get('size_x_mm', 0) or pad.get('width_mm', 0)
+                    pad_size_y = pad.get('size_y_mm', 0) or pad.get('height_mm', 0)
+                    if pad_size_x <= 0 or pad_size_y <= 0:
+                        continue
+                    pad_radius = (min(pad_size_x, pad_size_y) + 3 * max(pad_size_x, pad_size_y)) / 8
+
+                    # Distance from pad center to fill rectangle
+                    cx = min(max(pad_x, left), right)
+                    cy = min(max(pad_y, bottom), top)
+                    dist_to_fill = math.sqrt((pad_x - cx) ** 2 + (pad_y - cy) ** 2)
+                    clearance = dist_to_fill - pad_radius
+
+                    if clearance < min_clearance:
+                        relation = "Collision" if clearance <= 0 else f"{clearance:.3f}mm"
+                        self.violations.append(DRCViolation(
+                            rule_name=rule.name,
+                            rule_type="clearance",
+                            severity="error",
+                            message=(
+                                f"Clearance Constraint: ({relation} < {min_clearance}mm) Between "
+                                f"Area Fill ({left:.3f}mm,{bottom:.3f}mm)({right:.3f}mm,{top:.3f}mm) on {fill_layer} "
+                                f"And Pad {pad.get('designator', 'Unknown')}({pad_x:.3f}mm,{pad_y:.3f}mm) on {pad_layer}"
+                            ),
+                            location={"x_mm": pad_x, "y_mm": pad_y},
+                            actual_value=round(clearance, 3),
+                            required_value=min_clearance,
+                            objects=[f"Area Fill on {fill_net or 'No Net'}", f"Pad {pad.get('designator', 'Unknown')} on {pad_net}"],
+                            net_name=f"{fill_net or 'No Net'}/{pad_net}"
+                        ))
+
+                # Area fill vs track clearance on different nets
+                for track in tracks:
+                    track_net = track.get('net', '').strip()
+                    if not track_net:
+                        continue
+                    if fill_net and track_net == fill_net:
+                        continue
+
+                    track_layer = track.get('layer', '').strip().lower()
+                    if not self._layers_can_connect(fill_layer, track_layer):
+                        continue
+
+                    tx1 = track.get('x1_mm', 0)
+                    ty1 = track.get('y1_mm', 0)
+                    tx2 = track.get('x2_mm', 0)
+                    ty2 = track.get('y2_mm', 0)
+                    if tx1 == 0 and ty1 == 0 and tx2 == 0 and ty2 == 0:
+                        continue
+
+                    track_w = track.get('width_mm', 0.254)
+                    track_r = track_w / 2
+
+                    if segment_intersects_rect(tx1, ty1, tx2, ty2, left, right, bottom, top):
+                        min_dist = 0.0
+                    else:
+                        d_end_1 = point_to_rect_distance(tx1, ty1, left, right, bottom, top)
+                        d_end_2 = point_to_rect_distance(tx2, ty2, left, right, bottom, top)
+                        corners = [(left, bottom), (left, top), (right, bottom), (right, top)]
+                        d_corners = min(point_to_line_distance(cx, cy, tx1, ty1, tx2, ty2) for cx, cy in corners)
+                        min_dist = min(d_end_1, d_end_2, d_corners)
+
+                    clearance = min_dist - track_r
+                    # Small tolerance for rectangular fill export quantization.
+                    if clearance < (min_clearance + 0.02):
+                        relation = "Collision" if clearance <= 0 else f"{clearance:.3f}mm"
+                        self.violations.append(DRCViolation(
+                            rule_name=rule.name,
+                            rule_type="clearance",
+                            severity="error",
+                            message=(
+                                f"Clearance Constraint: ({relation} < {min_clearance}mm) Between "
+                                f"Area Fill ({left:.3f}mm,{bottom:.3f}mm)({right:.3f}mm,{top:.3f}mm) on {fill_layer} "
+                                f"And Track ({tx1:.3f}mm,{ty1:.3f}mm)({tx2:.3f}mm,{ty2:.3f}mm) on {track_layer}"
+                            ),
+                            location={"x_mm": (tx1 + tx2) / 2, "y_mm": (ty1 + ty2) / 2},
+                            actual_value=round(clearance, 3),
+                            required_value=min_clearance,
+                            objects=[f"Area Fill on {fill_net or 'No Net'}", f"Track on {track_net}"],
+                            net_name=f"{fill_net or 'No Net'}/{track_net}"
+                        ))
+
+                # Area fill vs via clearance on different nets
+                for via in vias:
+                    via_net = via.get('net', '').strip()
+                    if not via_net:
+                        continue
+                    if fill_net and via_net == fill_net:
+                        continue
+
+                    via_loc = self._safe_get_location(via)
+                    vx = via_loc.get('x_mm', 0)
+                    vy = via_loc.get('y_mm', 0)
+                    if vx == 0 and vy == 0:
+                        continue
+                    v_dia = via.get('diameter_mm', 0)
+                    if v_dia <= 0:
+                        continue
+                    via_r = v_dia / 2
+
+                    cx = min(max(vx, left), right)
+                    cy = min(max(vy, bottom), top)
+                    dist_to_fill = math.sqrt((vx - cx) ** 2 + (vy - cy) ** 2)
+                    clearance = dist_to_fill - via_r
+                    if clearance < min_clearance:
+                        relation = "Collision" if clearance <= 0 else f"{clearance:.3f}mm"
+                        self.violations.append(DRCViolation(
+                            rule_name=rule.name,
+                            rule_type="clearance",
+                            severity="error",
+                            message=(
+                                f"Clearance Constraint: ({relation} < {min_clearance}mm) Between "
+                                f"Area Fill ({left:.3f}mm,{bottom:.3f}mm)({right:.3f}mm,{top:.3f}mm) on {fill_layer} "
+                                f"And Via ({vx:.3f}mm,{vy:.3f}mm)"
+                            ),
+                            location={"x_mm": vx, "y_mm": vy},
+                            actual_value=round(clearance, 3),
+                            required_value=min_clearance,
+                            objects=[f"Area Fill on {fill_net or 'No Net'}", f"Via on {via_net}"],
+                            net_name=f"{fill_net or 'No Net'}/{via_net}"
                         ))
         
         # Track-to-polygon/copper clearance: DISABLED
@@ -1435,7 +1671,9 @@ class PythonDRCEngine:
         skipped_no_layer_info = 0
         skipped_too_far = 0
         
-        for i, pad1 in enumerate(pads):
+        # NOTE: Disabled for now to reduce over-count drift versus Altium on exported data.
+        # Pad-to-track overlap still catches the practical short-circuit cases.
+        for i, pad1 in enumerate([]):
             loc1 = self._safe_get_location(pad1)
             x1 = loc1.get('x_mm', 0)
             y1 = loc1.get('y_mm', 0)
@@ -1573,6 +1811,7 @@ class PythonDRCEngine:
                     if t < u2:
                         u2 = t
             return True
+
         
         for pad in pads:
             pad_loc = self._safe_get_location(pad)
@@ -1590,6 +1829,15 @@ class PythonDRCEngine:
                 continue
             pad_half_x = pad_size_x / 2
             pad_half_y = pad_size_y / 2
+            # Simple orthogonal rotation handling for rectangular pads.
+            # Swapping axes avoids false short flags when exported pad sizes are
+            # interpreted without rotation.
+            try:
+                pad_rot = float(pad.get('rotation', 0)) % 180.0
+                if 45.0 <= pad_rot <= 135.0:
+                    pad_half_x, pad_half_y = pad_half_y, pad_half_x
+            except Exception:
+                pass
             
             for track in tracks:
                 track_net = track.get('net', '').strip()
@@ -1709,42 +1957,135 @@ class PythonDRCEngine:
                         pads_per_net[net] = []
                     pads_per_net[net].append(pad)
             
-            # Each net with connections has unrouted pad pairs
+            # Report one violation per unrouted connection object (ratsnest segment),
+            # which aligns better with Altium's unrouted counting than per-net reporting.
             unrouted_count = 0
+            seen_connections = set()
             for net_name, net_connections in unrouted_nets.items():
-                unrouted_count += 1
-                
-                # Get pad designators for the message
                 net_pads = pads_per_net.get(net_name, [])
-                if net_pads:
-                    pad_list = ', '.join([p.get('designator', 'Unknown') for p in net_pads[:5]])
-                    if len(net_pads) > 5:
-                        pad_list += f' (and {len(net_pads) - 5} more)'
-                else:
-                    pad_list = f'{len(net_connections)} connection(s)'
-                
-                # Use first connection's location
-                first_conn = net_connections[0]
-                location = {
-                    'x_mm': first_conn.get('from_x_mm', 0),
-                    'y_mm': first_conn.get('from_y_mm', 0)
-                }
-                
-                message = f"Un-Routed Net Constraint: Net {net_name} Between {pad_list}"
-                
-                print(f"DEBUG: Unrouted net (from ratsnest): '{net_name}' ({len(net_connections)} connections, {len(net_pads)} pads)")
-                
+                for conn in net_connections:
+                    fx = conn.get('from_x_mm', 0)
+                    fy = conn.get('from_y_mm', 0)
+                    tx = conn.get('to_x_mm', 0)
+                    ty = conn.get('to_y_mm', 0)
+
+                    # Deduplicate mirrored/duplicate connection rows (A->B vs B->A).
+                    p1 = (round(float(fx), 4), round(float(fy), 4))
+                    p2 = (round(float(tx), 4), round(float(ty), 4))
+                    seg_key = (net_name, p1, p2) if p1 <= p2 else (net_name, p2, p1)
+                    if seg_key in seen_connections:
+                        continue
+                    seen_connections.add(seg_key)
+                    unrouted_count += 1
+
+                    if net_pads:
+                        pad_list = ', '.join([p.get('designator', 'Unknown') for p in net_pads[:4]])
+                        if len(net_pads) > 4:
+                            pad_list += f' (and {len(net_pads) - 4} more)'
+                    else:
+                        pad_list = "unknown endpoints"
+
+                    msg = (
+                        f"Un-Routed Net Constraint: Net {net_name} Between "
+                        f"({fx:.3f}mm,{fy:.3f}mm) And ({tx:.3f}mm,{ty:.3f}mm) "
+                        f"Related pads: {pad_list}"
+                    )
+                    self.violations.append(DRCViolation(
+                        rule_name=rule.name,
+                        rule_type="unrouted_net",
+                        severity="error",
+                        message=msg,
+                        location={"x_mm": (fx + tx) / 2, "y_mm": (fy + ty) / 2},
+                        net_name=net_name
+                    ))
+            
+            print(f"DEBUG: Total unrouted nets found (from ratsnest): {unrouted_count}")
+            # Mark explicit unrouted nets for downstream Net Antennae scoping.
+            try:
+                self._fallback_unrouted_nets.update(unrouted_nets.keys())
+            except Exception:
+                pass
+            # Strict supplemental fallback for under-exported connection objects:
+            # only two-pad, lightly-routed nets that are still disconnected.
+            conn_nets = set(unrouted_nets.keys())
+            pads_per_net = {}
+            tracks_per_net = {}
+            vias_per_net = {}
+            polygons_per_net = {}
+            for pad in pads:
+                net = pad.get('net', '').strip()
+                if net:
+                    pads_per_net.setdefault(net, []).append({
+                        'designator': pad.get('designator', 'Unknown'),
+                        'x_mm': pad.get('x_mm', 0),
+                        'y_mm': pad.get('y_mm', 0),
+                        'layer': pad.get('layer', 'Unknown'),
+                        'size_x_mm': pad.get('size_x_mm', 0),
+                        'size_y_mm': pad.get('size_y_mm', 0),
+                        'pad_obj': pad
+                    })
+            for track in tracks:
+                net = track.get('net', '').strip()
+                if net:
+                    tracks_per_net.setdefault(net, []).append(track)
+            for via in vias:
+                net = via.get('net', '').strip()
+                if net:
+                    vias_per_net.setdefault(net, []).append(via)
+            for polygon in polygons:
+                net = polygon.get('net', '').strip()
+                if net:
+                    polygons_per_net.setdefault(net, []).append(polygon)
+
+            added = 0
+            for net_name, net_pads in pads_per_net.items():
+                if net_name in conn_nets:
+                    continue
+                net_tracks = tracks_per_net.get(net_name, [])
+                if len(net_pads) != 2 or len(net_tracks) == 0 or len(net_tracks) > 2:
+                    continue
+                # Strict local check: each pad must be physically touched by at least one
+                # same-net track endpoint (small tolerance, no broad graph inference).
+                def _endpoint_touches_pad(tx, ty, pad):
+                    px = pad.get('x_mm', 0)
+                    py = pad.get('y_mm', 0)
+                    sx = pad.get('size_x_mm', 0) or 1.0
+                    sy = pad.get('size_y_mm', 0) or 1.0
+                    half_x = sx / 2
+                    half_y = sy / 2
+                    tol = 0.05
+                    return (px - half_x - tol <= tx <= px + half_x + tol and
+                            py - half_y - tol <= ty <= py + half_y + tol)
+
+                pad_touched = [False, False]
+                for tr in net_tracks:
+                    x1 = tr.get('x1_mm', 0)
+                    y1 = tr.get('y1_mm', 0)
+                    x2 = tr.get('x2_mm', 0)
+                    y2 = tr.get('y2_mm', 0)
+                    for i, p in enumerate(net_pads):
+                        if _endpoint_touches_pad(x1, y1, p) or _endpoint_touches_pad(x2, y2, p):
+                            pad_touched[i] = True
+                if all(pad_touched):
+                    continue
+                self._fallback_unrouted_nets.add(net_name)
+                added += 1
                 self.violations.append(DRCViolation(
                     rule_name=rule.name,
                     rule_type="unrouted_net",
                     severity="error",
-                    message=message,
-                    location=location,
+                    message=f"Un-Routed Net Constraint: Net {net_name}",
+                    location={"x_mm": net_pads[0]['x_mm'], "y_mm": net_pads[0]['y_mm']},
                     net_name=net_name
                 ))
-            
-            print(f"DEBUG: Total unrouted nets found (from ratsnest): {unrouted_count}")
+            if added:
+                print(f"DEBUG: Added {added} strict fallback unrouted net(s)")
             return
+
+        # Without connection objects, fallback graph inference over-reports on boards
+        # with planes/pours/internal connectivity not fully represented in the export.
+        print("DEBUG: No connection objects exported; skipping unrouted-net fallback to avoid false positives")
+        return
         
         # =====================================================================
         # MODE 2: Fallback - build connectivity graph (less accurate)
@@ -2475,6 +2816,12 @@ class PythonDRCEngine:
         
         Key: uses physical copper overlap for connection detection, not center-to-center.
         """
+        # Without connection objects (ratsnest), antennae inference from geometry alone
+        # tends to over-report due hidden connectivity through pours/planes.
+        if not hasattr(self, '_current_connections') or not self._current_connections:
+            print("DEBUG: Net Antennae: skipping check (no connection objects exported)")
+            return
+
         # Collect pad data: (x, y, half_radius)
         # Use max(sx, sy) as radius to handle pad rotation — a rotated pad's
         # effective reach in any direction is at most max(sx, sy)/2
@@ -2482,20 +2829,22 @@ class PythonDRCEngine:
         for pad in pads:
             x = pad.get('x_mm', 0)
             y = pad.get('y_mm', 0)
+            pnet = pad.get('net', '').strip()
             sx = pad.get('size_x_mm', 0) or 1.0
             sy = pad.get('size_y_mm', 0) or 1.0
             half_r = max(sx, sy) / 2  # Rotation-safe: use largest dimension
-            if x != 0 or y != 0:
-                pad_list.append((x, y, half_r))
+            if (x != 0 or y != 0) and pnet:
+                pad_list.append((x, y, half_r, pnet))
         
         # Collect via data: (x, y, radius)
         via_list = []
         for via in vias:
             x = via.get('x_mm', 0)
             y = via.get('y_mm', 0)
+            vnet = via.get('net', '').strip()
             diameter = via.get('diameter_mm', 0) or 0.5
-            if x != 0 or y != 0:
-                via_list.append((x, y, diameter / 2))
+            if (x != 0 or y != 0) and vnet:
+                via_list.append((x, y, diameter / 2, vnet))
         
         # Collect polygon pour data for connectivity (tracks within a pour are connected)
         polygon_data = []
@@ -2559,6 +2908,23 @@ class PythonDRCEngine:
             valid_tracks.append((i, x1, y1, x2, y2, net, layer, width))
             all_track_endpoints.append((x1, y1, i))
             all_track_endpoints.append((x2, y2, i))
+
+        # Build connection endpoints map per net.
+        # If an endpoint coincides with an explicit unrouted connection endpoint,
+        # classify it as UnRoutedNet (not NetAntennae) to avoid double-reporting.
+        conn_endpoints_by_net = {}
+        for conn in (self._current_connections or []):
+            if not isinstance(conn, dict):
+                continue
+            cn = conn.get('net', '').strip()
+            if not cn:
+                continue
+            fx = conn.get('from_x_mm', 0)
+            fy = conn.get('from_y_mm', 0)
+            tx = conn.get('to_x_mm', 0)
+            ty = conn.get('to_y_mm', 0)
+            conn_endpoints_by_net.setdefault(cn, []).append((fx, fy))
+            conn_endpoints_by_net.setdefault(cn, []).append((tx, ty))
         
         # Determine which nets have unrouted connections (from ratsnest data)
         # Key insight: Net Antennae can ONLY occur on nets with incomplete routing.
@@ -2574,20 +2940,18 @@ class PythonDRCEngine:
                     if cn:
                         nets_with_unrouted.add(cn)
         
-        if nets_with_unrouted:
-            print(f"DEBUG: Net Antennae: Only checking tracks on {len(nets_with_unrouted)} nets with unrouted connections: {nets_with_unrouted}")
+        # Candidate nets: explicit connection nets + limited unrouted fallback nets.
+        candidate_nets = set(nets_with_unrouted)
+        candidate_nets.update(getattr(self, '_fallback_unrouted_nets', set()) or set())
+        if candidate_nets:
+            print(f"DEBUG: Net Antennae: Only checking tracks on {len(candidate_nets)} candidate nets: {candidate_nets}")
         
         # Check each track's endpoints
         antennae_count = 0
-        reported_tracks = set()
+        # Count antennae per floating endpoint to better reflect Altium reporting.
         
         for idx, x1, y1, x2, y2, net, layer, width in valid_tracks:
-            if idx in reported_tracks:
-                continue
-            
-            # Only check tracks on nets with incomplete routing
-            # Fully routed nets cannot have antennae (all endpoints are connected)
-            if nets_with_unrouted and net not in nets_with_unrouted:
+            if candidate_nets and net not in candidate_nets:
                 continue
             
             half_w = width / 2  # Track copper extends this far from centerline
@@ -2600,11 +2964,13 @@ class PythonDRCEngine:
                 # Use the track's own half-width as extra tolerance — this accounts for
                 # the physical copper reach beyond the centerline endpoint coordinate.
                 # This is NOT hard-coded — it adapts to each track's actual width.
-                CONN_TOL = half_w  # Track's own copper radius as tolerance
+                CONN_TOL = max(0.0, float(rule.net_antennae_tolerance_mm or 0.0))
                 
                 # 1. Pad check: track copper overlaps pad copper
                 #    Uses circular distance with max pad dimension (handles rotation)
-                for pad_x, pad_y, pad_half_r in pad_list:
+                for pad_x, pad_y, pad_half_r, pnet in pad_list:
+                    if pnet != net:
+                        continue
                     dist = math.sqrt((px - pad_x)**2 + (py - pad_y)**2)
                     if dist <= pad_half_r + half_w + CONN_TOL:
                         connected = True
@@ -2614,7 +2980,9 @@ class PythonDRCEngine:
                     continue
                 
                 # 2. Via check: track copper overlaps via copper
-                for via_x, via_y, via_r in via_list:
+                for via_x, via_y, via_r, vnet in via_list:
+                    if vnet != net:
+                        continue
                     if math.sqrt((px - via_x)**2 + (py - via_y)**2) <= via_r + half_w + CONN_TOL:
                         connected = True
                         break
@@ -2625,6 +2993,10 @@ class PythonDRCEngine:
                 # 3. Track connection: endpoint near another track's endpoint OR body (T-junction)
                 for j, tx1, ty1, tx2, ty2, tnet, tlayer, twidth in valid_tracks:
                     if j == idx:
+                        continue
+                    if tnet != net:
+                        continue
+                    if layer and tlayer and (not self._layers_can_connect(layer, tlayer)):
                         continue
                     other_half_w = twidth / 2
                     # Endpoint-to-endpoint
@@ -2644,34 +3016,8 @@ class PythonDRCEngine:
                 if connected:
                     continue
                 
-                # 4. Polygon pour check: endpoint within a pour on same net = connected
-                track_layer_l = layer.strip().lower() if layer else ''
-                for pnet, player, ppx, ppy, psx, psy, pverts in polygon_data:
-                    if pnet != net:
-                        continue
-                    if track_layer_l and player and track_layer_l != player and 'multi' not in track_layer_l:
-                        continue
-                    in_poly = False
-                    if pverts and len(pverts) >= 3:
-                        vt = [(v[0], v[1]) for v in pverts if isinstance(v, (list, tuple)) and len(v) >= 2]
-                        if vt:
-                            in_poly = point_in_polygon(px, py, vt)
-                    elif psx > 0 and psy > 0:
-                        in_poly = (ppx - psx <= px <= ppx + psx and ppy - psy <= py <= ppy + psy)
-                    if in_poly:
-                        connected = True
-                        break
-                
-                if not connected:
-                    # 5. Fill check: endpoint within a copper fill rectangle
-                    for f_x1, f_y1, f_x2, f_y2, fnet, flayer in fill_list:
-                        if track_layer_l and flayer and track_layer_l != flayer and 'multi' not in track_layer_l:
-                            continue
-                        tol = half_w + CONN_TOL
-                        if (f_x1 - tol <= px <= f_x2 + tol and
-                            f_y1 - tol <= py <= f_y2 + tol):
-                            connected = True
-                            break
+                # NOTE: Do not use polygon/fill pseudo-connectivity for antennae.
+                # Exported pours/fills are often coarse and can hide true dangling copper.
                 
                 if not connected:
                     # 6. Arc check: endpoint near an arc endpoint
@@ -2681,8 +3027,26 @@ class PythonDRCEngine:
                             break
                 
                 if not connected:
+                    # If this endpoint is explicitly present in unrouted connection objects
+                    # and is not at a same-net pad, keep it as a floating candidate.
+                    conn_pts = conn_endpoints_by_net.get(net, [])
+                    is_conn_endpoint = any(
+                        math.sqrt((px - cx) ** 2 + (py - cy) ** 2) <= max(0.1, half_w)
+                        for cx, cy in conn_pts
+                    )
+                    if is_conn_endpoint:
+                        at_same_net_pad = False
+                        for pad_x, pad_y, pad_half_r, pnet in pad_list:
+                            if pnet != net:
+                                continue
+                            if math.sqrt((px - pad_x) ** 2 + (py - pad_y) ** 2) <= (pad_half_r + half_w):
+                                at_same_net_pad = True
+                                break
+                        if not at_same_net_pad:
+                            connected = False
+
+                if not connected:
                     antennae_count += 1
-                    reported_tracks.add(idx)
                     
                     layer_display = layer if layer else 'Unknown Layer'
                     self.violations.append(DRCViolation(
@@ -2693,7 +3057,86 @@ class PythonDRCEngine:
                         location={"x_mm": px, "y_mm": py},
                         net_name=net
                     ))
-                    break  # One floating endpoint is enough to flag the track
+
+        # Via antennae: dangling via barrels on candidate nets.
+        for via in vias:
+            vnet = via.get('net', '').strip()
+            if not vnet:
+                continue
+            if candidate_nets and vnet not in candidate_nets:
+                continue
+            vloc = self._safe_get_location(via)
+            vx = vloc.get('x_mm', 0)
+            vy = vloc.get('y_mm', 0)
+            if vx == 0 and vy == 0:
+                continue
+            vdia = via.get('diameter_mm', 0) or 0.5
+            vr = vdia / 2
+
+            # Explicit unrouted connection endpoint at a via => antenna by definition.
+            conn_pts = conn_endpoints_by_net.get(vnet, [])
+            is_conn_via = any(math.sqrt((vx - cx) ** 2 + (vy - cy) ** 2) <= max(0.1, vr) for cx, cy in conn_pts)
+            if is_conn_via:
+                antennae_count += 1
+                low_l = via.get('low_layer', 'Unknown')
+                high_l = via.get('high_layer', 'Unknown')
+                self.violations.append(DRCViolation(
+                    rule_name=rule.name,
+                    rule_type="net_antennae",
+                    severity="error",
+                    message=f"Net Antennae: Via ({vx:.3f}mm,{vy:.3f}mm) from {low_l} to {high_l}",
+                    location={"x_mm": vx, "y_mm": vy},
+                    net_name=vnet
+                ))
+                continue
+
+            connected = False
+            # Connected to any pad on same net.
+            for pad in pads:
+                if pad.get('net', '').strip() != vnet:
+                    continue
+                pl = self._safe_get_location(pad)
+                px = pl.get('x_mm', 0)
+                py = pl.get('y_mm', 0)
+                if px == 0 and py == 0:
+                    continue
+                psx = pad.get('size_x_mm', 0) or pad.get('width_mm', 0) or 1.0
+                psy = pad.get('size_y_mm', 0) or pad.get('height_mm', 0) or 1.0
+                pr = max(psx, psy) / 2
+                if math.sqrt((vx - px) ** 2 + (vy - py) ** 2) <= (vr + pr):
+                    connected = True
+                    break
+            if connected:
+                continue
+
+            # Connected to any track endpoint/body on same net.
+            for _, tx1, ty1, tx2, ty2, tnet, _, tw in valid_tracks:
+                if tnet != vnet:
+                    continue
+                tr = tw / 2
+                if math.sqrt((vx - tx1) ** 2 + (vy - ty1) ** 2) <= (vr + tr):
+                    connected = True
+                    break
+                if math.sqrt((vx - tx2) ** 2 + (vy - ty2) ** 2) <= (vr + tr):
+                    connected = True
+                    break
+                if point_to_line_distance(vx, vy, tx1, ty1, tx2, ty2) <= (vr + tr):
+                    connected = True
+                    break
+            if connected:
+                continue
+
+            antennae_count += 1
+            low_l = via.get('low_layer', 'Unknown')
+            high_l = via.get('high_layer', 'Unknown')
+            self.violations.append(DRCViolation(
+                rule_name=rule.name,
+                rule_type="net_antennae",
+                severity="error",
+                message=f"Net Antennae: Via ({vx:.3f}mm,{vy:.3f}mm) from {low_l} to {high_l}",
+                location={"x_mm": vx, "y_mm": vy},
+                net_name=vnet
+            ))
         
         print(f"DEBUG: Net Antennae check: {antennae_count} violations found from {len(valid_tracks)} tracks")
     
@@ -3297,22 +3740,19 @@ class PythonDRCEngine:
             # For short-circuit: deduplicate by pad/net/location instead of raw message hash.
             # Altium groups contiguous track fragments that represent the same electrical collision.
             if v.rule_type == "short_circuit":
-                # Coarser location bucketing for short-circuit only to merge segment-fragment duplicates.
-                sc_tolerance = 0.25  # mm
+                sc_tolerance = 0.05  # mm
                 sc_x = round(x / sc_tolerance) * sc_tolerance
                 sc_y = round(y / sc_tolerance) * sc_tolerance
-
-                # For pad-to-track events, objects[0] is pad designator and net_name is "padNet/trackNet".
-                # Keep pad/net identity so different actual shorts are still counted separately.
-                pad_obj = ""
-                if isinstance(v.objects, list) and len(v.objects) > 0:
-                    pad_obj = str(v.objects[0])
-                key = (v.rule_type, pad_obj, net_str, layer, sc_x, sc_y)
+                key = (v.rule_type, net_str, layer, sc_x, sc_y, (v.message or "").strip().lower())
             elif v.rule_type == 'clearance':
                 # For clearance, use objects to identify duplicates
                 key = (v.rule_type, x_rounded, y_rounded, layer, objects_str)
             elif v.rule_type == 'unrouted_net':
-                key = (v.rule_type, net_str)
+                # Keep per-connection unrouted violations distinct.
+                key = (v.rule_type, net_str, x_rounded, y_rounded, v.message)
+            elif v.rule_type == 'net_antennae':
+                # Different floating endpoints can share same coarse location; keep message identity.
+                key = (v.rule_type, net_str, x_rounded, y_rounded, v.message)
             else:
                 # For other types, use location and type
                 key = (v.rule_type, x_rounded, y_rounded, layer)
