@@ -1151,41 +1151,21 @@ class AltiumMCPServer:
                     elif filter_type == "signal" and not is_signal:
                         continue
                 
-                # Determine priority
-                if is_power:
-                    priority = "HIGH"
-                    if not is_routed:
-                        recommendation = f"🔴 URGENT: Power net '{net.name}' is UNROUTED! Route with wide traces (0.5-1.0mm) for power integrity."
-                    else:
-                        recommendation = f"✅ Power net '{net.name}' is routed. Consider widening traces if current width < 0.5mm."
-                    width_suggestion = "0.5-1.0mm"
-                    layer_suggestion = "Top layer or dedicated power plane"
-                elif is_clock:
-                    priority = "HIGH"
-                    if not is_routed:
-                        recommendation = f"🔴 URGENT: Clock net '{net.name}' is UNROUTED! Route as short as possible with matched lengths."
-                    else:
-                        recommendation = f"✅ Clock net '{net.name}' is routed. Verify length matching if differential pair."
-                    width_suggestion = "0.2-0.3mm (controlled impedance)"
-                    layer_suggestion = "Top layer, avoid vias"
-                elif is_signal:
-                    priority = "MEDIUM"
-                    if not is_routed:
-                        recommendation = f"⚠️ Signal net '{net.name}' needs routing. Route with controlled impedance, avoid vias when possible."
-                    else:
-                        recommendation = f"✅ Signal net '{net.name}' is routed. Check for crosstalk with adjacent traces."
-                    width_suggestion = "0.15-0.25mm"
-                    layer_suggestion = "Top or bottom layer"
-                else:
-                    priority = "NORMAL"
-                    if not is_routed:
-                        recommendation = f"📋 Net '{net.name}' needs routing. Standard routing with minimum clearance."
-                    else:
-                        recommendation = f"✅ Net '{net.name}' is routed."
-                    width_suggestion = "0.15-0.2mm (default)"
-                    layer_suggestion = "Any available layer"
+                # Get actual pad positions for this net
+                net_pads = self._get_net_pads_with_positions(net_id)
+                pad_count = len(net_pads)
                 
-                # Build suggestion
+                # Calculate routing metrics based on actual board data
+                routing_analysis = self._analyze_net_routing_requirements(
+                    net_name, net_pads, is_power, is_clock, is_signal, is_routed
+                )
+                
+                priority = routing_analysis["priority"]
+                recommendation = routing_analysis["recommendation"]
+                width_suggestion = routing_analysis["width"]
+                layer_suggestion = routing_analysis["layer"]
+                
+                # Build suggestion with detailed routing analysis
                 suggestion = {
                     "net": net.name,
                     "net_id": net_id,
@@ -1195,7 +1175,13 @@ class AltiumMCPServer:
                     "width_suggestion": width_suggestion,
                     "layer_suggestion": layer_suggestion,
                     "connected_components": component_count,
-                    "component_list": connected_components[:5]  # First 5 components
+                    "component_list": connected_components[:5],
+                    # Enhanced analysis data
+                    "routing_length_mm": routing_analysis.get("routing_length_mm", 0),
+                    "pad_count": routing_analysis.get("pad_count", pad_count),
+                    "pad_positions": [{"x": p["x"], "y": p["y"], "component": p["component"]} 
+                                     for p in net_pads[:6]],  # First 6 pads for routing
+                    "net_type": "power" if is_power else "clock" if is_clock else "signal" if is_signal else "general"
                 }
                 
                 suggestions.append(suggestion)
@@ -1232,6 +1218,218 @@ class AltiumMCPServer:
         except Exception as e:
             import traceback
             return {"error": f"{str(e)}\n{traceback.format_exc()}"}
+    
+    def _get_net_pads_with_positions(self, net_id: str) -> list:
+        """Get all pad positions for a specific net"""
+        pads = []
+        if not self.current_gir:
+            return pads
+        
+        for footprint in self.current_gir.footprints:
+            comp_x, comp_y = footprint.position[0], footprint.position[1]
+            for pad in footprint.pads:
+                if pad.net_id == net_id:
+                    # Calculate absolute position
+                    pad_x = comp_x + pad.position[0]
+                    pad_y = comp_y + pad.position[1]
+                    pads.append({
+                        "x": pad_x,
+                        "y": pad_y,
+                        "component": footprint.ref,
+                        "pad_id": pad.id,
+                        "layer": pad.layer or footprint.layer,
+                        "size": pad.size_mm if hasattr(pad, 'size_mm') else [1.0, 1.0]
+                    })
+        return pads
+    
+    def _calculate_trace_width_for_current(self, current_amps: float, copper_oz: float = 1.0, 
+                                           temp_rise_c: float = 10.0, is_internal: bool = False) -> float:
+        """Calculate trace width using IPC-2221 formula for current capacity"""
+        # IPC-2221 formula: I = k * (ΔT^b) * (A^c)
+        # Where A is cross-sectional area in mil²
+        # Rearranging for width: W = I / (k * ΔT^b * thickness)
+        
+        k = 0.024 if is_internal else 0.048  # Internal vs external constant
+        b = 0.44
+        c = 0.725
+        
+        # Copper thickness in mils (1 oz = 1.4 mils)
+        thickness_mils = copper_oz * 1.4
+        
+        # Calculate required area in mil²
+        # I = k * (ΔT^b) * (A^c)
+        # A = (I / (k * ΔT^b))^(1/c)
+        area_mils_sq = (current_amps / (k * (temp_rise_c ** b))) ** (1.0 / c)
+        
+        # Width = Area / thickness
+        width_mils = area_mils_sq / thickness_mils
+        
+        # Convert to mm (1 mil = 0.0254 mm)
+        width_mm = width_mils * 0.0254
+        
+        return round(max(width_mm, 0.15), 3)  # Minimum 0.15mm
+    
+    def _calculate_impedance_width(self, target_z: float = 50.0, substrate_height_mm: float = 0.2,
+                                   dielectric_constant: float = 4.5, copper_oz: float = 1.0) -> float:
+        """Calculate trace width for target impedance (microstrip approximation)"""
+        # Simplified microstrip impedance formula
+        # Z0 ≈ (87 / sqrt(εr + 1.41)) * ln(5.98 * H / (0.8 * W + T))
+        # Solving for W (iterative approximation)
+        
+        h = substrate_height_mm
+        t = copper_oz * 0.035  # mm copper thickness
+        er = dielectric_constant
+        
+        # Initial guess and iterate
+        w = h  # Start with W = H
+        for _ in range(10):
+            # Calculate impedance for current width
+            z_calc = (87 / (er + 1.41) ** 0.5) * (5.98 * h / (0.8 * w + t))
+            # Adjust width
+            if z_calc > target_z:
+                w *= 1.1  # Wider trace = lower impedance
+            else:
+                w *= 0.9
+        
+        return round(max(w, 0.1), 3)
+    
+    def _calculate_net_routing_length(self, pads: list) -> float:
+        """Calculate approximate routing length from pad positions"""
+        if len(pads) < 2:
+            return 0.0
+        
+        # Calculate total Manhattan distance for routing
+        total_length = 0.0
+        sorted_pads = sorted(pads, key=lambda p: (p['x'], p['y']))
+        
+        for i in range(len(sorted_pads) - 1):
+            dx = abs(sorted_pads[i+1]['x'] - sorted_pads[i]['x'])
+            dy = abs(sorted_pads[i+1]['y'] - sorted_pads[i]['y'])
+            total_length += dx + dy
+        
+        return round(total_length, 2)
+    
+    def _analyze_net_routing_requirements(self, net_name: str, net_pads: list, 
+                                          is_power: bool, is_clock: bool, 
+                                          is_signal: bool, is_routed: bool) -> dict:
+        """Analyze actual net requirements and generate intelligent suggestions"""
+        
+        # Get design rules if available
+        min_width = 0.15
+        if self.current_design_rules:
+            min_width = self.current_design_rules.get("min_trace_width_mm", 0.15)
+        
+        pad_count = len(net_pads)
+        routing_length = self._calculate_net_routing_length(net_pads)
+        
+        # Determine layer count
+        layer_count = len(self.current_gir.board.layers) if self.current_gir else 2
+        
+        # Build component summary
+        components = list(set([p['component'] for p in net_pads[:10]]))
+        comp_summary = ", ".join(components[:5])
+        if len(components) > 5:
+            comp_summary += f" (+{len(components)-5} more)"
+        
+        result = {
+            "priority": "NORMAL",
+            "recommendation": "",
+            "width": f"{min_width}mm",
+            "layer": "Top layer",
+            "routing_length_mm": routing_length,
+            "pad_count": pad_count,
+            "components": comp_summary
+        }
+        
+        if is_power:
+            # Power nets: calculate width based on estimated current
+            # Estimate current based on number of connected components
+            estimated_current = 0.5 + (pad_count * 0.1)  # Base + per-pad
+            calculated_width = self._calculate_trace_width_for_current(estimated_current)
+            
+            result["priority"] = "HIGH"
+            result["width"] = f"{calculated_width:.2f}mm (for ~{estimated_current:.1f}A capacity)"
+            
+            if layer_count >= 4:
+                result["layer"] = "Internal power plane (L2 or L3)"
+            else:
+                result["layer"] = "Top layer with wide pour or thick traces"
+            
+            if not is_routed:
+                result["recommendation"] = (
+                    f"🔴 URGENT: Power net '{net_name}' UNROUTED!\n"
+                    f"   • {pad_count} pads across: {comp_summary}\n"
+                    f"   • Required width: {calculated_width:.2f}mm (IPC-2221 for {estimated_current:.1f}A)\n"
+                    f"   • Routing length: ~{routing_length:.1f}mm\n"
+                    f"   • Consider: power plane or star topology from bulk capacitor"
+                )
+            else:
+                result["recommendation"] = (
+                    f"✅ Power net '{net_name}' routed. Verify:\n"
+                    f"   • Current width adequate for {estimated_current:.1f}A\n"
+                    f"   • Via count sufficient for layer transitions"
+                )
+        
+        elif is_clock:
+            # Clock nets: controlled impedance, length matching
+            impedance_width = self._calculate_impedance_width(50.0)
+            
+            result["priority"] = "HIGH"
+            result["width"] = f"{impedance_width:.2f}mm (50Ω microstrip)"
+            result["layer"] = "Top layer only - avoid vias for signal integrity"
+            
+            if not is_routed:
+                result["recommendation"] = (
+                    f"🔴 URGENT: Clock net '{net_name}' UNROUTED!\n"
+                    f"   • {pad_count} pads: {comp_summary}\n"
+                    f"   • Use controlled impedance: {impedance_width:.2f}mm for 50Ω\n"
+                    f"   • Total length: ~{routing_length:.1f}mm\n"
+                    f"   • CRITICAL: Route as short/direct as possible\n"
+                    f"   • Avoid vias, maintain continuous ground reference"
+                )
+            else:
+                result["recommendation"] = (
+                    f"✅ Clock net '{net_name}' routed. Verify:\n"
+                    f"   • Length matching (if differential pair)\n"
+                    f"   • No stubs or branches\n"
+                    f"   • Continuous ground plane below"
+                )
+        
+        elif is_signal:
+            # Signal nets: moderate requirements
+            result["priority"] = "MEDIUM"
+            signal_width = max(min_width * 1.2, 0.18)
+            result["width"] = f"{signal_width:.2f}mm"
+            result["layer"] = "Top or bottom layer"
+            
+            if not is_routed:
+                result["recommendation"] = (
+                    f"⚠️ Signal net '{net_name}' needs routing\n"
+                    f"   • {pad_count} pads: {comp_summary}\n"
+                    f"   • Suggested width: {signal_width:.2f}mm\n"
+                    f"   • Length: ~{routing_length:.1f}mm\n"
+                    f"   • Check for crosstalk if parallel to other signals"
+                )
+            else:
+                result["recommendation"] = f"✅ Signal net '{net_name}' routed"
+        
+        else:
+            # General nets
+            result["priority"] = "NORMAL"
+            result["width"] = f"{min_width}mm (design rule minimum)"
+            result["layer"] = "Any available layer"
+            
+            if not is_routed:
+                result["recommendation"] = (
+                    f"📋 Net '{net_name}' needs routing\n"
+                    f"   • {pad_count} pads: {comp_summary}\n"
+                    f"   • Length: ~{routing_length:.1f}mm\n"
+                    f"   • Standard routing, follow DRC"
+                )
+            else:
+                result["recommendation"] = f"✅ Net '{net_name}' routed"
+        
+        return result
     
     def route_net(self, net_id: str, start: list, end: list, layer: str = "L1", width: float = 0.25) -> dict:
         """Route a net"""

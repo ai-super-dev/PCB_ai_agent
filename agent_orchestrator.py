@@ -41,7 +41,10 @@ class AgentOrchestrator:
     
     def process_query(self, user_query: str, stream_callback: Optional[Callable[[str], None]] = None) -> Tuple[str, str, bool]:
         """
-        Process user query with design intelligence
+        Process user query with LLM-powered design intelligence.
+        
+        Architecture: LLM-first with fast-path optimizations for simple commands.
+        The LLM analyzes user intent with full board context, not pattern matching.
         
         Args:
             user_query: User query
@@ -53,100 +56,54 @@ class AgentOrchestrator:
         # Add user query to history
         self.conversation_history.append({"role": "user", "content": user_query})
         
-        # Get ALL available context (not just PCB)
+        # Get ALL available context
         all_context = self._get_all_available_context()
+        query_lower = user_query.lower().strip()
         
-        # Quick pattern matching for common commands (faster than LLM)
-        query_lower = user_query.lower()
+        # ============================================================
+        # FAST PATH: Only for unambiguous, simple commands
+        # These don't need LLM interpretation - they're explicit actions
+        # ============================================================
         
-        # Component location query - DIRECT ANSWER (no LLM)
-        if "where" in query_lower or "location" in query_lower or "find" in query_lower:
-            # Check if asking about a specific component
-            import re
-            comp_match = re.search(r'\b([A-Z]{1,3}[0-9]+)\b', user_query, re.IGNORECASE)
-            if comp_match:
-                comp_name = comp_match.group(1).upper()
-                response = self._get_component_location_direct(comp_name, all_context)
-                if response:
-                    self.conversation_history.append({"role": "assistant", "content": response})
-                    return response, "answered", False
+        # 1. Direct confirmation commands (user already saw options)
+        if query_lower in ["yes", "yes please", "apply", "do it", "proceed", "apply recommendations", "apply all"]:
+            response = self._apply_recommendations()
+            self.conversation_history.append({"role": "assistant", "content": response})
+            return response, "executed", True
         
-        # Move component command - DIRECT EXECUTION
-        if "move" in query_lower:
-            import re
-            # Pattern: "move R122 to 95, 65" or "move R122 to (95, 65)"
-            move_match = re.search(r'move\s+([A-Z]{1,3}[0-9]+)\s+to\s+\(?(\d+(?:\.\d+)?)\s*,\s*(\d+(?:\.\d+)?)\)?', user_query, re.IGNORECASE)
-            if move_match:
-                comp_name = move_match.group(1).upper()
-                new_x = float(move_match.group(2))
-                new_y = float(move_match.group(3))
-                response = self._move_component_direct(comp_name, new_x, new_y, all_context)
+        # 2. Direct component move with explicit coordinates (no interpretation needed)
+        move_match = re.search(r'move\s+([A-Z]{1,3}[0-9]+)\s+to\s+\(?(\d+(?:\.\d+)?)\s*,\s*(\d+(?:\.\d+)?)\)?', user_query, re.IGNORECASE)
+        if move_match:
+            comp_name = move_match.group(1).upper()
+            new_x = float(move_match.group(2))
+            new_y = float(move_match.group(3))
+            response = self._move_component_direct(comp_name, new_x, new_y, all_context)
+            self.conversation_history.append({"role": "assistant", "content": response})
+            return response, "executed", True
+        
+        # 3. Direct method selection (user already saw numbered options)
+        method_match = re.search(r'(?:use|apply)\s*(?:method|option|solution)\s*(\d+)', query_lower)
+        if method_match:
+            response = self._apply_selected_solution(user_query)
+            self.conversation_history.append({"role": "assistant", "content": response})
+            return response, "executed", True
+        
+        # 4. Direct component location query (data lookup, no interpretation)
+        comp_match = re.search(r'\b(?:where\s+is|find|locate|location\s+of)\s+([A-Z]{1,3}[0-9]+)\b', user_query, re.IGNORECASE)
+        if comp_match:
+            comp_name = comp_match.group(1).upper()
+            response = self._get_component_location_direct(comp_name, all_context)
+            if response:
                 self.conversation_history.append({"role": "assistant", "content": response})
-                return response, "executed", True
+                return response, "answered", False
         
-        # Apply recommendations pattern
-        if query_lower in ["yes", "yes please", "apply", "do it", "proceed", "apply recommendations"]:
-            action = "apply_recommendations"
-            intent_response = {"action": "apply_recommendations"}
-        # Ask about issues/mistakes
-        elif any(phrase in query_lower for phrase in ["what are mistake", "what are issue", "what are problem", "what is wrong", "find error", "find issue", "any mistake", "any issue", "any problem"]):
-            action = "list_issues"
-            intent_response = {"action": "list_issues"}
-        # Ask for solutions
-        elif any(phrase in query_lower for phrase in ["how to solve", "how to fix", "what is method", "what is solution", "how can i fix", "suggest solution", "recommend solution"]):
-            action = "suggest_solutions"
-            intent_response = {"action": "suggest_solutions"}
-        # Ask why something is an error
-        elif "why" in query_lower and any(word in query_lower for word in ["error", "issue", "problem", "wrong", "mistake"]):
-            action = "explain_error"
-            intent_response = {"action": "explain_error", "query": user_query}
-        # Select a specific solution
-        elif any(phrase in query_lower for phrase in ["use method", "apply method", "use solution", "apply solution", "option 1", "option 2", "option 3", "method 1", "method 2", "method 3"]):
-            action = "apply_selected"
-            intent_response = {"action": "apply_selected", "query": user_query}
-        # Check DRC result from Altium
-        elif "check drc result" in query_lower or "drc result" in query_lower:
-            action = "check_altium_drc"
-            intent_response = {"action": "check_altium_drc"}
-        # DRC patterns
-        elif any(word in query_lower for word in ["drc", "violation", "design rule check"]):
-            action = "drc"
-            intent_response = {"action": "drc"}
-        # Routing patterns
-        elif ("routing suggestion" in query_lower or "routing strategy" in query_lower or 
-              "generate routing" in query_lower or "what.*routing" in query_lower.replace(" ", "") or
-              "routing.*suggest" in query_lower.replace(" ", "")):
-            action = "routing"
-            intent_response = {"action": "routing", "routing_action": "suggestions"}
-        elif "what nets need routing" in query_lower or "nets need routing" in query_lower or "unrouted nets" in query_lower:
-            action = "routing"
-            intent_response = {"action": "routing", "routing_action": "suggestions", "filter": "unrouted"}
-        elif ("power" in query_lower and "routing" in query_lower) or ("routing" in query_lower and "power" in query_lower) or "suggest routing for power" in query_lower:
-            action = "routing"
-            intent_response = {"action": "routing", "routing_action": "suggestions", "filter": "power"}
-        elif "route net" in query_lower or ("route" in query_lower and "from" in query_lower):
-            action = "routing"
-            intent_response = {"action": "routing", "routing_action": "route"}
-        elif "place" in query_lower and "via" in query_lower:
-            action = "routing"
-            intent_response = {"action": "routing", "routing_action": "via"}
-        # Design rules patterns
-        elif any(phrase in query_lower for phrase in [
-            "design rule", "design rules", "what.*rule", "show.*rule", "list.*rule", 
-            "clearance rule", "width rule", "via rule", "constraint",
-            "minimum trace width", "min trace width", "trace width", "minimum width",
-            "clearance", "minimum clearance", "via size", "via drill"
-        ]):
-            action = "design_rules"
-            intent_response = {"action": "design_rules", "query": user_query}
-        # Artifact patterns
-        elif any(word in query_lower for word in ["artifact", "uuid", "where is my data"]):
-            action = "artifact"
-            intent_response = {"action": "artifact"}
-        else:
-            # Use LLM to determine intent for other queries
-            intent_response = self._determine_intent(user_query, all_context)
-            action = intent_response.get("action", "answer")
+        # ============================================================
+        # LLM PATH: All other queries go through LLM for intelligent analysis
+        # The LLM sees the full board context and decides the best action
+        # ============================================================
+        
+        intent_response = self._determine_intent_with_context(user_query, all_context)
+        action = intent_response.get("action", "answer")
         
         # Handle design intelligence actions
         if action == "analyze":
@@ -628,6 +585,156 @@ Default to answering questions using the loaded PCB data."""
                 return self._fallback_intent_detection(query)
         
         return self._fallback_intent_detection(query)
+    
+    def _determine_intent_with_context(self, query: str, all_context: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        LLM-powered intent determination with full board context.
+        
+        This is the primary decision-maker for user queries. It passes all available
+        board data to the LLM so it can make intelligent, context-aware decisions.
+        """
+        
+        # Build rich board context for LLM
+        board_context = self._build_rich_context_for_llm(all_context)
+        
+        system_prompt = """You are an expert PCB design co-pilot analyzing user requests.
+Your job is to understand WHAT the user wants and provide an intelligent response.
+
+You have access to real PCB data - use it to give specific, actionable answers.
+
+ACTIONS YOU CAN TAKE:
+1. "analyze" - Deep analysis of design (violations, optimizations, functional blocks)
+2. "routing" - Generate routing suggestions or execute routes
+3. "drc" - Run design rule check
+4. "explain_error" - Explain a specific violation/issue with board context
+5. "suggest_solutions" - Provide specific fix recommendations
+6. "list_issues" - List current problems on the board
+7. "answer" - Answer a question using the board data
+8. "design_rules" - Show/explain design rules
+9. "artifact" - Show artifact/storage info
+10. "execute" - Execute a specific command (move, modify, etc.)
+
+RESPOND WITH JSON:
+{
+    "action": "one of the actions above",
+    "reasoning": "why you chose this action based on the query and board context",
+    "routing_action": "suggestions|route|via" (if action is routing),
+    "filter": "power|unrouted|signal" (optional routing filter),
+    "query": "the user's original question",
+    "specific_context": "relevant board data you found (component names, net names, coordinates)",
+    "suggested_response": "if action=answer, provide the answer here using actual board data"
+}
+
+IMPORTANT:
+- Always reference ACTUAL component names, net names, and coordinates from the board data
+- Never give generic advice - tailor everything to THIS specific board
+- If the user asks about a specific component/net, find it in the data first
+- For routing suggestions, consider actual pad positions and net topology"""
+
+        # Include relevant board data
+        user_message = f"""BOARD CONTEXT:
+{board_context}
+
+CURRENT ISSUES ON BOARD:
+{json.dumps(self.pcb_issues[:5], indent=2) if self.pcb_issues else 'None stored'}
+
+STORED RECOMMENDATIONS:
+{json.dumps([{'net': r.get('net'), 'recommendation': r.get('recommendation')[:100]} for r in self.pcb_recommendations[:3]], indent=2) if self.pcb_recommendations else 'None'}
+
+USER QUERY: {query}
+
+Analyze the query in context of this specific board and determine the best action."""
+
+        messages = [
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": user_message}
+        ]
+        
+        try:
+            response = self.llm_client.chat(messages, temperature=0.3)
+            
+            if response:
+                # Extract JSON from response
+                json_match = re.search(r'\{.*\}', response, re.DOTALL)
+                if json_match:
+                    intent = json.loads(json_match.group())
+                    logger.info(f"LLM intent: {intent.get('action')} - {intent.get('reasoning', '')[:50]}")
+                    return intent
+        except Exception as e:
+            logger.warning(f"LLM intent determination failed: {e}")
+        
+        # Fallback to pattern matching
+        return self._fallback_intent_detection(query)
+    
+    def _build_rich_context_for_llm(self, all_context: Dict[str, Any]) -> str:
+        """Build comprehensive board context string for LLM analysis"""
+        context_parts = []
+        
+        pcb_info = all_context.get("pcb_info", {})
+        
+        # Board basics
+        if pcb_info:
+            context_parts.append(f"PCB File: {pcb_info.get('file_name', 'Unknown')}")
+            
+            stats = pcb_info.get("statistics", {})
+            if stats:
+                context_parts.append(f"Components: {stats.get('component_count', 0)}")
+                context_parts.append(f"Nets: {stats.get('net_count', 0)}")
+                context_parts.append(f"Tracks: {stats.get('track_count', 0)}")
+                context_parts.append(f"Vias: {stats.get('via_count', 0)}")
+                context_parts.append(f"Layers: {stats.get('layer_count', 2)}")
+            
+            # Board size
+            board_size = pcb_info.get("board_size", {})
+            if board_size:
+                context_parts.append(f"Board Size: {board_size.get('width_mm', 0)}mm x {board_size.get('height_mm', 0)}mm")
+        
+        # Design rules
+        rules = all_context.get("design_rules", {}) or pcb_info.get("rules", {})
+        if rules:
+            context_parts.append("\nDESIGN RULES:")
+            context_parts.append(f"- Min clearance: {rules.get('min_clearance_mm', 'N/A')}mm")
+            context_parts.append(f"- Min trace width: {rules.get('min_trace_width_mm', 'N/A')}mm")
+            context_parts.append(f"- Min via hole: {rules.get('min_via_hole_mm', 'N/A')}mm")
+        
+        # Sample components (for LLM to reference)
+        components = pcb_info.get("components", [])
+        if components:
+            context_parts.append(f"\nSAMPLE COMPONENTS ({len(components)} total):")
+            for comp in components[:15]:  # Show first 15
+                if isinstance(comp, dict):
+                    loc = comp.get("location", {})
+                    context_parts.append(
+                        f"- {comp.get('designator', 'Unknown')}: "
+                        f"{comp.get('footprint', 'N/A')} at "
+                        f"({loc.get('x_mm', 0):.1f}, {loc.get('y_mm', 0):.1f})mm"
+                    )
+        
+        # Important nets (power, ground, clock)
+        nets = pcb_info.get("nets", [])
+        if nets:
+            power_nets = []
+            ground_nets = []
+            signal_nets = []
+            
+            for net in nets[:100]:
+                if isinstance(net, dict):
+                    name = net.get("name", "").upper()
+                    if any(p in name for p in ['VCC', 'VDD', 'PWR', '+', 'VIN']):
+                        power_nets.append(name)
+                    elif any(p in name for p in ['GND', 'GROUND', 'VSS']):
+                        ground_nets.append(name)
+                    elif any(p in name for p in ['CLK', 'DATA', 'SDA', 'SCL']):
+                        signal_nets.append(name)
+            
+            if power_nets:
+                context_parts.append(f"\nPOWER NETS: {', '.join(power_nets[:10])}")
+            if ground_nets:
+                context_parts.append(f"GROUND NETS: {', '.join(ground_nets[:5])}")
+            if signal_nets:
+                context_parts.append(f"KEY SIGNALS: {', '.join(signal_nets[:10])}")
+        
+        return "\n".join(context_parts) if context_parts else "No board data available"
     
     def _fallback_intent_detection(self, query: str) -> Dict[str, Any]:
         # Fallback intent detection using keywords
@@ -1790,72 +1897,334 @@ Be constructive and specific - help the engineer improve the design."""
             return f"Error: {str(e)}"
     
     def _explain_error(self, query: str) -> str:
-        # Explain why something is an error with reasoning
+        """Explain why something is an error using LLM with actual board context"""
+        import requests
+        
+        # Get actual board context
+        try:
+            pcb_response = requests.get("http://localhost:8765/pcb/info", timeout=10)
+            pcb_info = pcb_response.json() if pcb_response.status_code == 200 else {}
+        except:
+            pcb_info = {}
+        
+        # Build context about the board
+        board_context = self._build_error_context(query, pcb_info)
+        
+        # Use LLM to generate contextual explanation
+        prompt = f"""As a senior PCB design engineer, explain this error/issue in the context of this specific board.
+
+User question: {query}
+
+Board Context:
+{board_context}
+
+Current issues on this board:
+{json.dumps(self.pcb_issues[:5], indent=2) if self.pcb_issues else 'No stored issues'}
+
+Provide a detailed, board-specific explanation including:
+1. **What is the problem?** - Explain in context of THIS board's components/nets
+2. **Why does it matter?** - Specific risks for this design (consider voltage levels, frequencies, component types)
+3. **How to fix it?** - Actionable steps with specific component names/coordinates from this board
+4. **Priority** - How urgent is this? (Critical/High/Medium/Low)
+
+Be specific. Reference actual component designators and net names from the board data.
+Do NOT give generic advice - tailor everything to THIS board."""
+
+        try:
+            response = self.llm_client.chat([
+                {"role": "system", "content": "You are an expert PCB design engineer providing board-specific analysis. Always reference actual component names and coordinates when available."},
+                {"role": "user", "content": prompt}
+            ], temperature=0.4)
+            
+            if response:
+                return f"## Error Analysis\n\n{response}"
+        except Exception as e:
+            logger.warning(f"LLM error explanation failed: {e}")
+        
+        # Fallback: provide issue-specific explanation with any available context
+        return self._fallback_explain_error(query, pcb_info)
+    
+    def _build_error_context(self, query: str, pcb_info: Dict[str, Any]) -> str:
+        """Build relevant context for error explanation"""
+        context_parts = []
+        
+        # Board basics
+        stats = pcb_info.get("statistics", {})
+        if stats:
+            context_parts.append(f"Board: {pcb_info.get('file_name', 'Unknown')}")
+            context_parts.append(f"Components: {stats.get('component_count', 0)}")
+            context_parts.append(f"Nets: {stats.get('net_count', 0)}")
+            context_parts.append(f"Layers: {stats.get('layer_count', 2)}")
+        
+        # Design rules
+        rules = pcb_info.get("rules", {})
+        if rules:
+            context_parts.append(f"\nDesign Rules:")
+            context_parts.append(f"- Min clearance: {rules.get('min_clearance_mm', 'N/A')}mm")
+            context_parts.append(f"- Min trace width: {rules.get('min_trace_width_mm', 'N/A')}mm")
+            context_parts.append(f"- Min via hole: {rules.get('min_via_hole_mm', 'N/A')}mm")
+        
+        # Try to find relevant components/nets mentioned in query
+        query_upper = query.upper()
+        components = pcb_info.get("components", [])
+        nets = pcb_info.get("nets", [])
+        
+        # Find mentioned components
+        mentioned_comps = []
+        for comp in components[:100]:  # Limit search
+            if isinstance(comp, dict):
+                designator = comp.get("designator", "")
+                if designator and designator.upper() in query_upper:
+                    loc = comp.get("location", {})
+                    mentioned_comps.append(
+                        f"  - {designator}: {comp.get('footprint', 'Unknown')} at ({loc.get('x_mm', 0):.1f}, {loc.get('y_mm', 0):.1f})mm"
+                    )
+        
+        if mentioned_comps:
+            context_parts.append(f"\nMentioned Components:\n" + "\n".join(mentioned_comps[:5]))
+        
+        # Find mentioned nets
+        mentioned_nets = []
+        for net in nets[:100]:
+            if isinstance(net, dict):
+                net_name = net.get("name", "")
+                if net_name and net_name.upper() in query_upper:
+                    mentioned_nets.append(f"  - {net_name}: {net.get('pad_count', '?')} pads")
+        
+        if mentioned_nets:
+            context_parts.append(f"\nMentioned Nets:\n" + "\n".join(mentioned_nets[:5]))
+        
+        # Relevant power/ground nets for power-related questions
+        if any(word in query.lower() for word in ['power', 'voltage', 'current', 'vcc', 'vdd', 'ground', 'gnd']):
+            power_nets = [n.get("name", "") for n in nets if isinstance(n, dict) and 
+                         any(p in n.get("name", "").upper() for p in ['VCC', 'VDD', 'PWR', '+', 'GND', 'VSS'])]
+            if power_nets:
+                context_parts.append(f"\nPower/Ground Nets: {', '.join(power_nets[:10])}")
+        
+        return "\n".join(context_parts) if context_parts else "No board data available"
+    
+    def _fallback_explain_error(self, query: str, pcb_info: Dict[str, Any]) -> str:
+        """Fallback error explanation when LLM is unavailable"""
         query_lower = query.lower()
         
-        # Common PCB design error explanations
-        explanations = {
-            "unrouted": {
-                "title": "Unrouted Net",
-                "why": "An unrouted net means there is no physical copper connection between the pads that should be electrically connected.",
-                "risk": "Without routing, the circuit won't work - signals can't travel between components.",
-                "solution": "Create copper traces (routes) to connect all pads belonging to this net."
-            },
-            "power": {
-                "title": "Unrouted Power Net",
-                "why": "Power nets (VCC, VDD, +5V, etc.) carry the supply voltage to components. Without routing, components won't receive power.",
-                "risk": "Components will not function. The circuit is essentially dead without power distribution.",
-                "solution": "Route power nets with WIDE traces (0.5mm or more) to handle current flow and reduce voltage drop."
-            },
-            "ground": {
-                "title": "Unrouted Ground Net",
-                "why": "Ground (GND, VSS) provides the reference voltage for all signals and a return path for current.",
-                "risk": "Poor grounding causes noise, EMI issues, and unreliable operation. It's the #1 cause of PCB problems.",
-                "solution": "Use a ground PLANE on an internal layer, or route with very wide traces."
-            },
-            "clearance": {
-                "title": "Clearance Violation",
-                "why": "Clearance is the minimum distance between copper features. Too close and they might short circuit.",
-                "risk": "Manufacturing defects, short circuits, or electrical arcing in high-voltage designs.",
-                "solution": "Increase spacing between tracks/pads, or use narrower traces."
-            },
-            "width": {
-                "title": "Trace Width Violation",
-                "why": "Trace width determines current-carrying capacity. Too narrow traces overheat.",
-                "risk": "Traces can burn, melt, or cause fire in extreme cases. Also causes voltage drops.",
-                "solution": "Increase trace width based on current requirements. Power traces need more width."
-            }
-        }
-        
-        # Find which error type is being asked about
-        for key, exp in explanations.items():
-            if key in query_lower:
-                result = f"## Why is '{exp['title']}' an Error?\n\n"
-                result += f"### The Problem\n{exp['why']}\n\n"
-                result += f"### The Risk\n⚠️ {exp['risk']}\n\n"
-                result += f"### The Solution\n✅ {exp['solution']}\n"
-                return result
-        
-        # If no specific match, provide general explanation
-        if self.pcb_issues:
-            # Use the first stored issue as example
+        # Base explanations with board context enhancement
+        if "clearance" in query_lower:
+            rules = pcb_info.get("rules", {})
+            min_clear = rules.get("min_clearance_mm", 0.15)
+            return f"""## Clearance Violation
+
+**On this board:** Minimum clearance is set to {min_clear}mm
+
+**Problem:** Two copper features are closer than {min_clear}mm apart.
+
+**Risk:** Manufacturing defects, potential shorts during production or use.
+
+**Fix:** 
+1. Move the offending traces/pads apart
+2. Use narrower traces if space is limited
+3. Route on a different layer if available
+
+Ask "show DRC violations" to see specific locations."""
+
+        elif "unrouted" in query_lower or "routing" in query_lower:
+            stats = pcb_info.get("statistics", {})
+            net_count = stats.get("net_count", 0)
+            return f"""## Unrouted Net
+
+**On this board:** {net_count} total nets need connectivity.
+
+**Problem:** A net has pads that should be connected but have no copper trace between them.
+
+**Risk:** Circuit will not function - no electrical path for signals/power.
+
+**Fix:**
+1. Identify the unrouted net's pads
+2. Route a trace connecting all pads on the net
+3. Use appropriate width (wider for power, controlled impedance for signals)
+
+Ask "what nets need routing?" to see all unrouted nets."""
+
+        elif any(word in query_lower for word in ['power', 'vcc', 'vdd']):
+            return f"""## Power Distribution Issue
+
+**Problem:** Power nets require special attention for current capacity and voltage drop.
+
+**Risk:** 
+- Underpowered components
+- Heat buildup in traces
+- Voltage drops affecting circuit operation
+
+**Fix:**
+1. Use wider traces (0.5mm+ for power)
+2. Consider power planes on internal layers
+3. Add decoupling capacitors near ICs
+
+Ask "suggest routing for power nets" for specific recommendations."""
+
+        elif self.pcb_issues:
             issue = self.pcb_issues[0]
-            result = f"## Explanation\n\n"
-            result += f"The issue **'{issue.get('type', 'Unknown')}'** is flagged because:\n\n"
-            result += f"- {issue.get('message', 'No details available')}\n\n"
-            result += "In PCB design, this typically indicates a problem that could affect:\n"
-            result += "- Circuit functionality\n"
-            result += "- Manufacturing quality\n"
-            result += "- Reliability\n\n"
-            result += "Ask about specific issues like 'why is unrouted power an error?' for detailed explanation."
-            return result
-        
-        return "Please specify which issue you want me to explain. For example: 'Why is unrouted power an error?'"
+            return f"""## Issue Analysis
+
+**Type:** {issue.get('type', 'Unknown')}
+**Details:** {issue.get('message', 'No details')}
+**Severity:** {issue.get('severity', 'Unknown')}
+
+This issue was detected in your board analysis. For a detailed, board-specific explanation, try asking about specific components or nets involved.
+
+Ask "how to fix this?" for solution recommendations."""
+
+        return "Please specify which error you'd like me to explain. For example: 'Why is the clearance violation on C135 a problem?'"
     
+    def _get_net_pad_positions(self, net_name: str, pcb_info: Dict[str, Any]) -> list:
+        """Get actual pad positions for a net from PCB data"""
+        pad_positions = []
+        components = pcb_info.get("components", [])
+        
+        for comp in components:
+            if not isinstance(comp, dict):
+                continue
+            
+            comp_loc = comp.get("location", {})
+            comp_x = comp_loc.get("x_mm", 0)
+            comp_y = comp_loc.get("y_mm", 0)
+            
+            # Check pads for this component
+            pads = comp.get("pads", [])
+            for pad in pads:
+                if isinstance(pad, dict):
+                    pad_net = pad.get("net", "").upper()
+                    if pad_net == net_name.upper() or net_name.upper() in pad_net:
+                        # Calculate absolute pad position
+                        pad_x = comp_x + pad.get("x_mm", pad.get("rel_x", 0))
+                        pad_y = comp_y + pad.get("y_mm", pad.get("rel_y", 0))
+                        pad_positions.append({
+                            "x": pad_x,
+                            "y": pad_y,
+                            "component": comp.get("designator", "Unknown"),
+                            "pad_name": pad.get("name", "?"),
+                            "layer": pad.get("layer", comp.get("layer", "Top"))
+                        })
+        
+        # Also check nets list for pad info
+        nets = pcb_info.get("nets", [])
+        for net in nets:
+            if isinstance(net, dict) and net.get("name", "").upper() == net_name.upper():
+                net_pads = net.get("pads", [])
+                for pad in net_pads:
+                    if isinstance(pad, dict) and pad not in pad_positions:
+                        pad_positions.append({
+                            "x": pad.get("x_mm", 0),
+                            "y": pad.get("y_mm", 0),
+                            "component": pad.get("component", "Unknown"),
+                            "pad_name": pad.get("name", "?"),
+                            "layer": pad.get("layer", "Top")
+                        })
+        
+        return pad_positions
+    
+    def _calculate_intelligent_route(self, net_name: str, rec: Dict[str, Any], pcb_info: Dict[str, Any]) -> Dict[str, Any]:
+        """Use LLM to calculate intelligent routing parameters based on actual board context"""
+        
+        # Get actual pad positions for this net
+        pad_positions = self._get_net_pad_positions(net_name, pcb_info)
+        
+        if len(pad_positions) < 2:
+            return None
+        
+        # Get design rules
+        design_rules = pcb_info.get("rules", {})
+        min_width = design_rules.get("min_trace_width_mm", 0.15)
+        min_clearance = design_rules.get("min_clearance_mm", 0.15)
+        
+        # Get board stackup info
+        layers = pcb_info.get("layers", [])
+        layer_count = len(layers) if layers else pcb_info.get("layer_count", 2)
+        
+        # Determine net characteristics
+        net_upper = net_name.upper()
+        is_power = any(p in net_upper for p in ['VCC', 'VDD', '+', 'PWR', 'POWER', 'VIN', '5V', '3V3', '12V'])
+        is_ground = any(p in net_upper for p in ['GND', 'GROUND', 'VSS', 'AGND', 'DGND'])
+        is_clock = any(p in net_upper for p in ['CLK', 'CLOCK', 'OSC', 'XTAL'])
+        is_high_speed = any(p in net_upper for p in ['USB', 'HDMI', 'ETH', 'LVDS', 'DIFF'])
+        
+        # Build context for LLM
+        context = f"""
+Net: {net_name}
+Pad positions: {json.dumps(pad_positions[:10])}
+Net type: {'Power' if is_power else 'Ground' if is_ground else 'Clock' if is_clock else 'High-speed' if is_high_speed else 'Signal'}
+Board layers: {layer_count}
+Design rules: min_width={min_width}mm, min_clearance={min_clearance}mm
+Recommendation context: {rec.get('recommendation', '')}
+"""
+        
+        # Ask LLM for intelligent routing parameters
+        prompt = f"""As a PCB design engineer, analyze this net and provide routing parameters.
+
+{context}
+
+Provide a JSON response with:
+1. "start": [x, y] - starting pad position (pick the most logical starting point)
+2. "end": [x, y] - ending pad position
+3. "width": trace width in mm (consider current capacity, impedance needs)
+4. "layer": recommended layer ("L1" for top, "L2", etc.)
+5. "via_needed": true/false
+6. "via_positions": [[x,y], ...] if vias needed
+7. "reasoning": brief explanation of your choices
+
+Consider:
+- Power/ground nets need wider traces (0.3-1.0mm depending on current)
+- High-speed signals need controlled impedance (typically 0.2-0.3mm for 50 ohm)
+- Clock signals should be short and direct
+- Minimize vias for high-frequency signals
+
+Return ONLY valid JSON, no markdown."""
+
+        try:
+            response = self.llm_client.chat([
+                {"role": "system", "content": "You are an expert PCB design engineer. Return only valid JSON."},
+                {"role": "user", "content": prompt}
+            ], temperature=0.3)
+            
+            if response:
+                # Parse LLM response - handle potential markdown wrapping
+                clean_response = response.strip()
+                if clean_response.startswith("```"):
+                    clean_response = clean_response.split("```")[1]
+                    if clean_response.startswith("json"):
+                        clean_response = clean_response[4:]
+                route_params = json.loads(clean_response.strip())
+                return route_params
+        except Exception as e:
+            logger.warning(f"LLM routing calculation failed: {e}")
+        
+        # Fallback: use actual pad positions directly with intelligent width calculation
+        if len(pad_positions) >= 2:
+            sorted_pads = sorted(pad_positions, key=lambda p: (p['x'], p['y']))
+            
+            # Calculate appropriate width based on net type
+            if is_power:
+                width = max(0.5, min_width * 3)
+            elif is_ground:
+                width = max(0.4, min_width * 2.5)
+            elif is_clock or is_high_speed:
+                width = 0.2
+            else:
+                width = max(0.2, min_width * 1.5)
+            
+            return {
+                "start": [sorted_pads[0]['x'], sorted_pads[0]['y']],
+                "end": [sorted_pads[-1]['x'], sorted_pads[-1]['y']],
+                "width": width,
+                "layer": "L1",
+                "via_needed": False,
+                "reasoning": f"Routed from {sorted_pads[0]['component']}.{sorted_pads[0]['pad_name']} to {sorted_pads[-1]['component']}.{sorted_pads[-1]['pad_name']}"
+            }
+        
+        return None
+
     def _apply_selected_solution(self, query: str) -> str:
-        # Apply a specific selected solution
+        # Apply a specific selected solution using actual board data and LLM intelligence
         import requests
-        import re
         
         query_lower = query.lower()
         
@@ -1865,10 +2234,9 @@ Be constructive and specific - help the engineer improve the design."""
         if method_match:
             method_num = int(method_match.group(1) or method_match.group(2) or method_match.group(3))
         elif "all" in query_lower:
-            # Apply all
             return self._apply_recommendations()
         else:
-            method_num = 1  # Default to first
+            method_num = 1
         
         if not self.pcb_recommendations:
             return "No solutions available. Ask 'how to solve these?' first to see options."
@@ -1881,38 +2249,59 @@ Be constructive and specific - help the engineer improve the design."""
         net_name = rec.get("net", "")
         
         try:
-            # Apply the route
-            route_data = {
-                "net_id": f"net-{net_name.lower()}",
-                "start": [10, 10],
-                "end": [50, 50],
-                "layer": "L1",
-                "width": 0.5 if rec.get("priority") == "high" else 0.25
-            }
+            # Get actual PCB data
+            pcb_response = requests.get("http://localhost:8765/pcb/info", timeout=10)
+            pcb_info = pcb_response.json() if pcb_response.status_code == 200 else {}
             
-            response = requests.post("http://localhost:8765/routing/route", json=route_data, timeout=10)
+            # Calculate intelligent route using actual pad positions and LLM analysis
+            route_params = self._calculate_intelligent_route(net_name, rec, pcb_info)
             
-            if response.status_code == 200:
-                result = f"## Method {method_num} Applied\n\n"
-                result += f"✅ **{rec.get('recommendation', 'Solution applied')}**\n\n"
-                result += f"- Net: `{net_name}`\n"
-                result += f"- Width: {route_data['width']}mm\n"
-                result += f"- Layer: Top\n\n"
-                result += "📁 Changes saved to artifact store.\n\n"
-                result += "Ask 'what are the remaining issues?' to see if more fixes are needed."
-                return result
+            if route_params:
+                route_data = {
+                    "net_id": f"net-{net_name.lower()}",
+                    "start": route_params.get("start", [0, 0]),
+                    "end": route_params.get("end", [0, 0]),
+                    "layer": route_params.get("layer", "L1"),
+                    "width": route_params.get("width", 0.25)
+                }
+                
+                response = requests.post("http://localhost:8765/routing/route", json=route_data, timeout=10)
+                
+                if response.status_code == 200:
+                    result = f"## Method {method_num} Applied\n\n"
+                    result += f"✅ **{rec.get('recommendation', 'Solution applied')}**\n\n"
+                    result += f"### Routing Details\n"
+                    result += f"- **Net:** `{net_name}`\n"
+                    result += f"- **From:** ({route_data['start'][0]:.2f}, {route_data['start'][1]:.2f}) mm\n"
+                    result += f"- **To:** ({route_data['end'][0]:.2f}, {route_data['end'][1]:.2f}) mm\n"
+                    result += f"- **Width:** {route_data['width']}mm\n"
+                    result += f"- **Layer:** {route_data['layer']}\n"
+                    
+                    if route_params.get("reasoning"):
+                        result += f"\n**Reasoning:** {route_params['reasoning']}\n"
+                    
+                    if route_params.get("via_needed") and route_params.get("via_positions"):
+                        result += f"\n**Vias placed:** {len(route_params['via_positions'])} via(s)\n"
+                    
+                    result += "\n📁 Changes saved to artifact store.\n\n"
+                    result += "Ask 'what are the remaining issues?' to see if more fixes are needed."
+                    return result
+                else:
+                    return f"Failed to apply route: {response.text}"
             else:
-                return f"Failed to apply: {response.text}"
+                return f"❌ Could not determine routing for net `{net_name}`.\n\nNo pad positions found. Please verify:\n1. The net name is correct\n2. The PCB file has been loaded properly\n3. Components are assigned to this net"
                 
         except requests.exceptions.RequestException as e:
             return f"Error: {str(e)}"
+        except json.JSONDecodeError as e:
+            return f"Error parsing PCB data: {str(e)}"
     
     def _apply_recommendations(self) -> str:
-        # Apply the recommended changes based on analysis
+        # Apply the recommended changes using actual board data and LLM intelligence
         import requests
         
         try:
-            # Get current PCB info and recommendations
+            # Get current PCB info
             response = requests.get("http://localhost:8765/pcb/info", timeout=10)
             if response.status_code != 200:
                 return "No PCB loaded. Please upload a PCB file first."
@@ -1931,20 +2320,29 @@ Be constructive and specific - help the engineer improve the design."""
             if not suggestions:
                 return "No recommendations to apply. Your PCB looks good!"
             
-            # Apply high priority recommendations
+            # Apply high priority recommendations with intelligent routing
             applied = []
+            failed = []
             for suggestion in suggestions[:3]:  # Apply top 3
-                if suggestion.get("priority") == "high":
+                priority = suggestion.get("priority", "").upper()
+                if priority in ["HIGH", "MEDIUM"]:
                     net_name = suggestion.get("net", "")
                     
-                    # Create a route for this net (simplified - in reality would use proper coordinates)
-                    route_data = {
-                        "net_id": f"net-{net_name.lower()}",
-                        "start": [10, 10],
-                        "end": [50, 50],
-                        "layer": "L1",
-                        "width": 0.5 if "power" in suggestion.get("recommendation", "").lower() else 0.25
-                    }
+                    # Use intelligent route calculation with actual pad positions
+                    route_params = self._calculate_intelligent_route(net_name, suggestion, pcb_info)
+                    
+                    if route_params:
+                        route_data = {
+                            "net_id": f"net-{net_name.lower()}",
+                            "start": route_params.get("start", [0, 0]),
+                            "end": route_params.get("end", [0, 0]),
+                            "layer": route_params.get("layer", "L1"),
+                            "width": route_params.get("width", 0.25)
+                        }
+                    else:
+                        # Cannot determine routing - skip with note
+                        failed.append(f"⚠️ **{net_name}**: Could not determine pad positions")
+                        continue
                     
                     route_response = requests.post(
                         "http://localhost:8765/routing/route",
@@ -1953,12 +2351,27 @@ Be constructive and specific - help the engineer improve the design."""
                     )
                     
                     if route_response.status_code == 200:
-                        applied.append(f"✅ Routed **{net_name}** with {route_data['width']}mm trace")
+                        start = route_data['start']
+                        end = route_data['end']
+                        reasoning = route_params.get('reasoning', '')
+                        applied.append(
+                            f"✅ **{net_name}**: ({start[0]:.1f},{start[1]:.1f}) → ({end[0]:.1f},{end[1]:.1f}), "
+                            f"width={route_data['width']}mm" + (f" | {reasoning}" if reasoning else "")
+                        )
+                    else:
+                        failed.append(f"❌ **{net_name}**: Server error - {route_response.text[:50]}")
             
-            if applied:
+            if applied or failed:
                 result = "## Recommendations Applied\n\n"
-                result += "\n".join(applied)
-                result += "\n\n📁 Changes saved to artifact store. "
+                if applied:
+                    result += "### Successfully Routed\n"
+                    result += "\n".join(applied)
+                    result += "\n\n"
+                if failed:
+                    result += "### Could Not Route\n"
+                    result += "\n".join(failed)
+                    result += "\n\n"
+                result += "📁 Changes saved to artifact store. "
                 result += "Ask 'show current artifact' to see the version history."
                 return result
             else:
