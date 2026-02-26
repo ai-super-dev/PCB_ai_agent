@@ -47,10 +47,28 @@ class AltiumScriptClient:
     
     def _find_project_root(self) -> Path:
         """Find the project root directory by looking for project markers."""
-        # Method 1: Try known workspace path (most reliable)
+        # Method 1: Start from script location and go up (most reliable)
+        script_path = Path(__file__).resolve()
+        current = script_path.parent  # tools directory
+        
+        # Go up until we find altium_scripts folder or project root markers
+        for _ in range(5):  # Max 5 levels up
+            if (current / "altium_scripts").exists():
+                return current
+            if (current / "altium_pcb_info.json").exists():
+                return current
+            if (current / "main.py").exists():
+                return current
+            current = current.parent
+        
+        # Method 2: Use current working directory
+        cwd = Path.cwd().resolve()
+        if (cwd / "altium_scripts").exists() or (cwd / "main.py").exists():
+            return cwd
+        
+        # Method 3: Try known workspace path (last resort)
         known_paths = [
             Path(r"E:\Altium_Project\PCB_ai_agent"),
-            Path(r"E:\AltiumProject\PCBaiagent"),  # Fallback for old path
         ]
         
         for path in known_paths:
@@ -254,25 +272,64 @@ class AltiumScriptClient:
                     # CRITICAL: Validate the result matches our command using 'action' field
                     # Altium's WriteRes now includes the action name in every result
                     result_action = result.get("action", "")
+                    result_msg = result.get("message", result.get("error", ""))
+                    
+                    # Check if this is a stale result
                     if result_action and result_action != action:
                         # This is a stale result from a PREVIOUS command!
                         stale_count += 1
                         print(f"  WARNING: Stale result detected! Expected action='{action}', got '{result_action}' (stale #{stale_count})")
+                        print(f"  Stale result message: '{result_msg[:100]}...'")
                         try:
                             self.result_file.unlink()
                         except:
                             pass
                         if stale_count >= 5:
                             print(f"  ERROR: Too many stale results, giving up")
-                            return {"success": False, "error": f"Received {stale_count} stale results from previous commands. Altium may not be processing '{action}'."}
-                        time.sleep(0.3)
+                            return {"success": False, "error": f"Received {stale_count} stale results from previous commands. Altium may not be processing '{action}'. Last stale result: {result_msg[:100]}"}
+                        time.sleep(0.5)  # Wait longer before retrying
                         continue
                     
+                    # Also check message content for common stale result patterns
+                    if not result_action and result_msg:
+                        # No action field but has message - might be old format or stale
+                        if "Schematic info exported" in result_msg and action != "export_schematic_info":
+                            stale_count += 1
+                            print(f"  WARNING: Detected stale export_schematic_info result (no action field)")
+                            try:
+                                self.result_file.unlink()
+                            except:
+                                pass
+                            if stale_count >= 5:
+                                return {"success": False, "error": f"Received stale export_schematic_info result when expecting '{action}'. Clear result file and try again."}
+                            time.sleep(0.5)
+                            continue
+                    
                     # Valid result - clean up and return
-                    try:
-                        self.result_file.unlink()
-                    except:
-                        pass
+                    # CRITICAL: Delete result file multiple times to ensure it's gone
+                    result_deleted = False
+                    for del_attempt in range(5):
+                        try:
+                            if self.result_file.exists():
+                                self.result_file.unlink()
+                                # Verify it's actually deleted
+                                time.sleep(0.1)
+                                if not self.result_file.exists():
+                                    result_deleted = True
+                                    if del_attempt > 0:
+                                        print(f"  Result file deleted on attempt {del_attempt + 1}")
+                                    break
+                            else:
+                                result_deleted = True
+                                break
+                        except Exception as e:
+                            if del_attempt < 4:
+                                time.sleep(0.2 * (del_attempt + 1))
+                            else:
+                                print(f"  WARNING: Could not delete result file after {del_attempt + 1} attempts: {e}")
+                    
+                    if not result_deleted and self.result_file.exists():
+                        print(f"  ERROR: Result file still exists after deletion attempts - stale results may occur!")
                     
                     return result
                 except json.JSONDecodeError:
@@ -615,5 +672,126 @@ class AltiumScriptClient:
             "rule_name": rule_name
         }
         return self._send_command(command)
+    
+    # ==================================================================
+    # SCHEMATIC-TO-PCB COMMANDS
+    # These commands are used with the schematic_PCB.pas script
+    # ==================================================================
+    
+    def export_schematic_info(self) -> Dict[str, Any]:
+        """
+        Export schematic info from Altium to JSON file.
+        Requires schematic_PCB.pas to be running in Altium.
+        
+        Returns:
+            Result dict with success/error
+        """
+        # Large schematics can take time to export - use longer timeout
+        old_timeout = self.timeout
+        self.timeout = max(self.timeout, 60)  # At least 60 seconds for large schematics
+        try:
+            result = self._send_command({"action": "export_schematic_info"})
+            return result
+        finally:
+            self.timeout = old_timeout
+    
+    def create_pcb_from_schematic(self) -> Dict[str, Any]:
+        """
+        Create a PCB document from the current schematic.
+        Uses direct build method to create components and nets from schematic data.
+        
+        Result message format:
+            PCB_BUILT|<comp_count>|<net_count>|<path> - Direct build succeeded
+            PCB_EMPTY|0|<path>                        - PCB created but empty
+        
+        Returns:
+            Result dict with success/error
+        """
+        # CRITICAL: Clear result file before sending command to prevent stale reads
+        print(f"  [create_pcb] Pre-command: Clearing result file...")
+        for clear_attempt in range(10):
+            try:
+                if self.result_file.exists():
+                    self.result_file.unlink()
+                time.sleep(0.2)
+                if not self.result_file.exists():
+                    print(f"  [create_pcb] Result file cleared (attempt {clear_attempt + 1})")
+                    # Verify it stays cleared
+                    time.sleep(0.5)
+                    if not self.result_file.exists():
+                        print(f"  [create_pcb] Result file confirmed cleared")
+                        break
+                    else:
+                        print(f"  [create_pcb] WARNING: Result file reappeared!")
+                else:
+                    print(f"  [create_pcb] Result file still exists (attempt {clear_attempt + 1})")
+            except Exception as e:
+                print(f"  [create_pcb] Clear attempt {clear_attempt + 1} failed: {e}")
+            time.sleep(0.3)
+        
+        # PCB creation can take a long time
+        old_timeout = self.timeout
+        self.timeout = max(self.timeout, 300)
+        result = self._send_command({"action": "create_pcb"})
+        self.timeout = old_timeout
+        return result
+    
+    def check_eco_status(self) -> Dict[str, Any]:
+        """
+        Check if the current PCB has components (ECO completed).
+        
+        Result message format:
+            ECO_OK|<count>|<path>   - PCB has components
+            ECO_EMPTY|0|<path>      - PCB is still empty
+        
+        Returns:
+            Result dict with success/error
+        """
+        return self._send_command({"action": "check_eco"})
+    
+    def auto_place_components(self) -> Dict[str, Any]:
+        """
+        Auto-place all components on the PCB.
+        Requires a PCB document to be open in Altium.
+        
+        Returns:
+            Result dict with success/error
+        """
+        old_timeout = self.timeout
+        self.timeout = max(self.timeout, 120)
+        result = self._send_command({"action": "auto_place"})
+        self.timeout = old_timeout
+        return result
+    
+    def auto_route(self) -> Dict[str, Any]:
+        """
+        Auto-route all nets on the PCB.
+        Requires a PCB document to be open in Altium.
+        
+        Returns:
+            Result dict with success/error
+        """
+        old_timeout = self.timeout
+        self.timeout = max(self.timeout, 180)
+        result = self._send_command({"action": "auto_route"})
+        self.timeout = old_timeout
+        return result
+    
+    def create_pcb_libraries(self) -> Dict[str, Any]:
+        """
+        Create Altium PCB library files from generated footprint specifications.
+        Reads footprint_libraries.json and creates .PcbLib files.
+        
+        Result message format:
+            PCB_LIBRARIES_CREATED|<count>|<path>   - Libraries created successfully
+        
+        Returns:
+            Result dict with success/error
+        """
+        old_timeout = self.timeout
+        self.timeout = max(self.timeout, 300)  # Library creation can take time
+        result = self._send_command({"action": "create_libraries"})
+        self.timeout = old_timeout
+        return result
 
 

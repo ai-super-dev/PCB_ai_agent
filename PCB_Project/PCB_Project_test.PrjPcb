@@ -50,23 +50,6 @@ PrefsVaultGUID=
 PrefsRevisionGUID=
 
 [Document1]
-DocumentPath=Y904A23-GF-DYGDSCH-V1.0.SchDoc
-AnnotationEnabled=1
-AnnotateStartValue=1
-AnnotationIndexControlEnabled=0
-AnnotateSuffix=
-AnnotateScope=All
-AnnotateOrder=-1
-DoLibraryUpdate=1
-DoDatabaseUpdate=1
-ClassGenCCAutoEnabled=1
-ClassGenCCAutoRoomEnabled=0
-ClassGenNCAutoScope=None
-DItemRevisionGUID=
-GenerateClassCluster=0
-DocumentUniqueId=FSKXYQMQ
-
-[Document2]
 DocumentPath=Y904A23-GF-DYPCB-V1.0.PcbDoc
 AnnotationEnabled=1
 AnnotateStartValue=1
@@ -83,6 +66,23 @@ DItemRevisionGUID=
 GenerateClassCluster=0
 DocumentUniqueId=NQWKGUUM
 
+[Document2]
+DocumentPath=Y904A23-GF-DYGDSCH-V1.0.SchDoc
+AnnotationEnabled=1
+AnnotateStartValue=1
+AnnotationIndexControlEnabled=0
+AnnotateSuffix=
+AnnotateScope=All
+AnnotateOrder=-1
+DoLibraryUpdate=1
+DoDatabaseUpdate=1
+ClassGenCCAutoEnabled=1
+ClassGenCCAutoRoomEnabled=0
+ClassGenNCAutoScope=None
+DItemRevisionGUID=
+GenerateClassCluster=0
+DocumentUniqueId=FSKXYQMQ
+
 [Configuration1]
 Name=Sources
 ParameterCount=0
@@ -92,9 +92,6 @@ Variant=[No Variations]
 OutputJobsCount=0
 ContentTypeGUID=CB6F2064-E317-11DF-B822-12313F0024A2
 ConfigurationType=Source
-
-[Generic_ScriptingSystem]
-StartProcName=..\altium_export_pcb_info.pas>ExportPCBInfo
 
 [OutputGroup1]
 Name=Netlist Outputs
@@ -467,8 +464,6 @@ OutputDocumentPath1=
 OutputVariantName1=
 OutputDefault1=0
 PageOptions1=Record=PageOptions|CenterHorizontal=True|CenterVertical=True|PrintScale=1.00|XCorrection=1.00|YCorrection=1.00|PrintKind=1|BorderSize=5000000|LeftOffset=0|BottomOffset=0|Orientation=2|PaperLength=1000|PaperWidth=1000|Scale=100|PaperSource=7|PrintQuality=-3|MediaType=1|DitherType=10|PrintScaleMode=1|PaperKind=Letter|PaperIndex=1
-Configuration1_Name1=OutputConfigurationParameter1
-Configuration1_Item1=Record=TextPrintView|Header=True|PageNumbers=True|LineNumbers=False|Syntax=True|WrapLines=True|UsePrinterFont=False|DocumentPath=E:\Workspace\AI\11.10.WayNe\new-version\altium_export_pcb_info.pas
 
 [OutputGroup8]
 Name=Validation Outputs
@@ -750,7 +745,6 @@ Type155=1
 Type156=1
 Type157=1
 Type158=1
-Type159=1
 
 [Difference Levels]
 Type1=1
@@ -839,7 +833,6 @@ Type83=1
 Type84=1
 Type85=1
 Type86=1
-Type87=1
 
 [Electrical Rules Check]
 Type1=1
@@ -1003,8 +996,6 @@ Type158=0
 Type159=0
 Type160=0
 Type161=0
-Type162=1
-Type163=1
 
 [ERC Connection Matrix]
 L1=NNNNNNNNNNNWNNNWW

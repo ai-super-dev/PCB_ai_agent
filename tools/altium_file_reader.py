@@ -1225,8 +1225,397 @@ class AltiumFileReader:
         return result
     
     def read_schematic(self, file_path: str) -> Dict[str, Any]:
-        """Read a Schematic document."""
-        return self.read_pcb(file_path)
+        """
+        Read a Schematic document and extract comprehensive information.
+        
+        Args:
+            file_path: Path to the .SchDoc file
+            
+        Returns:
+            Dictionary with detailed schematic information including
+            components, nets, pins, wires, power ports, etc.
+        """
+        full_path = Path(file_path)
+        if not full_path.is_absolute():
+            full_path = Path(self.base_path) / file_path
+            
+        if not full_path.exists():
+            return self._empty_schematic_result(str(full_path), f"File not found: {full_path}")
+        
+        try:
+            import olefile
+            return self._read_schematic_with_olefile(str(full_path))
+        except ImportError:
+            return self._empty_schematic_result(str(full_path), "Install olefile for schematic parsing: pip install olefile")
+        except Exception as e:
+            return self._empty_schematic_result(str(full_path), str(e))
+    
+    def _empty_schematic_result(self, file_path: str, error: str = None) -> Dict[str, Any]:
+        """Return empty schematic result structure."""
+        result = {
+            "file_name": os.path.basename(file_path),
+            "file_path": file_path,
+            "document_kind": "schematic",
+            "read_method": "none",
+            "components": [],
+            "nets": [],
+            "net_labels": [],
+            "power_ports": [],
+            "wires": [],
+            "junctions": [],
+            "statistics": {
+                "component_count": 0,
+                "net_count": 0,
+                "wire_count": 0,
+                "power_port_count": 0,
+                "junction_count": 0
+            }
+        }
+        if error:
+            result["error"] = error
+        return result
+    
+    def _read_schematic_with_olefile(self, file_path: str) -> Dict[str, Any]:
+        """Read Altium SchDoc file using olefile library."""
+        import olefile
+        
+        ole = olefile.OleFileIO(file_path)
+        
+        result = {
+            "file_name": os.path.basename(file_path),
+            "file_path": file_path,
+            "document_kind": "schematic",
+            "read_method": "olefile",
+            "components": [],
+            "nets": [],
+            "net_labels": [],
+            "power_ports": [],
+            "wires": [],
+            "junctions": [],
+            "statistics": {
+                "component_count": 0,
+                "net_count": 0,
+                "wire_count": 0,
+                "power_port_count": 0,
+                "junction_count": 0
+            }
+        }
+        
+        streams = ole.listdir()
+        result["metadata"] = {
+            "streams": len(streams),
+            "stream_names": ['/'.join(s) for s in streams]
+        }
+        
+        # SchDoc stores all data in the FileHeader stream as binary records
+        # Each record: 4-byte length (LE uint32), then pipe-delimited key=value text
+        try:
+            if ole.exists('FileHeader'):
+                data = ole.openstream('FileHeader').read()
+                records = self._parse_schematic_records(data)
+                
+                components = []
+                net_labels = []
+                power_ports = []
+                wires = []
+                junctions = []
+                pins_by_owner = {}  # owner_index -> list of pins
+                designators_by_owner = {}  # owner_index -> designator text
+                comments_by_owner = {}  # owner_index -> comment text
+                implementations_by_owner = {}  # owner_index -> footprint
+                
+                comp_index = 0  # Track component order for OWNERINDEX
+                comp_records = []  # Store raw component records in order
+                
+                for rec in records:
+                    record_type = rec.get('RECORD', '')
+                    
+                    # Component record (RECORD=1)
+                    if record_type == '1':
+                        comp_records.append(rec)
+                    
+                    # Pin record (RECORD=2)
+                    elif record_type == '2':
+                        owner = rec.get('OWNERINDEX', '-1')
+                        if owner not in pins_by_owner:
+                            pins_by_owner[owner] = []
+                        pins_by_owner[owner].append({
+                            "name": rec.get('NAME', ''),
+                            "designator": rec.get('DESIGNATOR', ''),
+                            "x": self._sch_coord_to_mils(rec.get('LOCATION.X', '0')),
+                            "y": self._sch_coord_to_mils(rec.get('LOCATION.Y', '0')),
+                            "electrical_type": rec.get('ELECTRICAL', ''),
+                        })
+                    
+                    # Net Label record (RECORD=25)
+                    elif record_type == '25':
+                        net_labels.append({
+                            "name": rec.get('TEXT', ''),
+                            "x": self._sch_coord_to_mils(rec.get('LOCATION.X', '0')),
+                            "y": self._sch_coord_to_mils(rec.get('LOCATION.Y', '0')),
+                        })
+                    
+                    # Power Port record (RECORD=17)
+                    elif record_type == '17':
+                        power_ports.append({
+                            "name": rec.get('TEXT', ''),
+                            "x": self._sch_coord_to_mils(rec.get('LOCATION.X', '0')),
+                            "y": self._sch_coord_to_mils(rec.get('LOCATION.Y', '0')),
+                            "style": rec.get('STYLE', ''),
+                        })
+                    
+                    # Wire record (RECORD=27)
+                    elif record_type == '27':
+                        wires.append({
+                            "x1": self._sch_coord_to_mils(rec.get('LOCATION.X', '0')),
+                            "y1": self._sch_coord_to_mils(rec.get('LOCATION.Y', '0')),
+                            "x2": self._sch_coord_to_mils(rec.get('CORNER.X', '0')),
+                            "y2": self._sch_coord_to_mils(rec.get('CORNER.Y', '0')),
+                        })
+                    
+                    # Junction record (RECORD=29)
+                    elif record_type == '29':
+                        junctions.append({
+                            "x": self._sch_coord_to_mils(rec.get('LOCATION.X', '0')),
+                            "y": self._sch_coord_to_mils(rec.get('LOCATION.Y', '0')),
+                        })
+                    
+                    # Designator record (RECORD=34)
+                    elif record_type == '34':
+                        owner = rec.get('OWNERINDEX', '-1')
+                        designators_by_owner[owner] = rec.get('TEXT', '')
+                    
+                    # Comment/Value record (RECORD=41)
+                    elif record_type == '41':
+                        owner = rec.get('OWNERINDEX', '-1')
+                        comments_by_owner[owner] = rec.get('TEXT', '')
+                    
+                    # Implementation record (RECORD=45 or RECORD=46)
+                    elif record_type in ('45', '46'):
+                        owner = rec.get('OWNERINDEX', '-1')
+                        model_name = rec.get('MODELNAME', '') or rec.get('MODELDATAFILENAME', '')
+                        model_type = rec.get('MODELTYPE', '')
+                        if model_type == 'PCBLIB' and model_name:
+                            implementations_by_owner[owner] = model_name
+                
+                # Build component list
+                for idx, rec in enumerate(comp_records):
+                    owner_idx = str(idx)
+                    
+                    designator = rec.get('DESIGNITEMID', '') or designators_by_owner.get(owner_idx, '')
+                    if not designator:
+                        designator = rec.get('LIBREFERENCE', f'COMP_{idx}')
+                    
+                    value = comments_by_owner.get(owner_idx, '') or rec.get('COMPONENTDESCRIPTION', '')
+                    footprint = implementations_by_owner.get(owner_idx, '')
+                    lib_ref = rec.get('LIBREFERENCE', '')
+                    description = rec.get('COMPONENTDESCRIPTION', '')
+                    
+                    pins = pins_by_owner.get(owner_idx, [])
+                    
+                    comp = {
+                        "designator": designator,
+                        "value": value,
+                        "lib_reference": lib_ref,
+                        "description": description,
+                        "footprint": footprint,
+                        "x": self._sch_coord_to_mils(rec.get('LOCATION.X', '0')),
+                        "y": self._sch_coord_to_mils(rec.get('LOCATION.Y', '0')),
+                        "pins": pins,
+                        "pin_count": len(pins),
+                    }
+                    components.append(comp)
+                
+                # Build netlist from wire connectivity and net labels
+                nets = self._build_netlist_from_schematic(components, wires, net_labels, power_ports, junctions)
+                
+                result["components"] = components
+                result["net_labels"] = net_labels
+                result["power_ports"] = power_ports
+                result["wires"] = wires
+                result["junctions"] = junctions
+                result["nets"] = nets
+                result["statistics"] = {
+                    "component_count": len(components),
+                    "net_count": len(nets),
+                    "wire_count": len(wires),
+                    "power_port_count": len(power_ports),
+                    "junction_count": len(junctions),
+                }
+                
+        except Exception as e:
+            print(f"Error parsing schematic FileHeader: {e}")
+            import traceback
+            traceback.print_exc()
+        
+        ole.close()
+        return result
+    
+    def _parse_schematic_records(self, data: bytes) -> List[Dict[str, str]]:
+        """
+        Parse binary records from SchDoc FileHeader stream.
+        
+        Each record format:
+        - 4 bytes: record data length (little-endian uint32)  
+        - N bytes: pipe-delimited key=value text (may include binary)
+        """
+        records = []
+        offset = 0
+        
+        while offset + 4 < len(data):
+            try:
+                # Read record length
+                rec_len = struct.unpack('<I', data[offset:offset+4])[0]
+                offset += 4
+                
+                if rec_len == 0 or offset + rec_len > len(data):
+                    break
+                
+                # Read record data
+                rec_data = data[offset:offset+rec_len]
+                offset += rec_len
+                
+                # Decode as text (latin-1 handles all byte values)
+                text = rec_data.decode('latin-1', errors='ignore')
+                
+                # Parse pipe-delimited key=value pairs
+                pairs = {}
+                for part in text.split('|'):
+                    if '=' in part:
+                        key, value = part.split('=', 1)
+                        # Clean up key/value
+                        key = key.strip().replace('\x00', '')
+                        value = value.strip().replace('\x00', '')
+                        if key:
+                            pairs[key] = value
+                
+                if pairs:
+                    records.append(pairs)
+                    
+            except (struct.error, ValueError):
+                offset += 1  # Skip byte and try again
+        
+        return records
+    
+    def _sch_coord_to_mils(self, value_str: str) -> float:
+        """Convert schematic coordinate to mils."""
+        try:
+            value_str = str(value_str).strip().replace('\x00', '')
+            if not value_str:
+                return 0.0
+            # Remove non-numeric characters
+            numeric = re.sub(r'[^0-9.\-]', '', value_str)
+            if numeric:
+                return float(numeric) / 10.0  # Altium schematic uses 10x mils internally
+        except:
+            pass
+        return 0.0
+    
+    def _build_netlist_from_schematic(self, components, wires, net_labels, power_ports, junctions) -> List[Dict[str, Any]]:
+        """
+        Build a netlist by analyzing wire connectivity in the schematic.
+        
+        This creates a simplified netlist by connecting pins that share
+        wire endpoints, net labels, or power ports at the same location.
+        """
+        nets = {}  # net_name -> {name, pins: [{component, pin}]}
+        
+        # Collect all connection points: (x, y) -> net_name
+        point_to_net = {}
+        
+        # Net labels define named nets at specific locations
+        for nl in net_labels:
+            key = (round(nl.get('x', 0), 1), round(nl.get('y', 0), 1))
+            net_name = nl.get('name', '')
+            if net_name:
+                point_to_net[key] = net_name
+                if net_name not in nets:
+                    nets[net_name] = {"name": net_name, "pins": []}
+        
+        # Power ports define power/ground nets
+        for pp in power_ports:
+            key = (round(pp.get('x', 0), 1), round(pp.get('y', 0), 1))
+            net_name = pp.get('name', '')
+            if net_name:
+                point_to_net[key] = net_name
+                if net_name not in nets:
+                    nets[net_name] = {"name": net_name, "pins": [], "is_power": True}
+        
+        # Build wire connectivity graph
+        # Two points connected by a wire chain share the same net
+        wire_points = set()
+        wire_connections = []  # [(x1,y1), (x2,y2)]
+        
+        for w in wires:
+            p1 = (round(w.get('x1', 0), 1), round(w.get('y1', 0), 1))
+            p2 = (round(w.get('x2', 0), 1), round(w.get('y2', 0), 1))
+            wire_points.add(p1)
+            wire_points.add(p2)
+            wire_connections.append((p1, p2))
+        
+        # Use Union-Find to group connected wire points
+        parent = {}
+        
+        def find(x):
+            if x not in parent:
+                parent[x] = x
+            while parent[x] != x:
+                parent[x] = parent[parent[x]]
+                x = parent[x]
+            return x
+        
+        def union(a, b):
+            ra, rb = find(a), find(b)
+            if ra != rb:
+                parent[ra] = rb
+        
+        # Connect wire endpoints
+        for p1, p2 in wire_connections:
+            union(p1, p2)
+        
+        # Connect junction points
+        for j in junctions:
+            jp = (round(j.get('x', 0), 1), round(j.get('y', 0), 1))
+            # Junction connects all wires passing through it
+            for p1, p2 in wire_connections:
+                if jp == p1 or jp == p2:
+                    union(jp, p1)
+                    union(jp, p2)
+        
+        # Assign net names to connected groups
+        group_to_net = {}
+        for point, net_name in point_to_net.items():
+            root = find(point)
+            group_to_net[root] = net_name
+        
+        # Find which pins connect to which nets
+        for comp in components:
+            for pin in comp.get('pins', []):
+                pin_point = (round(pin.get('x', 0), 1), round(pin.get('y', 0), 1))
+                root = find(pin_point)
+                
+                net_name = group_to_net.get(root, '')
+                if not net_name:
+                    # Auto-generate net name for unnamed nets
+                    net_name = f"Net_{root[0]}_{root[1]}"
+                    group_to_net[root] = net_name
+                
+                if net_name:
+                    if net_name not in nets:
+                        nets[net_name] = {"name": net_name, "pins": []}
+                    nets[net_name]["pins"].append({
+                        "component": comp.get('designator', ''),
+                        "pin": pin.get('designator', pin.get('name', '')),
+                    })
+        
+        # Filter out nets with no pins or single-pin nets with auto-generated names
+        result = []
+        for net_name, net_data in nets.items():
+            if len(net_data.get("pins", [])) > 0 or net_name in [nl.get('name') for nl in net_labels] or \
+               net_name in [pp.get('name') for pp in power_ports]:
+                result.append(net_data)
+        
+        return result
     
     def export_to_json(self, data: Dict[str, Any], output_path: str) -> bool:
         """Export the extracted data to a JSON file."""

@@ -35,6 +35,14 @@ try:
 except ImportError:
     SCRIPT_CLIENT_AVAILABLE = False
 
+# Try to import footprint generator (for LLM-based footprint generation)
+try:
+    from tools.footprint_generator import FootprintGenerator
+    from llm_client import LLMClient
+    FOOTPRINT_GENERATOR_AVAILABLE = True
+except ImportError:
+    FOOTPRINT_GENERATOR_AVAILABLE = False
+
 
 class AltiumMCPServer:
     """MCP Server with Python file reader and routing/DRC modules"""
@@ -51,12 +59,25 @@ class AltiumMCPServer:
         if SCRIPT_CLIENT_AVAILABLE:
             self.script_client = AltiumScriptClient()
         
+        # Footprint generator (for LLM-based footprint generation)
+        self.footprint_generator = None
+        if FOOTPRINT_GENERATOR_AVAILABLE:
+            try:
+                llm_client = LLMClient()
+                self.footprint_generator = FootprintGenerator(llm_client)
+            except Exception as e:
+                print(f"Warning: Could not initialize footprint generator: {e}")
+        
         # Current loaded PCB
         self.current_pcb_path = None
         self.current_pcb_is_json = False  # Track if current_pcb_path is JSON (from export) or OLE (direct read)
         self.current_artifact_id = None
         self.current_gir = None
         self.current_design_rules = None
+        
+        # Current loaded schematic
+        self.current_schematic_path = None
+        self.current_schematic_data = None
         
         # Default constraint artifact
         self.constraint_artifact_id = None
@@ -2251,6 +2272,749 @@ class AltiumMCPServer:
                 "move_component - Move component"
             ] if SCRIPT_CLIENT_AVAILABLE else []
         }
+    
+    # ==================================================================
+    # SCHEMATIC-TO-PCB METHODS
+    # ==================================================================
+    
+    def load_schematic(self, sch_path: str) -> dict:
+        """
+        Load a schematic file. 
+        
+        Priority:
+        1. Use schematic_info.json exported by schematic_PCB.pas (accurate Altium API data)
+        2. Fall back to olefile-based parsing (less reliable for schematics)
+        
+        Args:
+            sch_path: Path to .SchDoc file
+            
+        Returns:
+            dict with schematic data and statistics
+        """
+        try:
+            # PRIORITY 1: Check for schematic_info.json exported by schematic_PCB.pas
+            # This has accurate data extracted via the Altium API
+            sch_dir = Path(sch_path).parent
+            base_path = Path(__file__).parent
+            
+            # Search for schematic_info.json in common locations
+            json_candidates = [
+                sch_dir / "schematic_info.json",                    # Same folder as .SchDoc
+                base_path / "PCB_Project" / "schematic_info.json",  # Default export location
+            ]
+            
+            for json_path in json_candidates:
+                if json_path.exists():
+                    print(f"[MCP] Found Altium-exported schematic data: {json_path}")
+                    result = self.load_schematic_from_json(str(json_path))
+                    if result.get("success"):
+                        # Also store the original .SchDoc path for Make PCB flow
+                        self.current_schematic_path = sch_path
+                        result["file"] = Path(sch_path).name
+                        result["source"] = "altium_export"
+                        print(f"[MCP] Schematic loaded from Altium export: {result.get('statistics', {})}")
+                        return result
+                    else:
+                        print(f"[MCP] Failed to load from JSON ({json_path}): {result.get('error')}")
+            
+            # PRIORITY 2: Fall back to olefile-based parsing
+            print(f"[MCP] No Altium export found, falling back to olefile parser for: {sch_path}")
+            raw_data = self.reader.read_schematic(sch_path)
+            
+            if 'error' in raw_data and raw_data.get('read_method') == 'none':
+                return {"error": raw_data['error']}
+            
+            # Store schematic data
+            self.current_schematic_path = sch_path
+            self.current_schematic_data = raw_data
+            
+            stats = raw_data.get('statistics', {})
+            
+            return {
+                "success": True,
+                "source": "olefile",
+                "document_kind": "schematic",
+                "file": Path(sch_path).name,
+                "statistics": stats,
+                "components": raw_data.get('components', []),
+                "nets": raw_data.get('nets', []),
+                "net_labels": raw_data.get('net_labels', []),
+                "power_ports": raw_data.get('power_ports', []),
+                "message": f"Schematic loaded: {Path(sch_path).name} - {stats.get('component_count', 0)} components, {stats.get('net_count', 0)} nets",
+                "warning": "Loaded via olefile parser (limited accuracy). For best results, run schematic_PCB.pas in Altium first."
+            }
+        except Exception as e:
+            import traceback
+            return {"error": f"{str(e)}\n{traceback.format_exc()}"}
+    
+    def load_schematic_from_json(self, json_path: str = None) -> dict:
+        """
+        Load schematic data from JSON file exported by schematic_PCB.pas.
+        
+        Args:
+            json_path: Path to schematic_info.json (optional)
+            
+        Returns:
+            dict with schematic data
+        """
+        try:
+            base_path = Path(__file__).parent
+            
+            if json_path is None:
+                json_path = base_path / "PCB_Project" / "schematic_info.json"
+            else:
+                json_path = Path(json_path)
+            
+            if not json_path.exists():
+                return {
+                    "error": f"Schematic info file not found: {json_path}",
+                    "hint": "Run schematic_PCB.pas → StartServer in Altium Designer first"
+                }
+            
+            with open(json_path, 'r', encoding='utf-8') as f:
+                sch_data = json.load(f)
+            
+            self.current_schematic_path = str(json_path)
+            self.current_schematic_data = sch_data
+            
+            stats = sch_data.get('statistics', {})
+            
+            return {
+                "success": True,
+                "source": sch_data.get('export_source', 'unknown'),
+                "document_kind": "schematic",
+                "file": sch_data.get('file_name', 'Unknown'),
+                "statistics": stats,
+                "components": sch_data.get('components', []),
+                "nets": sch_data.get('nets', []),
+                "net_labels": sch_data.get('net_labels', []),
+                "power_ports": sch_data.get('power_ports', []),
+                "message": f"Schematic loaded from Altium export: {sch_data.get('file_name', 'Unknown')}"
+            }
+        except Exception as e:
+            return {"error": str(e)}
+    
+    def get_schematic_info(self) -> dict:
+        """Get currently loaded schematic info."""
+        if not self.current_schematic_data:
+            return {"error": "No schematic loaded. Use /schematic/load endpoint first."}
+        
+        data = self.current_schematic_data
+        return {
+            "file_name": data.get('file_name', 'Unknown'),
+            "document_kind": "schematic",
+            "statistics": data.get('statistics', {}),
+            "components": data.get('components', []),
+            "nets": data.get('nets', []),
+            "net_labels": data.get('net_labels', []),
+            "power_ports": data.get('power_ports', []),
+        }
+    
+    def make_pcb_from_schematic(self) -> dict:
+        """
+        Create a PCB from the current schematic using Altium's ECO system.
+        
+        This uses Altium's Engineering Change Order (ECO) to transfer components
+        with footprints from schematic to PCB. The ECO is automated as much as
+        possible, but may require one user click if the dialog appears.
+        
+        Steps:
+        1. Export schematic info (if not already done)
+        2. Create blank PCB document and add to project
+        3. Run ECO to transfer components with footprints
+        4. Auto-place components
+        5. Auto-route connections
+        6. Export final PCB info
+        
+        Returns:
+            dict with results of each step
+        """
+        if not SCRIPT_CLIENT_AVAILABLE or not self.script_client:
+            return {
+                "error": "Script client not available. Make sure schematic_PCB.pas is running in Altium.",
+                "hint": "Run DXP → Run Script → schematic_PCB.pas → StartServer"
+            }
+        
+        results = {
+            "steps": [],
+            "success": False,
+            "approach": "direct_build_from_schematic"
+        }
+        
+        import time
+        
+        # Step 0: Verify script is running
+        print("[Make PCB] Step 0: Checking if schematic_PCB.pas is running...")
+        try:
+            ping_result = self.script_client.ping()
+            if not ping_result:
+                results["steps"].append({
+                    "step": "ping",
+                    "success": False,
+                    "message": "schematic_PCB.pas script is not running in Altium"
+                })
+                results["error"] = "schematic_PCB.pas script is not running. Please run the script in Altium first."
+                return results
+            print("[Make PCB] Script is running - proceeding with export")
+            
+            # CRITICAL: Clear result file after ping to prevent stale results
+            result_file = Path(__file__).parent.parent / "altium_result.json"
+            if result_file.exists():
+                for clear_attempt in range(5):
+                    try:
+                        result_file.unlink()
+                        print(f"[Make PCB] Cleared ping result file (attempt {clear_attempt + 1})")
+                        break
+                    except Exception as e:
+                        if clear_attempt < 4:
+                            time.sleep(0.2)
+                        else:
+                            print(f"[Make PCB] Warning: Could not clear result file after ping: {e}")
+            
+            # Additional wait to ensure file system settles
+            time.sleep(1)
+        except Exception as e:
+            print(f"[Make PCB] Ping check failed: {e}")
+            results["steps"].append({
+                "step": "ping",
+                "success": False,
+                "message": f"Could not verify script: {str(e)}"
+            })
+            results["error"] = f"Could not verify if schematic_PCB.pas is running: {str(e)}"
+            return results
+        
+        # Step 1: Export schematic info
+        print("[Make PCB] Step 1: Exporting schematic info...")
+        try:
+            export_result = self.script_client.export_schematic_info()
+            export_action = export_result.get("action", "")
+            print(f"[Make PCB] Export result - success: {export_result.get('success')}, action: {export_action}")
+            
+            # Check for timeout or no result
+            if not export_result.get("success") and not export_result.get("error"):
+                # Likely a timeout - check if result file exists
+                result_file = Path(__file__).parent.parent / "altium_result.json"
+                if result_file.exists():
+                    try:
+                        with open(result_file, 'r') as f:
+                            timeout_content = f.read()
+                        print(f"[Make PCB] Result file exists but export failed. Content: {timeout_content[:200]}")
+                    except:
+                        pass
+                
+                results["steps"].append({
+                    "step": "export_schematic",
+                    "success": False,
+                    "message": "Export timed out - schematic may be too large or script may not be responding"
+                })
+                results["error"] = "Export schematic info timed out. Make sure:\n1. schematic_PCB.pas is running in Altium\n2. A schematic file is open\n3. The schematic is part of a valid project"
+                return results
+            
+            # Check for explicit error
+            if export_result.get("error"):
+                error_msg = export_result.get("error", "Unknown error")
+                results["steps"].append({
+                    "step": "export_schematic",
+                    "success": False,
+                    "message": error_msg
+                })
+                results["error"] = f"Cannot export schematic info: {error_msg}"
+                return results
+            
+            if export_result.get("success"):
+                results["steps"].append({
+                    "step": "export_schematic",
+                    "success": True,
+                    "message": export_result.get("message", "Schematic info exported")
+                })
+                print("[Make PCB] Schematic info exported successfully")
+                
+                # CRITICAL: Ensure complete synchronization before next command
+                import time
+                result_file = Path(__file__).parent.parent / "altium_result.json"
+                command_file = Path(__file__).parent.parent / "altium_command.json"
+                
+                # Wait for Altium to finish processing
+                print("[Make PCB] Waiting for Altium to finish processing export command...")
+                time.sleep(3)
+                
+                # Verify command file is consumed (Altium processed it)
+                if command_file.exists():
+                    print(f"[Make PCB] WARNING: Command file still exists - waiting longer...")
+                    time.sleep(3)
+                    if command_file.exists():
+                        print(f"[Make PCB] ERROR: Command file still exists after wait - Altium may not be processing commands")
+                
+                # CRITICAL: Clear result file and verify it stays cleared
+                print("[Make PCB] Clearing result file and verifying it stays cleared...")
+                cleared_successfully = False
+                for clear_attempt in range(15):  # More attempts with verification
+                    try:
+                        if result_file.exists():
+                            # Read what's in it for debugging
+                            try:
+                                with open(result_file, 'r') as f:
+                                    stale_content = f.read()[:100]
+                                print(f"[Make PCB] Stale result content: {stale_content}...")
+                            except:
+                                pass
+                            result_file.unlink()
+                        
+                        # Verify it's actually gone
+                        time.sleep(0.3)
+                        if not result_file.exists():
+                            # Wait a bit more to ensure it doesn't reappear
+                            time.sleep(1)
+                            if not result_file.exists():
+                                print(f"[Make PCB] Result file cleared and verified (attempt {clear_attempt + 1})")
+                                cleared_successfully = True
+                                break
+                            else:
+                                print(f"[Make PCB] WARNING: Result file reappeared! Retrying...")
+                        else:
+                            print(f"[Make PCB] Result file still exists after delete (attempt {clear_attempt + 1})")
+                    except Exception as e:
+                        print(f"[Make PCB] Clear attempt {clear_attempt + 1} exception: {e}")
+                    
+                    time.sleep(0.5)
+                
+                if not cleared_successfully:
+                    print(f"[Make PCB] ERROR: Could not clear result file after all attempts!")
+                    print(f"[Make PCB] This will cause stale result issues. Manual intervention may be needed.")
+                else:
+                    print(f"[Make PCB] Result file successfully cleared - proceeding to PCB creation")
+                
+                # Additional safety wait
+                time.sleep(2)
+            else:
+                results["steps"].append({
+                    "step": "export_schematic",
+                    "success": False,
+                    "message": export_result.get("error", "Failed to export schematic")
+                })
+                results["error"] = "Cannot export schematic info"
+                return results
+        except Exception as e:
+            results["steps"].append({"step": "export_schematic", "success": False, "message": str(e)})
+            results["error"] = f"Exception during schematic export: {str(e)}"
+            return results
+        
+        # Step 2: Create PCB directly from schematic data (no ECO)
+        print("[Make PCB] Step 2: Creating PCB directly from schematic data...")
+        
+        # Final verification: Ensure result file is definitely gone
+        result_file = Path(__file__).parent.parent / "altium_result.json"
+        command_file = Path(__file__).parent.parent / "altium_command.json"
+        
+        print(f"[Make PCB] Pre-flight check:")
+        print(f"  - Result file exists: {result_file.exists()}")
+        print(f"  - Command file exists: {command_file.exists()}")
+        
+        if result_file.exists():
+            print(f"[Make PCB] CRITICAL: Result file exists before create_pcb! Clearing...")
+            try:
+                # Read and log what's in it
+                with open(result_file, 'r') as f:
+                    stale_content = f.read()
+                print(f"[Make PCB] Stale result content: {stale_content[:200]}...")
+                result_file.unlink()
+                time.sleep(0.5)
+                if not result_file.exists():
+                    print(f"[Make PCB] Stale result file cleared")
+                else:
+                    print(f"[Make PCB] ERROR: Could not clear stale result file!")
+            except Exception as e:
+                print(f"[Make PCB] Exception reading/clearing stale result: {e}")
+        
+        if command_file.exists():
+            print(f"[Make PCB] WARNING: Command file exists - previous command may not be processed")
+            time.sleep(2)
+        
+        time.sleep(2)  # Final wait before sending command
+        
+        try:
+            create_result = self.script_client.create_pcb_from_schematic()
+            msg = create_result.get("message", "")
+            
+            # Debug: Log the actual message received
+            print(f"[Make PCB] Received message from create_pcb: '{msg[:100]}...' (length: {len(msg)})")
+            print(f"[Make PCB] Result success: {create_result.get('success')}, action: {create_result.get('action', 'N/A')}")
+            
+            if create_result.get("success"):
+                # Parse result message
+                if msg.startswith("PCB_BUILT|"):
+                    # Direct build succeeded - components and nets created from schematic JSON
+                    parts = msg.split("|")
+                    comp_count = int(parts[1]) if len(parts) > 1 else 0
+                    pcb_path = parts[2] if len(parts) > 2 else "Unknown"
+                    
+                    results["steps"].append({
+                        "step": "create_pcb",
+                        "success": True,
+                        "message": f"PCB built directly from schematic with {comp_count} components"
+                    })
+                    results["pcb_file"] = pcb_path
+                    results["component_count"] = comp_count
+                    print(f"[Make PCB] PCB built successfully: {comp_count} components")
+                    
+                elif msg.startswith("PCB_EMPTY|"):
+                    # Build failed - no components created
+                    parts = msg.split("|")
+                    pcb_path = parts[2] if len(parts) > 2 else "Unknown"
+                    
+                    error_msg = (
+                        "PCB creation completed but no components were added.\n"
+                        "Possible causes:\n"
+                        "1. Schematic info file not found or invalid\n"
+                        "2. Schematic has no components\n"
+                        "3. Component creation failed\n\n"
+                        "Check that schematic_info.json exists and contains component data."
+                    )
+                    
+                    results["steps"].append({
+                        "step": "create_pcb",
+                        "success": False,
+                        "message": error_msg
+                    })
+                    results["pcb_file"] = pcb_path
+                    results["component_count"] = 0
+                    results["error"] = error_msg
+                    results["hint"] = "Verify schematic_info.json exists in PCB_Project folder and contains component data."
+                    return results
+                elif msg.startswith("Schematic info exported"):
+                    # Got stale result from export_schematic_info instead of create_pcb
+                    print(f"[Make PCB] ERROR: Received export_schematic_info result instead of create_pcb result")
+                    print(f"[Make PCB] This indicates a stale result file issue")
+                    error_msg = (
+                        "Received wrong result from Altium (stale result from previous command).\n"
+                        "This usually means:\n"
+                        "1. The result file wasn't cleared between commands\n"
+                        "2. Altium didn't process the create_pcb command\n\n"
+                        "Try:\n"
+                        "1. Wait a few seconds and try again\n"
+                        "2. Check that schematic_PCB.pas is running in Altium\n"
+                        "3. Check Altium for any error messages"
+                    )
+                    results["steps"].append({
+                        "step": "create_pcb",
+                        "success": False,
+                        "message": error_msg
+                    })
+                    results["error"] = error_msg
+                    results["hint"] = "This is a stale result issue. The create_pcb command may not have been processed by Altium."
+                    return results
+                else:
+                    # Unexpected message format
+                    print(f"[Make PCB] WARNING: Unexpected message format: '{msg[:200]}'")
+                    results["steps"].append({
+                        "step": "create_pcb",
+                        "success": False,
+                        "message": f"Unexpected result format: {msg[:100]}..."
+                    })
+                    results["error"] = f"Unexpected result format: {msg[:100]}..."
+                    results["hint"] = "Check Altium script logs to see what command was actually processed."
+                    return results
+            else:
+                results["steps"].append({
+                    "step": "create_pcb",
+                    "success": False,
+                    "message": create_result.get("error", "Failed to create PCB")
+                })
+                results["error"] = "PCB creation failed"
+                return results
+        except Exception as e:
+            results["steps"].append({"step": "create_pcb", "success": False, "message": str(e)})
+            results["error"] = f"Exception during PCB creation: {str(e)}"
+            return results
+        
+        time.sleep(2)
+        
+        # Step 3: Auto-place components
+        print("[Make PCB] Step 3: Auto-placing components...")
+        try:
+            place_result = self.script_client.auto_place_components()
+            results["steps"].append({
+                "step": "auto_place",
+                "success": place_result.get("success", False),
+                "message": place_result.get("message", "Auto-placement completed")
+            })
+            if not place_result.get("success"):
+                print(f"[Make PCB] Auto-placement warning: {place_result.get('error', 'Unknown error')}")
+        except Exception as e:
+            results["steps"].append({"step": "auto_place", "success": False, "message": str(e)})
+            print(f"[Make PCB] Auto-placement failed: {str(e)}")
+        
+        time.sleep(2)
+        
+        # Step 4: Auto-route
+        print("[Make PCB] Step 4: Auto-routing...")
+        try:
+            route_result = self.script_client.auto_route()
+            results["steps"].append({
+                "step": "auto_route",
+                "success": route_result.get("success", False),
+                "message": route_result.get("message", "Auto-routing completed")
+            })
+            if not route_result.get("success"):
+                print(f"[Make PCB] Auto-routing warning: {route_result.get('error', 'Unknown error')}")
+        except Exception as e:
+            results["steps"].append({"step": "auto_route", "success": False, "message": str(e)})
+            print(f"[Make PCB] Auto-routing failed: {str(e)}")
+        
+        time.sleep(2)
+        
+        # Step 5: Export PCB info
+        print("[Make PCB] Step 5: Exporting PCB info...")
+        try:
+            export_pcb_result = self.script_client.export_pcb_info()
+            results["steps"].append({
+                "step": "export_pcb",
+                "success": export_pcb_result.get("success", False),
+                "message": export_pcb_result.get("message", "PCB info exported")
+            })
+        except Exception as e:
+            results["steps"].append({"step": "export_pcb", "success": False, "message": str(e)})
+            print(f"[Make PCB] PCB export failed: {str(e)}")
+        
+        # Final result
+        results["success"] = True
+        results["message"] = f"✅ PCB created successfully! File: {results.get('pcb_file', 'Unknown')}"
+        results["statistics"] = {
+            "components": results.get("component_count", 0),
+            "steps_completed": len([s for s in results["steps"] if s.get("success")])
+        }
+        
+        return results
+    
+    def generate_footprints(self, components: List[Dict[str, Any]] = None) -> dict:
+        """
+        Generate footprint specifications for components using LLM
+        
+        Args:
+            components: List of component dicts. If None, uses current schematic data.
+        
+        Returns:
+            Dict mapping designator -> footprint specification
+        """
+        if not self.footprint_generator:
+            return {
+                "error": "Footprint generator not available. LLM client may not be initialized.",
+                "hint": "Make sure OPENAI_API_KEY is set in environment variables"
+            }
+        
+        # Use provided components or current schematic data
+        if components is None:
+            if not self.current_schematic_data:
+                return {"error": "No schematic loaded. Load schematic first or provide components."}
+            components = self.current_schematic_data.get("components", [])
+        
+        if not components:
+            return {"error": "No components provided or found in schematic."}
+        
+        print(f"[Generate Footprints] Analyzing {len(components)} components with LLM...")
+        print(f"[Generate Footprints] Using optimized grouping - will generate one LLM call per unique footprint")
+        
+        try:
+            # Generate footprints (now optimized to group by footprint)
+            footprint_results = self.footprint_generator.generate_footprints_batch(components)
+            
+            # Extract library structure (unique footprints)
+            footprint_libraries = footprint_results.pop('_footprint_libraries', {})
+            
+            # Prepare library structure for Altium PCB library creation
+            library_structure = self.footprint_generator.prepare_library_structure(footprint_libraries)
+            
+            # Count unique footprints vs total components
+            unique_footprints = len(footprint_libraries)
+            total_components = len(footprint_results)
+            
+            print(f"[Generate Footprints] Generated {unique_footprints} unique footprints for {total_components} components")
+            print(f"[Generate Footprints] Categories: {library_structure['statistics']['category_counts']}")
+            
+            return {
+                "success": True,
+                "footprints": footprint_results,  # Component designator -> footprint spec mapping
+                "footprint_libraries": footprint_libraries,  # Unique footprint_key -> footprint spec
+                "library_structure": library_structure,  # Organized by category
+                "statistics": {
+                    "unique_footprints": unique_footprints,
+                    "total_components": total_components,
+                    "categories": library_structure['statistics']['category_counts']
+                },
+                "count": unique_footprints,
+                "message": f"Generated {unique_footprints} unique footprint libraries for {total_components} components"
+            }
+        except Exception as e:
+            import traceback
+            print(f"[Generate Footprints] Error: {str(e)}")
+            print(traceback.format_exc())
+            return {
+                "error": f"Failed to generate footprints: {str(e)}",
+                "success": False
+            }
+    
+    def create_pcb_libraries(self) -> dict:
+        """
+        Create Altium PCB library files from generated footprint specifications.
+        Calls the Altium script to create .PcbLib files.
+        
+        Returns:
+            Dict with success/error and library file path
+        """
+        if not SCRIPT_CLIENT_AVAILABLE or not self.script_client:
+            return {
+                "error": "Script client not available. Make sure schematic_PCB.pas is running in Altium.",
+                "hint": "Run DXP → Run Script → schematic_PCB.pas → StartServer"
+            }
+        
+        print("[Create Libraries] Creating PCB library files from footprint specifications...")
+        
+        try:
+            result = self.script_client.create_pcb_libraries()
+            
+            if result.get("success"):
+                message = result.get("message", "")
+                if message.startswith("PCB_LIBRARIES_CREATED|"):
+                    parts = message.split("|")
+                    footprint_count = int(parts[1]) if len(parts) > 1 else 0
+                    lib_path = parts[2] if len(parts) > 2 else "Unknown"
+                    
+                    return {
+                        "success": True,
+                        "footprint_count": footprint_count,
+                        "library_path": lib_path,
+                        "message": f"Created PCB library with {footprint_count} footprints: {lib_path}"
+                    }
+                else:
+                    return {
+                        "success": True,
+                        "message": message
+                    }
+            else:
+                return {
+                    "success": False,
+                    "error": result.get("error", "Unknown error creating libraries")
+                }
+        except Exception as e:
+            import traceback
+            print(f"[Create Libraries] Error: {str(e)}")
+            print(traceback.format_exc())
+            return {
+                "success": False,
+                "error": f"Failed to create PCB libraries: {str(e)}"
+            }
+    
+    def continue_pcb_setup(self) -> dict:
+        """
+        Continue PCB setup after manual ECO.
+        Runs auto-place, auto-route, and export.
+        Called when user has manually completed ECO transfer.
+        """
+        if not SCRIPT_CLIENT_AVAILABLE or not self.script_client:
+            return {"error": "Script client not available."}
+        
+        results = {
+            "steps": [],
+            "success": False,
+        }
+        
+        import time
+        
+        # Step 1: Check if PCB has components (ECO was done)
+        print("[Continue PCB] Step 1: Checking ECO status...")
+        try:
+            eco_check = self.script_client.check_eco_status()
+            msg = eco_check.get("message", "")
+            if msg.startswith("ECO_OK|"):
+                parts = msg.split("|")
+                comp_count = int(parts[1]) if len(parts) > 1 else 0
+                results["steps"].append({
+                    "step": "eco_check",
+                    "success": True,
+                    "message": f"ECO verified: {comp_count} components found"
+                })
+                print(f"[Continue PCB] ECO OK: {comp_count} components")
+            elif msg.startswith("ECO_EMPTY|"):
+                results["steps"].append({
+                    "step": "eco_check",
+                    "success": False,
+                    "message": "PCB is still empty. Please complete the ECO transfer first."
+                })
+                results["error"] = "PCB has no components. Complete ECO first."
+                return results
+            else:
+                results["steps"].append({
+                    "step": "eco_check", 
+                    "success": True,
+                    "message": msg
+                })
+        except Exception as e:
+            results["steps"].append({"step": "eco_check", "success": False, "message": str(e)})
+            results["error"] = f"Cannot check ECO status: {str(e)}"
+            return results
+        
+        time.sleep(1)
+        
+        # Step 2: Auto-place
+        print("[Continue PCB] Step 2: Auto-placing components...")
+        try:
+            step2 = self.script_client.auto_place_components()
+            results["steps"].append({
+                "step": "auto_place",
+                "success": step2.get("success", False),
+                "message": step2.get("message", step2.get("error", "Unknown"))
+            })
+        except Exception as e:
+            results["steps"].append({"step": "auto_place", "success": False, "message": str(e)})
+        
+        time.sleep(2)
+        
+        # Step 3: Auto-route
+        print("[Continue PCB] Step 3: Auto-routing...")
+        try:
+            step3 = self.script_client.auto_route()
+            results["steps"].append({
+                "step": "auto_route",
+                "success": step3.get("success", False),
+                "message": step3.get("message", step3.get("error", "Unknown"))
+            })
+        except Exception as e:
+            results["steps"].append({"step": "auto_route", "success": False, "message": str(e)})
+        
+        time.sleep(2)
+        
+        # Step 4: Export PCB info
+        print("[Continue PCB] Step 4: Exporting PCB info...")
+        try:
+            step4 = self.script_client.export_pcb_info()
+            results["steps"].append({
+                "step": "export_pcb_info",
+                "success": step4.get("success", False),
+                "message": step4.get("message", step4.get("error", "Unknown"))
+            })
+        except Exception as e:
+            results["steps"].append({"step": "export_pcb_info", "success": False, "message": str(e)})
+        
+        # Step 5: Load the exported PCB info
+        print("[Continue PCB] Step 5: Loading exported PCB data...")
+        try:
+            load_result = self.load_from_altium_export()
+            if load_result.get("success"):
+                results["pcb_info"] = {
+                    "file": load_result.get("file", ""),
+                    "artifact_id": load_result.get("artifact_id", ""),
+                    "statistics": load_result.get("statistics", {}),
+                }
+                results["success"] = True
+                results["message"] = "PCB auto-placed and auto-routed successfully!"
+            else:
+                results["success"] = True
+                results["message"] = "PCB placed and routed. Manual refresh may be needed."
+        except Exception as e:
+            results["success"] = True
+            results["message"] = "PCB placed and routed. Use Refresh to load data."
+        
+        return results
 
 
 # Global server instance
@@ -2349,17 +3113,25 @@ class MCPRequestHandler(BaseHTTPRequestHandler):
         elif path == "/altium/ping":
             self._send_json(mcp_server.apply_to_altium("ping"))
         
+        # Schematic endpoints
+        elif path == "/schematic/info":
+            self._send_json(mcp_server.get_schematic_info())
+        
         else:
             self._send_json({"error": "Not found", "endpoints": [
                 "/health",
                 "/status",
                 "/pcb/info - Get loaded PCB information",
+                "/schematic/info - Get loaded schematic information",
                 "/routing/suggestions - Get routing suggestions",
                 "/drc/run - Run DRC check",
                 "/drc/auto-generate-rules - Automatically generate DRC rules",
                 "/drc/suggestions - Get DRC violation suggestions",
                 "/drc/update-suggestions - Check for suggestion updates",
                 "POST /pcb/load - Load .PcbDoc file",
+                "POST /schematic/load - Load .SchDoc file",
+                "POST /schematic/load-export - Load from schematic_info.json",
+                "POST /schematic/make-pcb - Create PCB from schematic",
                 "POST /routing/route - Create route",
                 "POST /routing/via - Place via",
                 "--- OPTIONAL: Apply to Altium ---",
@@ -2431,6 +3203,39 @@ class MCPRequestHandler(BaseHTTPRequestHandler):
             result = mcp_server.learn_from_drc_violations(violations_artifact_id)
             self._send_json(result)
         
+        # Schematic endpoints
+        elif path == "/schematic/load":
+            sch_path = data.get("path")
+            if not sch_path:
+                self._send_json({"error": "Missing 'path' parameter"}, 400)
+                return
+            result = mcp_server.load_schematic(sch_path)
+            self._send_json(result)
+        
+        elif path == "/schematic/load-export":
+            json_path = data.get("json_path")
+            result = mcp_server.load_schematic_from_json(json_path)
+            self._send_json(result)
+        
+        elif path == "/schematic/make-pcb":
+            result = mcp_server.make_pcb_from_schematic()
+            self._send_json(result)
+        
+        elif path == "/schematic/continue-pcb":
+            result = mcp_server.continue_pcb_setup()
+            self._send_json(result)
+        
+        elif path == "/schematic/generate-footprints":
+            # Generate footprints for components using LLM
+            components = data.get("components")  # Optional: provide components directly
+            result = mcp_server.generate_footprints(components)
+            self._send_json(result)
+        
+        elif path == "/schematic/create-libraries":
+            # Create Altium PCB library files from generated footprint specifications
+            result = mcp_server.create_pcb_libraries()
+            self._send_json(result)
+        
         else:
             self._send_json({"error": "Not found"}, 404)
     
@@ -2457,6 +3262,18 @@ def run_server(port=8765):
     print()
     print("  POST /pcb/load            - Load PCB file")
     print("       {\"path\": \"path/to/file.PcbDoc\"}")
+    print()
+    print("  POST /schematic/load      - Load schematic file")
+    print("       {\"path\": \"path/to/file.SchDoc\"}")
+    print()
+    print("  POST /schematic/make-pcb  - Create PCB from schematic")
+    print("       (auto-place + auto-route)")
+    print()
+    print("  POST /schematic/generate-footprints - Generate footprints using LLM")
+    print("       {\"components\": [...]} (optional, uses current schematic if omitted)")
+    print()
+    print("  POST /schematic/create-libraries - Create Altium PCB library files")
+    print("       (requires footprint_libraries.json from generate-footprints)")
     print()
     print("  POST /routing/route       - Route a net")
     print("       {\"net_id\": \"net-1\", \"start\": [0,0], \"end\": [10,10]}")

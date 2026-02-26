@@ -394,23 +394,6 @@ class AltiumMCPClient:
             print(f"Error modifying PCB: {e}")
             return None
     
-    def get_schematic_info(self) -> Optional[Dict[str, Any]]:
-        """Get information about the current schematic"""
-        if not self.connected:
-            return None
-        
-        try:
-            response = self.session.get(
-                f"{self.server_url}/altium/schematic/info",
-                timeout=MCP_TIMEOUT
-            )
-            if response.status_code == 200:
-                return response.json()
-            return None
-        except Exception as e:
-            print(f"Error getting schematic info: {e}")
-            return None
-    
     def get_project_info(self) -> Optional[Dict[str, Any]]:
         """Get information about the current project"""
         if not self.connected:
@@ -709,4 +692,173 @@ class AltiumMCPClient:
         except Exception as e:
             print(f"Error running DRC: {e}")
             return None
+    
+    # ==================================================================
+    # SCHEMATIC-TO-PCB METHODS
+    # ==================================================================
+    
+    def load_schematic_file(self, sch_path: str) -> Dict[str, Any]:
+        """
+        Load a schematic file (.SchDoc) using Python file reader.
+        
+        Args:
+            sch_path: Path to .SchDoc file
+            
+        Returns:
+            dict with schematic data and statistics
+        """
+        try:
+            response = self.session.post(
+                f"{self.server_url}/schematic/load",
+                json={"path": sch_path},
+                timeout=MCP_TIMEOUT
+            )
+            if response.status_code == 200:
+                result = response.json()
+                if result.get("success"):
+                    self.connected = True
+                    self.active_document_type = self.DOC_SCHEMATIC
+                return result
+            return {"error": f"Server error: {response.status_code}"}
+        except Exception as e:
+            return {"error": str(e)}
+    
+    def load_schematic_from_export(self, json_path: str = None) -> Dict[str, Any]:
+        """
+        Load schematic data from JSON file exported by schematic_PCB.pas.
+        
+        Args:
+            json_path: Path to schematic_info.json (optional)
+            
+        Returns:
+            dict with schematic data
+        """
+        try:
+            payload = {}
+            if json_path:
+                payload["json_path"] = json_path
+            
+            response = self.session.post(
+                f"{self.server_url}/schematic/load-export",
+                json=payload,
+                timeout=MCP_TIMEOUT
+            )
+            if response.status_code == 200:
+                result = response.json()
+                if result.get("success"):
+                    self.connected = True
+                    self.active_document_type = self.DOC_SCHEMATIC
+                return result
+            return {"error": f"Server error: {response.status_code}"}
+        except Exception as e:
+            return {"error": str(e)}
+    
+    def get_schematic_info(self) -> Optional[Dict[str, Any]]:
+        """Get information about the currently loaded schematic."""
+        try:
+            response = self.session.get(
+                f"{self.server_url}/schematic/info",
+                timeout=MCP_TIMEOUT
+            )
+            if response.status_code == 200:
+                return response.json()
+            return None
+        except Exception as e:
+            print(f"Error getting schematic info: {e}")
+            return None
+    
+    def generate_footprints(self, components: list = None) -> Dict[str, Any]:
+        """
+        Generate footprint specifications for components using LLM.
+        
+        Args:
+            components: Optional list of component dicts. If None, uses current schematic.
+        
+        Returns:
+            dict with generated footprint specifications
+        """
+        try:
+            payload = {}
+            if components:
+                payload["components"] = components
+            
+            response = self.session.post(
+                f"{self.server_url}/schematic/generate-footprints",
+                json=payload,
+                timeout=600  # Increased timeout: LLM generation for many components can take time (10 minutes)
+            )
+            if response.status_code == 200:
+                return response.json()
+            return {"error": f"Server error: {response.status_code}"}
+        except Exception as e:
+            return {"error": str(e)}
+    
+    def create_pcb_libraries(self) -> Dict[str, Any]:
+        """
+        Create Altium PCB library files from generated footprint specifications.
+        
+        Returns:
+            dict with success/error and library file path
+        """
+        try:
+            response = self.session.post(
+                f"{self.server_url}/schematic/create-libraries",
+                json={},
+                timeout=300  # Library creation can take time
+            )
+            if response.status_code == 200:
+                return response.json()
+            return {"error": f"Server error: {response.status_code}"}
+        except Exception as e:
+            return {"error": str(e)}
+    
+    def make_pcb_from_schematic(self) -> Dict[str, Any]:
+        """
+        Create PCB from schematic: auto-create, auto-place, auto-route.
+        
+        This triggers the full schematic-to-PCB flow in Altium:
+        1. Create PCB document from schematic (+ ECO attempt)
+        2. If ECO succeeded: auto-place, auto-route, export
+        3. If ECO needs manual action: return instructions
+        
+        Returns:
+            dict with results of each step
+        """
+        try:
+            response = self.session.post(
+                f"{self.server_url}/schematic/make-pcb",
+                json={},
+                timeout=600  # Long timeout - ECO dialog may need user interaction
+            )
+            if response.status_code == 200:
+                result = response.json()
+                if result.get("success") and not result.get("eco_manual_needed"):
+                    self.active_document_type = self.DOC_PCB
+                return result
+            return {"error": f"Server error: {response.status_code}"}
+        except Exception as e:
+            return {"error": str(e)}
+    
+    def continue_pcb_setup(self) -> Dict[str, Any]:
+        """
+        Continue PCB setup after manual ECO transfer.
+        Runs auto-place, auto-route, and export on the current PCB.
+        
+        Returns:
+            dict with results of each step
+        """
+        try:
+            response = self.session.post(
+                f"{self.server_url}/schematic/continue-pcb",
+                json={},
+                timeout=300
+            )
+            if response.status_code == 200:
+                result = response.json()
+                if result.get("success"):
+                    self.active_document_type = self.DOC_PCB
+                return result
+            return {"error": f"Server error: {response.status_code}"}
+        except Exception as e:
+            return {"error": str(e)}
 

@@ -96,18 +96,32 @@ class ConfirmationModal(ctk.CTkToplevel):
         self.result = None
         
         self.title("Confirm Action")
-        self.geometry("500x200")
+        self.geometry("600x300")
         self.resizable(False, False)
         
-        # Make modal
+        # Make modal - try grab_set, but don't let it block if it fails
         self.transient(parent)
-        self.grab_set()
+        try:
+            self.grab_set()
+        except:
+            pass  # Some systems don't support grab_set
         
         # Center on parent
+        parent.update_idletasks()
         self.update_idletasks()
-        x = parent.winfo_x() + (parent.winfo_width() // 2) - (500 // 2)
-        y = parent.winfo_y() + (parent.winfo_height() // 2) - (200 // 2)
-        self.geometry(f"500x200+{x}+{y}")
+        try:
+            x = parent.winfo_x() + (parent.winfo_width() // 2) - (600 // 2)
+            y = parent.winfo_y() + (parent.winfo_height() // 2) - (300 // 2)
+            self.geometry(f"600x300+{x}+{y}")
+        except:
+            # Fallback: center on screen
+            self.geometry("600x300+100+100")
+        
+        # Force window to front and get focus
+        self.lift()
+        self.attributes('-topmost', True)
+        self.after(50, lambda: self.attributes('-topmost', False))
+        self.after(100, lambda: self.focus_force())
         
         # Colors
         colors = {
@@ -120,53 +134,93 @@ class ConfirmationModal(ctk.CTkToplevel):
         
         self.configure(fg_color=colors["bg"])
         
+        # Use grid layout for better control
+        self.grid_columnconfigure(0, weight=1)
+        self.grid_rowconfigure(0, weight=1)
+        
+        # Main container
+        main_frame = ctk.CTkFrame(self, fg_color=colors["bg"])
+        main_frame.grid(row=0, column=0, sticky="nsew", padx=20, pady=20)
+        main_frame.grid_columnconfigure(0, weight=1)
+        main_frame.grid_rowconfigure(0, weight=1)
+        main_frame.grid_rowconfigure(1, weight=0)
+        
         # Message label
         msg_label = ctk.CTkLabel(
-            self,
+            main_frame,
             text=message,
-            font=ctk.CTkFont(size=14),
+            font=ctk.CTkFont(size=13),
             text_color=colors["text"],
-            wraplength=450,
-            justify="left"
+            wraplength=540,
+            justify="left",
+            anchor="nw"
         )
-        msg_label.pack(pady=30, padx=20)
+        msg_label.grid(row=0, column=0, sticky="nsew", padx=20, pady=(20, 10))
         
-        # Buttons frame
-        btn_frame = ctk.CTkFrame(self, fg_color="transparent")
-        btn_frame.pack(pady=20)
+        # Buttons frame - fixed at bottom
+        btn_frame = ctk.CTkFrame(main_frame, fg_color="transparent")
+        btn_frame.grid(row=1, column=0, sticky="", pady=20)
         
-        # Yes button
+        # Yes button - make it very prominent
         yes_btn = ctk.CTkButton(
             btn_frame,
-            text="Yes",
-            width=100,
-            height=35,
+            text="✓ Yes",
+            width=130,
+            height=45,
             fg_color=colors["primary"],
             hover_color=colors["primary_hover"],
-            font=ctk.CTkFont(size=13, weight="bold"),
-            command=self._on_yes
+            font=ctk.CTkFont(size=15, weight="bold"),
+            command=self._on_yes,
+            corner_radius=6,
+            border_width=0
         )
-        yes_btn.pack(side="left", padx=10)
+        yes_btn.grid(row=0, column=0, padx=15)
         
         # No button
         no_btn = ctk.CTkButton(
             btn_frame,
-            text="No",
-            width=100,
-            height=35,
+            text="✗ No",
+            width=130,
+            height=45,
             fg_color=colors["secondary"],
             hover_color="#475569",
-            font=ctk.CTkFont(size=13),
-            command=self._on_no
+            font=ctk.CTkFont(size=15),
+            command=self._on_no,
+            corner_radius=6,
+            border_width=0
         )
-        no_btn.pack(side="left", padx=10)
+        no_btn.grid(row=0, column=1, padx=15)
         
-        # Focus on Yes button
-        yes_btn.focus_set()
+        # Ensure window is interactive
+        self.protocol("WM_DELETE_WINDOW", self._on_no)
+        
+        # Focus on window first, then button
+        self.after(50, lambda: self.focus_force())
+        self.after(100, lambda: yes_btn.focus_set())
         
         # Bind Enter and Escape keys
         self.bind("<Return>", lambda e: self._on_yes())
         self.bind("<Escape>", lambda e: self._on_no())
+        
+        # Store button references
+        self.yes_btn = yes_btn
+        self.no_btn = no_btn
+        
+        # Final update to ensure everything is rendered and visible
+        self.update()
+        self.update_idletasks()
+        
+        # Force buttons to be visible and on top
+        yes_btn.lift()
+        no_btn.lift()
+        btn_frame.lift()
+        
+        # Ensure buttons are definitely rendered
+        yes_btn.update()
+        no_btn.update()
+        
+        # One more update after a short delay to ensure visibility
+        self.after(100, lambda: [self.update(), yes_btn.update(), no_btn.update()])
     
     def _on_yes(self):
         self.result = True
@@ -229,6 +283,12 @@ class AgentPage(ctk.CTkFrame):
         # Rule management flags
         self.waiting_for_rule_input = False
         self.rule_action_type = None  # "add" or "update"
+        
+        # Schematic-to-PCB state
+        self.current_schematic_path = None
+        self.current_schematic_artifact_id = None
+        self.current_schematic_components = None
+        self.generated_footprints = None
         
         self.setup_ui()
         self.add_welcome_message()
@@ -422,6 +482,8 @@ class AgentPage(ctk.CTkFrame):
         
         # Menu items
         menu_items = [
+            ("Make PCB", "make_pcb", "Create PCB from schematic (auto-place + auto-route, may need 1 click)"),
+            ("Continue PCB Setup", "continue_pcb", "Auto-place & auto-route after manual ECO transfer"),
             ("Run DRC", "run_drc", "Run Design Rule Check in Altium"),
             ("View Design Rules", "view_design_rules", "View all design rules from Altium"),
             ("Auto-Generate DRC Rules", "auto_generate_rules", "Automatically generate DRC rules from PCB design"),
@@ -499,7 +561,11 @@ class AgentPage(ctk.CTkFrame):
         """Handle menu action"""
         self.hide_menu()
         
-        if action == "run_drc":
+        if action == "make_pcb":
+            self._make_pcb_from_schematic()
+        elif action == "continue_pcb":
+            self._continue_pcb_setup()
+        elif action == "run_drc":
             self._run_altium_drc()
         elif action == "refresh":
             self._refresh_from_altium()
@@ -1074,12 +1140,18 @@ class AgentPage(ctk.CTkFrame):
         """Add professional welcome message"""
         welcome = """Hi! I'm EagilinsED, your PCB design assistant.
 
-Use the menu (three dots) for actions like Run DRC, Export PCB, etc.
+Upload a file to get started:
+  - Schematic (.SchDoc): Extract info, then 'Make PCB' for automated PCB creation
+  - PCB (.PcbDoc): Analyze existing PCB design
+
+Use the menu (three dots) for actions like Make PCB (automated with ECO), Run DRC, and more.
 
 Chat with me to:
+- Analyze your schematic or PCB design
+- Create PCB from schematic automatically
 - Move, add, or delete components
-- Get routing recommendations  
-- Analyze your design"""
+- Get routing recommendations
+- Run DRC and fix violations"""
         
         self.add_message(welcome, is_user=False)
     
@@ -1097,6 +1169,49 @@ Chat with me to:
         self.chat_frame._parent_canvas.yview_moveto(1.0)
         
         return msg
+    
+    def _add_message_buttons(self, msg_frame: ChatMessage, on_yes, on_no):
+        """Add Yes/No buttons to a message frame"""
+        # Create buttons frame
+        buttons_frame = ctk.CTkFrame(msg_frame.bubble, fg_color="transparent")
+        buttons_frame.grid(row=1, column=0, pady=(10, 16), padx=18, sticky="w")
+        
+        # Yes button
+        yes_btn = ctk.CTkButton(
+            buttons_frame,
+            text="✓ Yes",
+            command=on_yes,
+            width=120,
+            height=35,
+            font=ctk.CTkFont(size=13, weight="bold"),
+            fg_color=self.colors["success"],
+            hover_color="#059669",
+            corner_radius=8
+        )
+        yes_btn.grid(row=0, column=0, padx=(0, 10))
+        
+        # No button
+        no_btn = ctk.CTkButton(
+            buttons_frame,
+            text="✗ No",
+            command=on_no,
+            width=120,
+            height=35,
+            font=ctk.CTkFont(size=13, weight="bold"),
+            fg_color=self.colors.get("bg_input", "#334155"),
+            hover_color=self.colors.get("bg_hover", "#475569"),
+            corner_radius=8
+        )
+        no_btn.grid(row=0, column=1, padx=(10, 0))
+        
+        # Store buttons reference in message frame for later removal
+        msg_frame.action_buttons = buttons_frame
+    
+    def _remove_message_buttons(self, msg_frame: ChatMessage):
+        """Remove action buttons from a message frame"""
+        if hasattr(msg_frame, 'action_buttons'):
+            msg_frame.action_buttons.destroy()
+            delattr(msg_frame, 'action_buttons')
     
     def send_message(self):
         """Send user message"""
@@ -3650,13 +3765,1030 @@ Chat with me to:
             if filepath.lower().endswith('.pcbdoc'):
                 self.load_pcb_file(filepath)
             elif filepath.lower().endswith('.schdoc'):
-                self.add_message(f"Selected schematic: {filepath}", is_user=True)
-                self.add_message("Schematic analysis coming soon!", is_user=False)
+                self.load_schematic_file(filepath)
             elif filepath.lower().endswith('.prjpcb'):
                 self.add_message(f"Selected project: {filepath}", is_user=True)
                 self.add_message("Project analysis coming soon!", is_user=False)
             else:
                 self.add_message(f"Unknown file type: {filepath}", is_user=False)
+    
+    def load_schematic_file(self, filepath: str):
+        """Load and analyze a Schematic file via MCP server"""
+        import os
+        
+        # Show loading message
+        self.add_message(f"Loading schematic: {os.path.basename(filepath)}", is_user=True)
+        self.set_status("Loading Schematic...", "warning")
+        self.set_loading(True)
+        
+        # Process in background
+        def load():
+            try:
+                # Load schematic via MCP client
+                # This will prioritize schematic_info.json exported by schematic_PCB.pas
+                result = self.mcp_client.load_schematic_file(filepath)
+                
+                if result.get("error"):
+                    raise Exception(result.get("error"))
+                
+                # Get data from the load result (already contains components, nets, etc.)
+                stats = result.get("statistics", {})
+                artifact_id = result.get("artifact_id", "unknown")
+                source = result.get("source", "unknown")
+                
+                # Components and nets come directly from the load result
+                components = result.get("components", [])
+                nets = result.get("nets", [])
+                net_labels = result.get("net_labels", [])
+                power_ports = result.get("power_ports", [])
+                
+                # If load result doesn't have details, fetch from server
+                if not components and not nets:
+                    sch_info = self.mcp_client.get_schematic_info()
+                    if sch_info and not sch_info.get("error"):
+                        components = sch_info.get("components", [])
+                        nets = sch_info.get("nets", [])
+                        net_labels = sch_info.get("net_labels", [])
+                        power_ports = sch_info.get("power_ports", [])
+                
+                # Build detailed response
+                source_label = "(from Altium export)" if source == "altium_export" else "(parsed from file)"
+                response = f"""Schematic Loaded Successfully! {source_label}
+
+File: {os.path.basename(filepath)}
+
+Schematic Statistics
+  Components: {stats.get('component_count', len(components))}
+  Nets: {stats.get('net_count', len(nets))}
+  Wires: {stats.get('wire_count', 0)}
+  Power Ports: {stats.get('power_port_count', len(power_ports))}
+"""
+                
+                # List components with real designators
+                if components:
+                    response += "\nComponent List:\n"
+                    for i, comp in enumerate(components[:20]):
+                        designator = comp.get('designator', comp.get('SOURCEDESIGNATOR', 'Unknown'))
+                        lib_ref = comp.get('lib_reference', comp.get('lib_ref', comp.get('SOURCELIBREFERENCE', '')))
+                        value = comp.get('value', '')
+                        footprint = comp.get('footprint', '')
+                        description = comp.get('description', comp.get('COMPONENTDESCRIPTION', ''))
+                        
+                        line = f"  {designator}"
+                        if lib_ref:
+                            line += f": {lib_ref}"
+                        if value:
+                            line += f" ({value})"
+                        if footprint:
+                            line += f" [{footprint}]"
+                        if description and not lib_ref:
+                            line += f" - {description}"
+                        response += line + "\n"
+                    if len(components) > 20:
+                        response += f"  ... and {len(components) - 20} more components\n"
+                
+                # List nets with pin connections
+                if nets:
+                    response += f"\nNet List ({len(nets)} nets):\n"
+                    for i, net in enumerate(nets[:15]):
+                        net_name = net.get('name', net.get('NAME', 'Unnamed'))
+                        pins = net.get('pins', [])
+                        if pins:
+                            pin_str = ", ".join([f"{p.get('component','?')}-{p.get('pin','?')}" for p in pins[:4]])
+                            if len(pins) > 4:
+                                pin_str += f" +{len(pins)-4} more"
+                            response += f"  {net_name}: {pin_str}\n"
+                        else:
+                            response += f"  {net_name}\n"
+                    if len(nets) > 15:
+                        response += f"  ... and {len(nets) - 15} more nets\n"
+                
+                # Power ports / topology info
+                if power_ports:
+                    response += f"\nPower Topology ({len(power_ports)} ports):\n"
+                    # Group by name
+                    power_names = {}
+                    for pp in power_ports:
+                        name = pp.get('name', 'Unknown')
+                        power_names[name] = power_names.get(name, 0) + 1
+                    for name, count in sorted(power_names.items()):
+                        response += f"  {name} ({count} port{'s' if count > 1 else ''})\n"
+                elif nets:
+                    # Fall back: extract power nets from net list
+                    power_keywords = ['VCC', 'VDD', 'GND', 'PWR', '3V3', '5V', '12V', '1V8', 'VBAT', 'VSS', '3.3V', '24V']
+                    power_nets = [n for n in nets if any(kw in n.get('name', '').upper() for kw in power_keywords)]
+                    if power_nets:
+                        response += "\nPower Topology:\n"
+                        for pn in power_nets:
+                            pn_name = pn.get('name', '')
+                            pn_pins = len(pn.get('pins', []))
+                            response += f"  {pn_name} ({pn_pins} connections)\n"
+                
+                # Show warning if using olefile fallback
+                if result.get("warning"):
+                    response += f"\nNote: {result['warning']}\n"
+                
+                # Store schematic data for footprint generation
+                self.current_schematic_path = filepath
+                self.current_schematic_components = components
+                
+                # Show success message
+                self._safe_after(0, lambda: self.add_message(response, is_user=False))
+                self._safe_after(0, lambda: self.set_status("Schematic Loaded", "success"))
+                self._safe_after(0, lambda: self.set_loading(False))
+                
+                # Show confirmation dialog: "Do you want to make libraries?"
+                self._safe_after(100, lambda: self._ask_generate_footprints(components))
+                
+            except Exception as e:
+                error_msg = f"Error loading schematic: {str(e)}"
+                self._safe_after(0, lambda: self.add_message(error_msg, is_user=False))
+                self._safe_after(0, lambda: self.set_status("Error", "error"))
+                self._safe_after(0, lambda: self.set_loading(False))
+        
+        threading.Thread(target=load, daemon=True).start()
+    
+    def _ask_generate_footprints(self, components: list):
+        """Show message with buttons asking if user wants to generate footprints"""
+        # Add the question as a message
+        question_msg = (
+            f"Do you want to make libraries?\n\n"
+            f"Found {len(components)} components in schematic.\n\n"
+            "• Yes: AI will analyze components and generate detailed footprint specifications\n"
+            "• No: Use existing footprint information from schematic"
+        )
+        
+        # Add message to chat
+        msg_frame = self.add_message(question_msg, is_user=False)
+        
+        # Add buttons below the message
+        def on_yes():
+            # Remove buttons and show generating message
+            self._remove_message_buttons(msg_frame)
+            self._generate_footprints(components)
+        
+        def on_no():
+            # Remove buttons and show skipping message
+            self._remove_message_buttons(msg_frame)
+            self.add_message(
+                "Skipping footprint generation.\n"
+                "PCB will be created using existing footprint information from schematic.\n\n"
+                "Proceeding to PCB creation...",
+                is_user=False
+            )
+            # Proceed directly to PCB creation
+            self._safe_after(500, lambda: self._make_pcb_from_schematic())
+        
+        # Add buttons to the message frame
+        self._add_message_buttons(msg_frame, on_yes, on_no)
+    
+    def _generate_footprints(self, components: list):
+        """Generate footprints using LLM and then proceed to PCB creation"""
+        self.add_message("Generating footprint libraries using AI...", is_user=False)
+        self.set_status("Generating Footprints...", "warning")
+        self.set_loading(True)
+        
+        def generate():
+            try:
+                # Call MCP server to generate footprints
+                result = self.mcp_client.generate_footprints(components)
+                
+                if result.get("success"):
+                    footprints = result.get("footprints", {})
+                    footprint_libraries = result.get("footprint_libraries", {})
+                    library_structure = result.get("library_structure", {})
+                    stats = result.get("statistics", {})
+                    
+                    # Save footprints to JSON file for DelphiScript to read
+                    from pathlib import Path
+                    import json
+                    import os
+                    import sys
+                    
+                    # Get absolute path to workspace root - use explicit path to avoid any issues
+                    # First try the known correct path
+                    explicit_workspace = Path(r"E:\Altium_Project\PCB_ai_agent")
+                    if explicit_workspace.exists() and (explicit_workspace / "PCB_Project").exists():
+                        workspace_root = explicit_workspace.resolve()
+                    else:
+                        # Fallback: use current working directory
+                        cwd = Path(os.getcwd()).resolve()
+                        if (cwd / "PCB_Project").exists():
+                            workspace_root = cwd
+                        elif (cwd.parent / "PCB_Project").exists():
+                            workspace_root = cwd.parent
+                        else:
+                            # Search up the directory tree
+                            current = cwd
+                            workspace_root = None
+                            for _ in range(5):
+                                if (current / "PCB_Project").exists():
+                                    workspace_root = current
+                                    break
+                                if current.parent == current:
+                                    break
+                                current = current.parent
+                            if workspace_root is None:
+                                workspace_root = cwd
+                    
+                    workspace_root = workspace_root.resolve()
+                    
+                    # CRITICAL VALIDATION: Ensure workspace root is correct
+                    workspace_str = str(workspace_root)
+                    if "AltiumProject" in workspace_str or "PCBaiagent" in workspace_str:
+                        raise Exception(
+                            f"CRITICAL: Workspace root contains incorrect path pattern!\n"
+                            f"Workspace: {workspace_root}\n"
+                            f"This should contain 'Altium_Project' and 'PCB_ai_agent' with underscores."
+                        )
+                    
+                    if not workspace_root.exists():
+                        raise Exception(f"Workspace root does not exist: {workspace_root}")
+                    
+                    pcb_project_dir = workspace_root / "PCB_Project"
+                    
+                    # Debug: Print the resolved paths
+                    print(f"[DEBUG] Workspace root: {workspace_root}")
+                    print(f"[DEBUG] PCB_Project dir: {pcb_project_dir}")
+                    
+                    # Ensure directory exists with proper permissions
+                    try:
+                        pcb_project_dir.mkdir(parents=True, exist_ok=True)
+                        print(f"[DEBUG] PCB_Project directory: {pcb_project_dir}")
+                        print(f"[DEBUG] PCB_Project exists: {pcb_project_dir.exists()}")
+                    except Exception as e:
+                        raise Exception(f"Cannot create PCB_Project directory at {pcb_project_dir}: {str(e)}")
+                    
+                    # CRITICAL: Use ONLY hardcoded explicit paths - no path resolution at all
+                    # This eliminates any possibility of path resolution errors
+                    EXPLICIT_FOOTPRINT_FILE = r"E:\Altium_Project\PCB_ai_agent\PCB_Project\generated_footprints.json"
+                    EXPLICIT_LIBRARY_FILE = r"E:\Altium_Project\PCB_ai_agent\PCB_Project\footprint_libraries.json"
+                    
+                    # IMMEDIATE VALIDATION: Verify the hardcoded paths are correct
+                    if "AltiumProject" in EXPLICIT_FOOTPRINT_FILE or "PCBaiagent" in EXPLICIT_FOOTPRINT_FILE or "PCBProject" in EXPLICIT_FOOTPRINT_FILE:
+                        raise Exception(f"CRITICAL: Hardcoded footprint file path is wrong! Path: {EXPLICIT_FOOTPRINT_FILE}")
+                    if "AltiumProject" in EXPLICIT_LIBRARY_FILE or "PCBaiagent" in EXPLICIT_LIBRARY_FILE or "PCBProject" in EXPLICIT_LIBRARY_FILE or "footprintlibraries.json" in EXPLICIT_LIBRARY_FILE:
+                        raise Exception(f"CRITICAL: Hardcoded library file path is wrong! Path: {EXPLICIT_LIBRARY_FILE}")
+                    
+                    # Verify directories exist and are writable
+                    footprint_dir = Path(EXPLICIT_FOOTPRINT_FILE).parent
+                    library_dir = Path(EXPLICIT_LIBRARY_FILE).parent
+                    
+                    if not footprint_dir.exists():
+                        raise Exception(f"Directory does not exist: {footprint_dir}")
+                    if not library_dir.exists():
+                        raise Exception(f"Directory does not exist: {library_dir}")
+                    if not os.access(str(footprint_dir), os.W_OK):
+                        raise Exception(f"Directory is not writable: {footprint_dir}")
+                    if not os.access(str(library_dir), os.W_OK):
+                        raise Exception(f"Directory is not writable: {library_dir}")
+                    
+                    print(f"[CRITICAL DEBUG] Using hardcoded footprint file: {EXPLICIT_FOOTPRINT_FILE}")
+                    print(f"[CRITICAL DEBUG] Using hardcoded library file: {EXPLICIT_LIBRARY_FILE}")
+                    
+                    # Save component->footprint mapping (for PCB creation)
+                    # Use same temp file + overwrite approach to handle locked files
+                    footprint_temp_file = Path(EXPLICIT_FOOTPRINT_FILE + '.tmp')
+                    footprint_write_success = False
+                    
+                    for footprint_attempt in range(5):
+                        try:
+                            # Clean up any existing temp file
+                            if footprint_temp_file.exists():
+                                try:
+                                    footprint_temp_file.unlink()
+                                except:
+                                    pass
+                            
+                            # Write to temp file first
+                            with open(footprint_temp_file, 'w', encoding='utf-8') as f:
+                                json.dump(footprints, f, indent=2)
+                                f.flush()
+                                os.fsync(f.fileno())
+                            
+                            # Try to delete existing file (optional - rename will overwrite)
+                            existing_footprint = Path(EXPLICIT_FOOTPRINT_FILE)
+                            if existing_footprint.exists():
+                                try:
+                                    existing_footprint.unlink()
+                                except:
+                                    pass  # Ignore deletion errors - rename will overwrite
+                            
+                            # Try atomic rename
+                            try:
+                                os.rename(str(footprint_temp_file), EXPLICIT_FOOTPRINT_FILE)
+                                footprint_write_success = True
+                                break
+                            except (PermissionError, OSError):
+                                # Rename failed, try direct overwrite
+                                if footprint_attempt < 4:
+                                    time.sleep(0.2 * (footprint_attempt + 1))
+                                    continue
+                                # Final attempt: direct overwrite
+                                with open(EXPLICIT_FOOTPRINT_FILE, 'w', encoding='utf-8') as f:
+                                    json.dump(footprints, f, indent=2)
+                                    f.flush()
+                                    os.fsync(f.fileno())
+                                try:
+                                    footprint_temp_file.unlink()
+                                except:
+                                    pass
+                                footprint_write_success = True
+                                break
+                        except PermissionError as e:
+                            error_msg = str(e)
+                            if footprint_attempt < 4:
+                                time.sleep(0.2 * (footprint_attempt + 1))
+                                continue
+                            # Final attempt failed
+                            if "AltiumProject" in error_msg or "PCBaiagent" in error_msg:
+                                raise Exception(
+                                    f"CRITICAL: PermissionError shows wrong path for footprint file!\n"
+                                    f"Hardcoded path: {EXPLICIT_FOOTPRINT_FILE}\n"
+                                    f"Error message: {error_msg}\n"
+                                    f"SOLUTION: Please completely close and restart the application."
+                                )
+                            raise Exception(
+                                f"Cannot write to file (file is locked by another process):\n"
+                                f"{EXPLICIT_FOOTPRINT_FILE}\n\n"
+                                f"Please close the file in your IDE and try again."
+                            )
+                        except Exception as e:
+                            if footprint_attempt < 4:
+                                time.sleep(0.2 * (footprint_attempt + 1))
+                                continue
+                            raise Exception(f"Failed to write {EXPLICIT_FOOTPRINT_FILE}: {str(e)}")
+                    
+                    if footprint_write_success:
+                        print(f"[CRITICAL DEBUG] Successfully wrote footprint file to: {EXPLICIT_FOOTPRINT_FILE}")
+                    else:
+                        raise Exception(f"Failed to write {EXPLICIT_FOOTPRINT_FILE} after 5 attempts")
+                    
+                    # Save library structure (for Altium PCB library creation)
+                    # Structure: top-level "footprints" array for DelphiScript parsing
+                    footprints_array = []
+                    for footprint_key, footprint_spec in footprint_libraries.items():
+                        if footprint_key == '_footprint_libraries':
+                            continue
+                        # Extract pin_count from pads array
+                        pads = footprint_spec.get('pads', [])
+                        pin_count = len(pads) if isinstance(pads, list) else 2
+                        
+                        footprints_array.append({
+                            'footprint_name': footprint_spec.get('footprint_name', footprint_key),
+                            'pin_count': pin_count,
+                            'component_type': footprint_spec.get('component_type', 'unknown'),
+                            'package_type': footprint_spec.get('package_type', 'smd'),
+                            'pads': footprint_spec.get('pads', []),
+                            'silkscreen': footprint_spec.get('silkscreen', {}),
+                            'component_count': footprint_spec.get('component_count', 0)
+                        })
+                    
+                    library_data = {
+                        'footprints': footprints_array,  # Array for DelphiScript parsing
+                        'footprint_libraries': footprint_libraries,  # Keep original structure
+                        'library_structure': library_structure,
+                        'statistics': stats
+                    }
+                    # CRITICAL: Use ONLY the hardcoded explicit path - no path resolution at all
+                    # This eliminates any possibility of path resolution errors
+                    # DO NOT MODIFY THIS PATH - it must match exactly: E:\Altium_Project\PCB_ai_agent\PCB_Project\footprint_libraries.json
+                    # Note: EXPLICIT_LIBRARY_FILE was already defined above, reuse it
+                    EXPLICIT_LIBRARY_PATH = EXPLICIT_LIBRARY_FILE
+                    
+                    # IMMEDIATE VALIDATION: Verify the hardcoded path is correct (this should always pass)
+                    if "AltiumProject" in EXPLICIT_LIBRARY_PATH or "PCBaiagent" in EXPLICIT_LIBRARY_PATH or "PCBProject" in EXPLICIT_LIBRARY_PATH or "footprintlibraries.json" in EXPLICIT_LIBRARY_PATH:
+                        raise Exception(
+                            f"CRITICAL: Hardcoded path constant is wrong! This is a code error.\n"
+                            f"Hardcoded path: {EXPLICIT_LIBRARY_PATH}\n"
+                            f"Expected: E:\\Altium_Project\\PCB_ai_agent\\PCB_Project\\footprint_libraries.json"
+                        )
+                    
+                    # Verify it contains the correct elements
+                    if "Altium_Project" not in EXPLICIT_LIBRARY_PATH or "PCB_ai_agent" not in EXPLICIT_LIBRARY_PATH or "PCB_Project" not in EXPLICIT_LIBRARY_PATH or "footprint_libraries.json" not in EXPLICIT_LIBRARY_PATH:
+                        raise Exception(
+                            f"CRITICAL: Hardcoded path missing required elements!\n"
+                            f"Hardcoded path: {EXPLICIT_LIBRARY_PATH}\n"
+                            f"Expected to contain: Altium_Project, PCB_ai_agent, PCB_Project, footprint_libraries.json"
+                        )
+                    
+                    # Verify the directory exists and is writable using the hardcoded path
+                    lib_dir_path = Path(EXPLICIT_LIBRARY_PATH).parent
+                    if not lib_dir_path.exists():
+                        raise Exception(f"Directory does not exist: {lib_dir_path}")
+                    if not os.access(EXPLICIT_LIBRARY_PATH, os.W_OK):
+                        # Check parent directory instead
+                        if not os.access(str(lib_dir_path), os.W_OK):
+                            raise Exception(f"Directory is not writable: {lib_dir_path}")
+                    
+                    # CRITICAL: Print the exact path we're about to use
+                    print(f"[CRITICAL DEBUG] About to write to: {EXPLICIT_LIBRARY_PATH}")
+                    print(f"[CRITICAL DEBUG] Path type: {type(EXPLICIT_LIBRARY_PATH)}")
+                    print(f"[CRITICAL DEBUG] Path repr: {repr(EXPLICIT_LIBRARY_PATH)}")
+                    print(f"[CRITICAL DEBUG] Directory exists: {lib_dir_path.exists()}")
+                    print(f"[CRITICAL DEBUG] Directory writable: {os.access(str(lib_dir_path), os.W_OK)}")
+                    
+                    # Check if file is locked BEFORE attempting to write
+                    existing_file = Path(EXPLICIT_LIBRARY_PATH)
+                    file_is_locked = False
+                    if existing_file.exists():
+                        # Try to open file in append mode to check if it's locked
+                        try:
+                            with open(EXPLICIT_LIBRARY_PATH, 'a') as test_f:
+                                pass  # File is not locked
+                        except PermissionError:
+                            file_is_locked = True
+                            print(f"[CRITICAL DEBUG] File is locked: {EXPLICIT_LIBRARY_PATH}")
+                    
+                    # Use temp file + atomic rename approach to avoid file locking issues
+                    # This is the same approach used in altium_script_client.py
+                    import time
+                    from datetime import datetime
+                    temp_file = Path(EXPLICIT_LIBRARY_PATH + '.tmp')
+                    max_write_attempts = 10
+                    write_success = False
+                    backup_file = None
+                    
+                    # If file is locked, prepare backup filename
+                    if file_is_locked:
+                        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+                        backup_file = Path(EXPLICIT_LIBRARY_PATH.replace('.json', f'_backup_{timestamp}.json'))
+                        print(f"[CRITICAL DEBUG] File is locked, will write to backup: {backup_file}")
+                    
+                    for write_attempt in range(max_write_attempts):
+                        try:
+                            # Clean up any existing temp file first
+                            if temp_file.exists():
+                                try:
+                                    temp_file.unlink()
+                                except:
+                                    pass
+                            
+                            # Write to temp file first
+                            with open(temp_file, 'w', encoding='utf-8') as f:
+                                json.dump(library_data, f, indent=2)
+                                f.flush()
+                                os.fsync(f.fileno())  # Force write to disk
+                            
+                            # If file was detected as locked, try backup first
+                            if file_is_locked and backup_file:
+                                try:
+                                    os.rename(str(temp_file), str(backup_file))
+                                    write_success = True
+                                    # Now try to overwrite the main file one more time
+                                    try:
+                                        with open(backup_file, 'r', encoding='utf-8') as src:
+                                            with open(EXPLICIT_LIBRARY_PATH, 'w', encoding='utf-8') as dst:
+                                                dst.write(src.read())
+                                        # Successfully overwrote main file, delete backup
+                                        try:
+                                            backup_file.unlink()
+                                        except:
+                                            pass
+                                        print(f"[CRITICAL DEBUG] Successfully overwrote locked file!")
+                                    except PermissionError:
+                                        # Still locked, but we have backup
+                                        raise Exception(
+                                            f"File is locked and cannot be overwritten:\n"
+                                            f"{EXPLICIT_LIBRARY_PATH}\n\n"
+                                            f"✅ SOLUTION: I've saved the new data to a backup file:\n"
+                                            f"{backup_file}\n\n"
+                                            f"Please do ONE of the following:\n"
+                                            f"  1. Close the file in your IDE (close the file tab)\n"
+                                            f"  2. Close Altium Designer if it's reading this file\n"
+                                            f"  3. Close any file explorer windows showing this directory\n\n"
+                                            f"Then manually replace the locked file:\n"
+                                            f"  • Delete: {EXPLICIT_LIBRARY_PATH}\n"
+                                            f"  • Rename: {backup_file.name} → footprint_libraries.json\n\n"
+                                            f"Or simply close the file and try generating footprints again."
+                                        )
+                                    break
+                                except Exception as e:
+                                    # Backup write failed too
+                                    raise Exception(
+                                        f"Cannot write to file or backup (file is locked):\n"
+                                        f"{EXPLICIT_LIBRARY_PATH}\n\n"
+                                        f"Please close the file in your IDE (close the file tab) and try again."
+                                    )
+                            
+                            # Try to remove old file if it exists (but don't fail if locked)
+                            # This is just an optimization - rename will overwrite anyway
+                            if existing_file.exists() and not file_is_locked:
+                                for del_attempt in range(3):  # Fewer attempts, don't fail
+                                    try:
+                                        existing_file.unlink()
+                                        break  # Successfully deleted
+                                    except PermissionError:
+                                        # File is locked - that's OK, we'll try to overwrite it
+                                        if del_attempt < 2:
+                                            time.sleep(0.1)
+                                        # Continue even if deletion fails - rename might still work
+                                    except Exception:
+                                        # Other error - continue anyway
+                                        break
+                            
+                            # Try atomic rename first (temp -> real) - this will overwrite if target exists
+                            rename_success = False
+                            for rename_attempt in range(5):
+                                try:
+                                    os.rename(str(temp_file), EXPLICIT_LIBRARY_PATH)
+                                    rename_success = True
+                                    break
+                                except PermissionError:
+                                    # File might be locked - try direct overwrite instead
+                                    if rename_attempt < 4:
+                                        time.sleep(0.2 * (rename_attempt + 1))  # Exponential backoff
+                                    else:
+                                        # Rename failed, try direct overwrite as fallback
+                                        break
+                                except OSError:
+                                    # On Windows, rename might fail if target is locked
+                                    # Try direct overwrite instead
+                                    break
+                            
+                            # If rename failed (file locked), try direct overwrite
+                            if not rename_success:
+                                try:
+                                    # Direct overwrite - this works even if file is open in some editors
+                                    with open(EXPLICIT_LIBRARY_PATH, 'w', encoding='utf-8') as f:
+                                        json.dump(library_data, f, indent=2)
+                                        f.flush()
+                                        os.fsync(f.fileno())
+                                    # Clean up temp file
+                                    try:
+                                        temp_file.unlink()
+                                    except:
+                                        pass
+                                    write_success = True
+                                except PermissionError:
+                                    # Even direct overwrite failed - file is truly locked
+                                    # Write to backup and give clear instructions
+                                    if backup_file is None:
+                                        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+                                        backup_file = Path(EXPLICIT_LIBRARY_PATH.replace('.json', f'_backup_{timestamp}.json'))
+                                    try:
+                                        with open(backup_file, 'w', encoding='utf-8') as f:
+                                            json.dump(library_data, f, indent=2)
+                                        raise Exception(
+                                            f"File is locked and cannot be overwritten:\n"
+                                            f"{EXPLICIT_LIBRARY_PATH}\n\n"
+                                            f"✅ SOLUTION: I've saved the new data to a backup file:\n"
+                                            f"{backup_file}\n\n"
+                                            f"Please close the file in your IDE (close the file tab) and try again.\n"
+                                            f"Or manually replace the file:\n"
+                                            f"  • Delete: {EXPLICIT_LIBRARY_PATH}\n"
+                                            f"  • Rename: {backup_file.name} → footprint_libraries.json"
+                                        )
+                                    except Exception as backup_err:
+                                        # Even backup failed
+                                        raise Exception(
+                                            f"Cannot write to file (file is locked by another process):\n"
+                                            f"{EXPLICIT_LIBRARY_PATH}\n\n"
+                                            f"Please close any programs that might have this file open:\n"
+                                            f"  • Your IDE (if the file is open in the editor) - CLOSE THE FILE TAB\n"
+                                            f"  • Altium Designer\n"
+                                            f"  • File explorer windows showing this directory\n"
+                                            f"  • Any other programs accessing this file\n\n"
+                                            f"After closing, try generating footprints again."
+                                        )
+                            else:
+                                write_success = True
+                            
+                            if write_success:
+                                time.sleep(0.1)  # Brief filesystem settle
+                                print(f"[CRITICAL DEBUG] Successfully wrote library file to: {EXPLICIT_LIBRARY_PATH}")
+                                break
+                                
+                        except PermissionError as e:
+                            error_msg = str(e)
+                            if write_attempt < max_write_attempts - 1:
+                                # Retry with exponential backoff
+                                wait_time = 0.2 * (write_attempt + 1)
+                                print(f"[CRITICAL DEBUG] PermissionError on attempt {write_attempt + 1}/{max_write_attempts}, retrying in {wait_time}s...")
+                                time.sleep(wait_time)
+                                continue
+                            else:
+                                # Final attempt failed
+                                raise Exception(
+                                    f"Permission denied writing to {EXPLICIT_LIBRARY_PATH} after {max_write_attempts} attempts.\n"
+                                    f"Error: {error_msg}\n\n"
+                                    f"Possible causes:\n"
+                                    f"  • File is locked by another process (Altium Designer, file explorer, etc.)\n"
+                                    f"  • Antivirus or file system protection is blocking access\n"
+                                    f"  • Insufficient file permissions\n\n"
+                                    f"SOLUTION: Please close any programs that might have this file open and try again."
+                                )
+                        except Exception as e:
+                            error_msg = str(e)
+                            # Always use the correct hardcoded path in error messages, never trust error_msg path
+                            if "AltiumProject" in error_msg or "PCBaiagent" in error_msg or "footprintlibraries.json" in error_msg:
+                                # The nested exception contains wrong path - replace it with correct path
+                                raise Exception(
+                                    f"Failed to write {EXPLICIT_LIBRARY_PATH}\n"
+                                    f"Original error: {error_msg}\n\n"
+                                    f"Possible causes:\n"
+                                    f"  • File is locked by another process (Altium Designer, file explorer, IDE, etc.)\n"
+                                    f"  • The file {EXPLICIT_LIBRARY_PATH} is currently open in your IDE or another program\n"
+                                    f"  • Antivirus or file system protection is blocking access\n\n"
+                                    f"SOLUTION: Please close the file {EXPLICIT_LIBRARY_PATH} in your IDE and any other programs, then try again."
+                                )
+                            # For other exceptions, still use the correct path
+                            raise Exception(f"Failed to write {EXPLICIT_LIBRARY_PATH}: {error_msg}")
+                    
+                    if not write_success:
+                        raise Exception(
+                            f"Failed to write {EXPLICIT_LIBRARY_PATH} after {max_write_attempts} attempts.\n"
+                            f"Please close any programs that might have this file open and try again."
+                        )
+                    
+                    # Build success message with statistics
+                    unique_count = stats.get('unique_footprints', 0)
+                    total_components = stats.get('total_components', 0)
+                    categories = stats.get('categories', {})
+                    
+                    # Step 2: Create actual Altium PCB library files (.PcbLib)
+                    self._safe_after(0, lambda: self.add_message(
+                        "Creating Altium PCB library files (.PcbLib)...", is_user=False
+                    ))
+                    
+                    lib_result = self.mcp_client.create_pcb_libraries()
+                    
+                    if lib_result.get("success"):
+                        lib_path = lib_result.get("library_path", "Unknown")
+                        footprint_count = lib_result.get("footprint_count", 0)
+                        
+                        msg = f"✅ Footprint libraries generated successfully!\n\n"
+                        msg += f"📊 Statistics:\n"
+                        msg += f"  • {unique_count} unique footprints generated\n"
+                        msg += f"  • {total_components} components mapped\n"
+                        if categories:
+                            msg += f"  • Categories: {', '.join([f'{k}({v})' for k, v in categories.items()])}\n"
+                        msg += f"\n💾 Files created:\n"
+                        msg += f"  • {EXPLICIT_FOOTPRINT_FILE}\n"
+                        msg += f"  • {EXPLICIT_LIBRARY_FILE}\n"
+                        msg += f"  • {lib_path} ({footprint_count} footprints)\n\n"
+                        msg += f"Ready to create PCB with generated footprints!"
+                        
+                        self._safe_after(0, lambda: self.add_message(msg, is_user=False))
+                        self._safe_after(0, lambda: self.set_status("Libraries Created", "success"))
+                        
+                        # Store generated footprints for PCB creation
+                        self.generated_footprints = footprints
+                        self.footprint_libraries = footprint_libraries
+                        
+                        # Show confirmation dialog
+                        self._safe_after(500, lambda: self._ask_proceed_to_pcb(files_saved=True))
+                    else:
+                        lib_error = lib_result.get("error", "Unknown error")
+                        msg = f"✅ Footprint specifications generated!\n\n"
+                        msg += f"📊 Statistics:\n"
+                        msg += f"  • {unique_count} unique footprints generated\n"
+                        msg += f"  • {total_components} components mapped\n"
+                        msg += f"\n💾 JSON files saved:\n"
+                        msg += f"  • {EXPLICIT_FOOTPRINT_FILE}\n"
+                        msg += f"  • {EXPLICIT_LIBRARY_FILE}\n\n"
+                        msg += f"⚠️ Warning: Could not create .PcbLib files: {lib_error}\n"
+                        msg += f"Proceeding with existing footprint information..."
+                        
+                        self._safe_after(0, lambda: self.add_message(msg, is_user=False))
+                        self._safe_after(0, lambda: self.set_status("Libraries Partially Created", "warning"))
+                        
+                        # Store generated footprints
+                        self.generated_footprints = footprints
+                        self.footprint_libraries = footprint_libraries
+                        
+                        # Show confirmation dialog even if library creation failed (but files were saved)
+                        self._safe_after(500, lambda: self._ask_proceed_to_pcb(files_saved=True))
+                else:
+                    error = result.get("error", "Unknown error")
+                    self._safe_after(0, lambda: self.add_message(
+                        f"❌ Footprint generation failed: {error}\n\n"
+                        f"Proceeding to PCB creation with existing footprint information...",
+                        is_user=False
+                    ))
+                    self._safe_after(0, lambda: self.set_status("Generation Failed", "warning"))
+                    # Don't show success message if generation failed
+                    self._safe_after(500, lambda: self._ask_proceed_to_pcb(files_saved=False))
+                
+                self._safe_after(0, lambda: self.set_loading(False))
+            except Exception as e:
+                import traceback
+                error_details = str(e)
+                # Log full traceback for debugging
+                print(f"[ERROR] Footprint generation failed: {error_details}")
+                print(f"[ERROR] Traceback: {traceback.format_exc()}")
+                
+                self._safe_after(0, lambda: self.add_message(
+                    f"❌ Error generating footprints: {error_details}\n\n"
+                    f"Proceeding to PCB creation with existing footprint information...",
+                    is_user=False
+                ))
+                self._safe_after(0, lambda: self.set_status("Error", "error"))
+                self._safe_after(0, lambda: self.set_loading(False))
+                # Don't show success message if there was an error - just ask if they want to proceed anyway
+                self._safe_after(500, lambda: self._ask_proceed_to_pcb(files_saved=False))
+        
+        threading.Thread(target=generate, daemon=True).start()
+    
+    def _ask_proceed_to_pcb(self, files_saved: bool = True):
+        """Show confirmation dialog asking if user wants to proceed to PCB creation"""
+        if files_saved:
+            question_msg = (
+                f"Do you want to create PCB now?\n\n"
+                f"Footprint libraries have been generated and saved.\n"
+                f"Click 'Yes' to proceed with PCB creation, or 'No' to stop here."
+            )
+        else:
+            question_msg = (
+                f"Do you want to create PCB now?\n\n"
+                f"Note: Footprint generation encountered errors, but you can still proceed with existing footprint information.\n"
+                f"Click 'Yes' to proceed with PCB creation, or 'No' to stop here."
+            )
+        
+        # Add the question as a message
+        msg_frame = self.add_message(question_msg, is_user=False)
+        
+        # Add Yes and No buttons
+        def on_yes():
+            # Remove buttons and proceed to PCB creation
+            self._remove_message_buttons(msg_frame)
+            self._make_pcb_from_schematic_with_footprints()
+        
+        def on_no():
+            # Remove buttons and show cancellation message
+            self._remove_message_buttons(msg_frame)
+            self.add_message(
+                "PCB creation cancelled.\n\n"
+                "You can create PCB later using the 'Make PCB' button in the menu.",
+                is_user=False
+            )
+            self.set_status("Ready", "info")
+        
+        # Add buttons to the message frame
+        self._add_message_buttons(msg_frame, on_yes, on_no)
+    
+    def _make_pcb_from_schematic_with_footprints(self):
+        """Make PCB from schematic, using generated footprints if available"""
+        # This will be called after footprint generation (or if user clicked No)
+        # The actual PCB creation logic will check for generated_footprints
+        self._make_pcb_from_schematic()
+    
+    def _on_schematic_loaded(self, response: str, artifact_id: str, filepath: str):
+        """Handle successful schematic load"""
+        self.add_message(response, is_user=False)
+        self.set_loading(False)
+        self.set_status("Schematic Loaded", "success")
+        
+        # Store schematic state for Make PCB flow
+        self.current_schematic_path = filepath
+        self.current_schematic_artifact_id = artifact_id
+    
+    def _on_schematic_load_error(self, error: str):
+        """Handle schematic load error"""
+        self.add_message(error, is_user=False)
+        self.set_loading(False)
+        self.set_status("Error", "error")
+    
+    def _make_pcb_from_schematic(self):
+        """Create PCB from loaded schematic - auto-place & auto-route"""
+        if not self.current_schematic_path:
+            self.add_message(
+                "No schematic loaded!\n\n"
+                "Please upload a schematic file (.SchDoc) first using the upload button, "
+                "then click 'Make PCB' to create a PCB from it.",
+                is_user=False
+            )
+            return
+        
+        import os
+        sch_name = os.path.basename(self.current_schematic_path)
+        
+        # Confirm with user
+        def on_confirm():
+            self.add_message(f"Creating PCB from schematic: {sch_name}", is_user=True)
+            self.add_message(
+                "Starting automated PCB creation process...\n\n"
+                "This will:\n"
+                "  1. Create a new PCB document in the same project\n"
+                "  2. Automatically transfer all components and nets from schematic (ECO)\n"
+                "  3. Auto-place all components\n"
+                "  4. Auto-route all nets\n\n"
+                "⚠️ IMPORTANT: If an ECO dialog appears in Altium, please click 'Execute Changes'.\n"
+                "The rest of the process is fully automated.\n\n"
+                "This may take a few minutes. Please wait...",
+                is_user=False
+            )
+            self.set_status("Creating PCB...", "warning")
+            self.set_loading(True)
+            
+            # Run in background
+            def create_pcb():
+                try:
+                    print("[Make PCB UI] Sending make_pcb_from_schematic request...")
+                    result = self.mcp_client.make_pcb_from_schematic()
+                    print(f"[Make PCB UI] Got result: success={result.get('success')}, "
+                          f"eco_manual={result.get('eco_manual_needed')}, error={result.get('error')}")
+                    
+                    if result.get("error"):
+                        raise Exception(result.get("error"))
+                    
+                    # Check if ECO needs manual action (shouldn't happen with full automation)
+                    if result.get("eco_manual_needed"):
+                        # This should be rare - automation should handle it
+                        msg = "PCB Document Created!\n\n"
+                        msg += "The new PCB document has been created and added to the project.\n\n"
+                        msg += "⚠️ ECO Automation Issue:\n"
+                        msg += "The automated ECO transfer did not complete successfully.\n"
+                        msg += "This may be due to:\n"
+                        msg += "  - Altium dialog timing\n"
+                        msg += "  - Missing pywin32 library (install: pip install pywin32)\n"
+                        msg += "  - Dialog button text differences\n\n"
+                        msg += "Please check the MCP server console for detailed automation logs.\n\n"
+                        msg += "You can try:\n"
+                        msg += "  1. Click 'Make PCB' again (automation will retry)\n"
+                        msg += "  2. Or manually complete ECO in Altium, then use 'Continue PCB Setup'\n"
+                        
+                        new_pcb_path = result.get("new_pcb_path", "")
+                        final_msg = msg
+                        final_result = result
+                        self._safe_after(100, lambda: self._on_pcb_eco_needed(final_msg, final_result))
+                        return
+                    
+                    # ECO succeeded - full flow completed
+                    msg = "PCB Creation Complete!\n\n"
+                    
+                    server_msg = result.get("message", "")
+                    if server_msg:
+                        msg += f"{server_msg}\n\n"
+                    
+                    # Show step-by-step results
+                    steps = result.get("steps", [])
+                    if steps:
+                        msg += "Process Results:\n"
+                        for step_info in steps:
+                            step_name = step_info.get("step", "unknown")
+                            status_icon = "OK" if step_info.get("success") else "FAIL"
+                            msg += f"  [{status_icon}] {step_name}\n"
+                            step_msg = step_info.get("message", "")
+                            if step_msg:
+                                msg += f"       {step_msg}\n"
+                    
+                    # Get stats from pcb_info
+                    pcb_info = result.get("pcb_info", {})
+                    pcb_stats = pcb_info.get("statistics", result.get("statistics", {}))
+                    if pcb_stats:
+                        msg += f"\nPCB Statistics:\n"
+                        msg += f"  Components: {pcb_stats.get('component_count', 'N/A')}\n"
+                        msg += f"  Nets: {pcb_stats.get('net_count', 'N/A')}\n"
+                        msg += f"  Tracks: {pcb_stats.get('track_count', 'N/A')}\n"
+                        msg += f"  Vias: {pcb_stats.get('via_count', 'N/A')}\n"
+                    
+                    msg += "\nNext Steps:\n"
+                    msg += "  - Click 'Run DRC' to check for design rule violations\n"
+                    msg += "  - Click 'Get DRC Suggestions' for AI-powered fixes\n"
+                    msg += "  - Ask me to optimize placement or routing\n"
+                    
+                    print(f"[Make PCB UI] Scheduling UI update with message ({len(msg)} chars)")
+                    final_msg = msg
+                    final_result = result
+                    self._safe_after(100, lambda: self._on_pcb_created(final_msg, final_result))
+                    
+                except Exception as e:
+                    import traceback
+                    error_msg = f"Error creating PCB: {str(e)}"
+                    print(f"[Make PCB UI] Exception: {error_msg}")
+                    print(traceback.format_exc())
+                    final_error = error_msg
+                    self._safe_after(100, lambda: self._on_pcb_create_error(final_error))
+                finally:
+                    print("[Make PCB UI] Thread completing, ensuring loading state reset")
+                    self._safe_after(500, lambda: self.set_loading(False))
+            
+            threading.Thread(target=create_pcb, daemon=True).start()
+        
+        def on_cancel():
+            self.add_message("PCB creation cancelled.", is_user=False)
+        
+        ConfirmationModal(
+            self,
+            f"Create PCB from schematic '{sch_name}'?\n\n"
+            "This will create a new PCB document, auto-place components, "
+            "and auto-route all nets.\n\n"
+            "Note: If an ECO dialog appears in Altium during the process,\n"
+            "click Validate → Execute → Close to transfer schematic data.",
+            on_confirm,
+            on_cancel
+        )
+    
+    def _continue_pcb_setup(self):
+        """Continue PCB setup after manual ECO - auto-place & auto-route"""
+        self.add_message("Continuing PCB setup (auto-place + auto-route)...", is_user=True)
+        self.set_status("Continuing PCB setup...", "warning")
+        self.set_loading(True)
+        
+        def do_continue():
+            try:
+                print("[Continue PCB UI] Sending continue_pcb_setup request...")
+                result = self.mcp_client.continue_pcb_setup()
+                print(f"[Continue PCB UI] Got result: success={result.get('success')}, error={result.get('error')}")
+                
+                if result.get("error"):
+                    raise Exception(result.get("error"))
+                
+                msg = "PCB Setup Complete!\n\n"
+                server_msg = result.get("message", "")
+                if server_msg:
+                    msg += f"{server_msg}\n\n"
+                
+                steps = result.get("steps", [])
+                if steps:
+                    msg += "Process Results:\n"
+                    for step_info in steps:
+                        step_name = step_info.get("step", "unknown")
+                        status_icon = "OK" if step_info.get("success") else "FAIL"
+                        msg += f"  [{status_icon}] {step_name}\n"
+                        step_msg = step_info.get("message", "")
+                        if step_msg:
+                            msg += f"       {step_msg}\n"
+                
+                pcb_info = result.get("pcb_info", {})
+                pcb_stats = pcb_info.get("statistics", {})
+                if pcb_stats:
+                    msg += f"\nPCB Statistics:\n"
+                    msg += f"  Components: {pcb_stats.get('component_count', 'N/A')}\n"
+                    msg += f"  Nets: {pcb_stats.get('net_count', 'N/A')}\n"
+                    msg += f"  Tracks: {pcb_stats.get('track_count', 'N/A')}\n"
+                    msg += f"  Vias: {pcb_stats.get('via_count', 'N/A')}\n"
+                
+                msg += "\nNext Steps:\n"
+                msg += "  - Click 'Run DRC' to check for design rule violations\n"
+                msg += "  - Click 'Get DRC Suggestions' for AI-powered fixes\n"
+                
+                final_msg = msg
+                final_result = result
+                self._safe_after(100, lambda: self._on_pcb_created(final_msg, final_result))
+                
+            except Exception as e:
+                import traceback
+                error_msg = f"Error continuing PCB setup: {str(e)}"
+                print(f"[Continue PCB UI] Exception: {error_msg}")
+                print(traceback.format_exc())
+                final_error = error_msg
+                self._safe_after(100, lambda: self._on_pcb_create_error(final_error))
+            finally:
+                self._safe_after(500, lambda: self.set_loading(False))
+        
+        threading.Thread(target=do_continue, daemon=True).start()
+    
+    def _on_pcb_eco_needed(self, message: str, result: dict):
+        """Handle case where ECO needs manual action"""
+        self.add_message(message, is_user=False)
+        self.set_loading(False)
+        self.set_status("ECO Required", "warning")
+        
+        # Store the new PCB path
+        new_pcb_path = result.get("new_pcb_path")
+        if new_pcb_path:
+            self.current_pcb_path = new_pcb_path
+    
+    def _on_pcb_created(self, message: str, result: dict):
+        """Handle successful PCB creation"""
+        self.add_message(message, is_user=False)
+        self.set_loading(False)
+        self.set_status("PCB Created", "success")
+        
+        # Store the new PCB artifact for DRC flow
+        pcb_artifact_id = result.get("pcb_artifact_id")
+        if pcb_artifact_id:
+            self.current_artifact_id = pcb_artifact_id
+        
+        # If PCB was loaded, transition to PCB mode
+        new_pcb_path = result.get("new_pcb_path")
+        if new_pcb_path:
+            self.current_pcb_path = new_pcb_path
+    
+    def _on_pcb_create_error(self, error: str):
+        """Handle PCB creation error"""
+        tips = "Tips:\n"
+        
+        # Provide specific guidance based on error message
+        if "No schematic open" in error or "no schematic found" in error.lower():
+            tips += "  - Open the schematic file in Altium Designer first\n"
+            tips += "  - Or ensure the schematic is part of the active project\n"
+            tips += "  - The script will try to open it automatically if found in the project\n"
+        else:
+            tips += "  - Make sure Altium Designer is running\n"
+            tips += "  - Make sure schematic_PCB.pas script server is running in Altium\n"
+            tips += "  - Check that the schematic file is part of a valid project\n"
+        
+        tips += "  - Try uploading the schematic file again"
+        
+        self.add_message(
+            f"{error}\n\n{tips}",
+            is_user=False
+        )
+        self.set_loading(False)
+        self.set_status("PCB Creation Failed", "error")
     
     def load_pcb_file(self, filepath: str):
         """Load and analyze a PCB file via MCP server"""

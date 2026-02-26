@@ -1,0 +1,5607 @@
+{
+  "board_size": {
+    "width_mm": 100.0,
+    "height_mm": 84.93055987099108
+  },
+  "components": [
+    {
+      "designator": "C153",
+      "footprint": "C2512",
+      "value": "1210-10uF-100V",
+      "x_mm": 12.5,
+      "y_mm": 12.5,
+      "rotation": 0.0,
+      "layer": "Top"
+    },
+    {
+      "designator": "C152",
+      "footprint": "C2512",
+      "value": "1206-1uF-100V",
+      "x_mm": 22.5,
+      "y_mm": 12.5,
+      "rotation": 0.0,
+      "layer": "Top"
+    },
+    {
+      "designator": "C147",
+      "footprint": "C2512",
+      "value": "0603-0.1uF-50V",
+      "x_mm": 32.5,
+      "y_mm": 12.5,
+      "rotation": 0.0,
+      "layer": "Top"
+    },
+    {
+      "designator": "C143",
+      "footprint": "C2512",
+      "value": "1210-22uF-25V",
+      "x_mm": 42.5,
+      "y_mm": 12.5,
+      "rotation": 0.0,
+      "layer": "Top"
+    },
+    {
+      "designator": "C144",
+      "footprint": "C2512",
+      "value": "1210-22uF-25V",
+      "x_mm": 52.5,
+      "y_mm": 12.5,
+      "rotation": 0.0,
+      "layer": "Top"
+    },
+    {
+      "designator": "C145",
+      "footprint": "C2512",
+      "value": "1210-22uF-25V",
+      "x_mm": 62.5,
+      "y_mm": 12.5,
+      "rotation": 0.0,
+      "layer": "Top"
+    },
+    {
+      "designator": "C146",
+      "footprint": "C2512",
+      "value": "1210-22uF-25V",
+      "x_mm": 72.5,
+      "y_mm": 12.5,
+      "rotation": 0.0,
+      "layer": "Top"
+    },
+    {
+      "designator": "C155",
+      "footprint": "C2512",
+      "value": "0603-0.01uF-50V",
+      "x_mm": 82.5,
+      "y_mm": 12.5,
+      "rotation": 0.0,
+      "layer": "Top"
+    },
+    {
+      "designator": "C156",
+      "footprint": "C2512",
+      "value": "0603-39pF-50V",
+      "x_mm": 12.5,
+      "y_mm": 22.5,
+      "rotation": 0.0,
+      "layer": "Top"
+    },
+    {
+      "designator": "R106",
+      "footprint": "R0402",
+      "value": "0603-100k",
+      "x_mm": 20.5,
+      "y_mm": 20.25,
+      "rotation": 0.0,
+      "layer": "Top"
+    },
+    {
+      "designator": "R103",
+      "footprint": "R0402",
+      "value": "NC",
+      "x_mm": 26.5,
+      "y_mm": 20.25,
+      "rotation": 0.0,
+      "layer": "Top"
+    },
+    {
+      "designator": "R102",
+      "footprint": "R0402",
+      "value": "NC",
+      "x_mm": 32.5,
+      "y_mm": 20.25,
+      "rotation": 0.0,
+      "layer": "Top"
+    },
+    {
+      "designator": "R104",
+      "footprint": "R0402",
+      "value": "0603-12k",
+      "x_mm": 38.5,
+      "y_mm": 20.25,
+      "rotation": 0.0,
+      "layer": "Top"
+    },
+    {
+      "designator": "R105",
+      "footprint": "R0402",
+      "value": "0603-0R",
+      "x_mm": 44.5,
+      "y_mm": 20.25,
+      "rotation": 0.0,
+      "layer": "Top"
+    },
+    {
+      "designator": "R101",
+      "footprint": "R0402",
+      "value": "0603-10k",
+      "x_mm": 50.5,
+      "y_mm": 20.25,
+      "rotation": 0.0,
+      "layer": "Top"
+    },
+    {
+      "designator": "R98",
+      "footprint": "R0402",
+      "value": "0603-143k",
+      "x_mm": 56.5,
+      "y_mm": 20.25,
+      "rotation": 0.0,
+      "layer": "Top"
+    },
+    {
+      "designator": "C141",
+      "footprint": "C2512",
+      "value": "1206-10uF-50V",
+      "x_mm": 64.5,
+      "y_mm": 22.5,
+      "rotation": 0.0,
+      "layer": "Top"
+    },
+    {
+      "designator": "C135",
+      "footprint": "C2512",
+      "value": "0805-1uF-50V",
+      "x_mm": 74.5,
+      "y_mm": 22.5,
+      "rotation": 0.0,
+      "layer": "Top"
+    },
+    {
+      "designator": "C136",
+      "footprint": "C2512",
+      "value": "0805-10uF-16V",
+      "x_mm": 84.5,
+      "y_mm": 22.5,
+      "rotation": 0.0,
+      "layer": "Top"
+    },
+    {
+      "designator": "C137",
+      "footprint": "C2512",
+      "value": "0603-1uF-16V",
+      "x_mm": 12.5,
+      "y_mm": 32.5,
+      "rotation": 0.0,
+      "layer": "Top"
+    },
+    {
+      "designator": "R96",
+      "footprint": "R0402",
+      "value": "0805-0R",
+      "x_mm": 20.5,
+      "y_mm": 30.25,
+      "rotation": 0.0,
+      "layer": "Top"
+    },
+    {
+      "designator": "R97",
+      "footprint": "R0402",
+      "value": "0805-0R",
+      "x_mm": 26.5,
+      "y_mm": 30.25,
+      "rotation": 0.0,
+      "layer": "Top"
+    },
+    {
+      "designator": "C151",
+      "footprint": "C2512",
+      "value": "1206-10uF-50V",
+      "x_mm": 34.5,
+      "y_mm": 32.5,
+      "rotation": 0.0,
+      "layer": "Top"
+    },
+    {
+      "designator": "C148",
+      "footprint": "C2512",
+      "value": "0805-1uF-50V",
+      "x_mm": 44.5,
+      "y_mm": 32.5,
+      "rotation": 0.0,
+      "layer": "Top"
+    },
+    {
+      "designator": "C149",
+      "footprint": "C2512",
+      "value": "0805-10uF-16V",
+      "x_mm": 54.5,
+      "y_mm": 32.5,
+      "rotation": 0.0,
+      "layer": "Top"
+    },
+    {
+      "designator": "C150",
+      "footprint": "C2512",
+      "value": "0603-1uF-16V",
+      "x_mm": 64.5,
+      "y_mm": 32.5,
+      "rotation": 0.0,
+      "layer": "Top"
+    },
+    {
+      "designator": "R99",
+      "footprint": "R0402",
+      "value": "0805-0R",
+      "x_mm": 72.5,
+      "y_mm": 30.25,
+      "rotation": 0.0,
+      "layer": "Top"
+    },
+    {
+      "designator": "R100",
+      "footprint": "R0402",
+      "value": "0805-0R",
+      "x_mm": 78.5,
+      "y_mm": 30.25,
+      "rotation": 0.0,
+      "layer": "Top"
+    },
+    {
+      "designator": "D11",
+      "footprint": "SMB",
+      "value": "SMBFJ150A",
+      "x_mm": 86.5,
+      "y_mm": 32.5,
+      "rotation": 0.0,
+      "layer": "Top"
+    },
+    {
+      "designator": "D12",
+      "footprint": "SMC",
+      "value": "SM8100C",
+      "x_mm": 12.5,
+      "y_mm": 42.5,
+      "rotation": 0.0,
+      "layer": "Top"
+    },
+    {
+      "designator": "C142",
+      "footprint": "C2512",
+      "value": "0603-1uF-16V",
+      "x_mm": 22.5,
+      "y_mm": 42.5,
+      "rotation": 0.0,
+      "layer": "Top"
+    },
+    {
+      "designator": "C140",
+      "footprint": "C2512",
+      "value": "0603-1uF-16V",
+      "x_mm": 32.5,
+      "y_mm": 42.5,
+      "rotation": 0.0,
+      "layer": "Top"
+    },
+    {
+      "designator": "C138",
+      "footprint": "C2512",
+      "value": "0805-4.7uF-16V",
+      "x_mm": 42.5,
+      "y_mm": 42.5,
+      "rotation": 0.0,
+      "layer": "Top"
+    },
+    {
+      "designator": "C139",
+      "footprint": "C2512",
+      "value": "0603-1uF-16V",
+      "x_mm": 52.5,
+      "y_mm": 42.5,
+      "rotation": 0.0,
+      "layer": "Top"
+    },
+    {
+      "designator": "R95",
+      "footprint": "R0402",
+      "value": "0603-0R",
+      "x_mm": 60.5,
+      "y_mm": 40.25,
+      "rotation": 0.0,
+      "layer": "Top"
+    },
+    {
+      "designator": "C176",
+      "footprint": "CAE-13.5X13.5X13.5mm(SMD)",
+      "value": "VMML1351J221MV",
+      "x_mm": 68.5,
+      "y_mm": 42.5,
+      "rotation": 0.0,
+      "layer": "Top"
+    },
+    {
+      "designator": "C175",
+      "footprint": "CAE-13.5X13.5X13.5mm(SMD)",
+      "value": "VMML1351J221MV",
+      "x_mm": 78.5,
+      "y_mm": 42.5,
+      "rotation": 0.0,
+      "layer": "Top"
+    },
+    {
+      "designator": "C174",
+      "footprint": "CAE-13.5X13.5X13.5mm(SMD)",
+      "value": "VMML1351J221MV",
+      "x_mm": 12.5,
+      "y_mm": 52.5,
+      "rotation": 0.0,
+      "layer": "Top"
+    },
+    {
+      "designator": "C173",
+      "footprint": "CAE-13.5X13.5X13.5mm(SMD)",
+      "value": "VMML1351J221MV",
+      "x_mm": 22.5,
+      "y_mm": 52.5,
+      "rotation": 0.0,
+      "layer": "Top"
+    },
+    {
+      "designator": "C172",
+      "footprint": "C2220",
+      "value": "1210-47uF-50V",
+      "x_mm": 32.5,
+      "y_mm": 52.5,
+      "rotation": 0.0,
+      "layer": "Top"
+    },
+    {
+      "designator": "R110",
+      "footprint": "R2010",
+      "value": "0603-4k",
+      "x_mm": 42.5,
+      "y_mm": 52.5,
+      "rotation": 0.0,
+      "layer": "Top"
+    },
+    {
+      "designator": "R111",
+      "footprint": "R2010",
+      "value": "0603-6k",
+      "x_mm": 52.5,
+      "y_mm": 52.5,
+      "rotation": 0.0,
+      "layer": "Top"
+    },
+    {
+      "designator": "R113",
+      "footprint": "R2010",
+      "value": "NC",
+      "x_mm": 62.5,
+      "y_mm": 52.5,
+      "rotation": 0.0,
+      "layer": "Top"
+    },
+    {
+      "designator": "R118",
+      "footprint": "R2010",
+      "value": "NC",
+      "x_mm": 72.5,
+      "y_mm": 52.5,
+      "rotation": 0.0,
+      "layer": "Top"
+    },
+    {
+      "designator": "C165",
+      "footprint": "C2220",
+      "value": "1812-1000pF-2kV",
+      "x_mm": 82.5,
+      "y_mm": 52.5,
+      "rotation": 0.0,
+      "layer": "Top"
+    },
+    {
+      "designator": "R107",
+      "footprint": "R0402",
+      "value": "0603-6.8k",
+      "x_mm": 10.5,
+      "y_mm": 60.25,
+      "rotation": 0.0,
+      "layer": "Top"
+    },
+    {
+      "designator": "R114",
+      "footprint": "R0402",
+      "value": "0603-150k",
+      "x_mm": 16.5,
+      "y_mm": 60.25,
+      "rotation": 0.0,
+      "layer": "Top"
+    },
+    {
+      "designator": "R119",
+      "footprint": "R0402",
+      "value": "0603-30k",
+      "x_mm": 22.5,
+      "y_mm": 60.25,
+      "rotation": 0.0,
+      "layer": "Top"
+    },
+    {
+      "designator": "C169",
+      "footprint": "C2220",
+      "value": "1210-47uF-50V",
+      "x_mm": 30.5,
+      "y_mm": 62.5,
+      "rotation": 0.0,
+      "layer": "Top"
+    },
+    {
+      "designator": "R112",
+      "footprint": "R2010",
+      "value": "0805-0R",
+      "x_mm": 40.5,
+      "y_mm": 62.5,
+      "rotation": 0.0,
+      "layer": "Top"
+    },
+    {
+      "designator": "C159",
+      "footprint": "C2220",
+      "value": "1210-47uF-50V",
+      "x_mm": 50.5,
+      "y_mm": 62.5,
+      "rotation": 0.0,
+      "layer": "Top"
+    },
+    {
+      "designator": "C158",
+      "footprint": "C2220",
+      "value": "1210-10uF-50V",
+      "x_mm": 60.5,
+      "y_mm": 62.5,
+      "rotation": 0.0,
+      "layer": "Top"
+    },
+    {
+      "designator": "C170",
+      "footprint": "C2220",
+      "value": "0603-0.01uF-50V",
+      "x_mm": 70.5,
+      "y_mm": 62.5,
+      "rotation": 0.0,
+      "layer": "Top"
+    },
+    {
+      "designator": "C161",
+      "footprint": "C2220",
+      "value": "1210-47uF-50V",
+      "x_mm": 80.5,
+      "y_mm": 62.5,
+      "rotation": 0.0,
+      "layer": "Top"
+    },
+    {
+      "designator": "C162",
+      "footprint": "C2220",
+      "value": "1210-10uF-50V",
+      "x_mm": 12.5,
+      "y_mm": 72.5,
+      "rotation": 0.0,
+      "layer": "Top"
+    },
+    {
+      "designator": "R115",
+      "footprint": "R2010",
+      "value": "0603-68k",
+      "x_mm": 22.5,
+      "y_mm": 72.5,
+      "rotation": 0.0,
+      "layer": "Top"
+    },
+    {
+      "designator": "R117",
+      "footprint": "R2010",
+      "value": "0603-12k",
+      "x_mm": 32.5,
+      "y_mm": 72.5,
+      "rotation": 0.0,
+      "layer": "Top"
+    },
+    {
+      "designator": "R108",
+      "footprint": "R2010",
+      "value": "0603-30k",
+      "x_mm": 42.5,
+      "y_mm": 72.5,
+      "rotation": 0.0,
+      "layer": "Top"
+    },
+    {
+      "designator": "C171",
+      "footprint": "C2220",
+      "value": "0603-0.01uF-50V",
+      "x_mm": 52.5,
+      "y_mm": 72.5,
+      "rotation": 0.0,
+      "layer": "Top"
+    },
+    {
+      "designator": "R116",
+      "footprint": "R2010",
+      "value": "0603-1.2k",
+      "x_mm": 62.5,
+      "y_mm": 72.5,
+      "rotation": 0.0,
+      "layer": "Top"
+    },
+    {
+      "designator": "R120",
+      "footprint": "R2010",
+      "value": "0603-6.2k",
+      "x_mm": 72.5,
+      "y_mm": 72.5,
+      "rotation": 0.0,
+      "layer": "Top"
+    },
+    {
+      "designator": "C164",
+      "footprint": "C2220",
+      "value": "0603-0.01uF-50V",
+      "x_mm": 82.5,
+      "y_mm": 72.5,
+      "rotation": 0.0,
+      "layer": "Top"
+    },
+    {
+      "designator": "C163",
+      "footprint": "C2220",
+      "value": "0603-0.01uF-50V",
+      "x_mm": 12.5,
+      "y_mm": 82.5,
+      "rotation": 0.0,
+      "layer": "Top"
+    },
+    {
+      "designator": "C168",
+      "footprint": "C2220",
+      "value": "1210-10uF-50V",
+      "x_mm": 22.5,
+      "y_mm": 82.5,
+      "rotation": 0.0,
+      "layer": "Top"
+    },
+    {
+      "designator": "C157",
+      "footprint": "C2220",
+      "value": "1210-10uF-50V",
+      "x_mm": 32.5,
+      "y_mm": 82.5,
+      "rotation": 0.0,
+      "layer": "Top"
+    },
+    {
+      "designator": "R109",
+      "footprint": "R2010",
+      "value": "0805-0R",
+      "x_mm": 42.5,
+      "y_mm": 82.5,
+      "rotation": 0.0,
+      "layer": "Top"
+    },
+    {
+      "designator": "C166",
+      "footprint": "C2220",
+      "value": "1210-47uF-50V",
+      "x_mm": 52.5,
+      "y_mm": 82.5,
+      "rotation": 0.0,
+      "layer": "Top"
+    },
+    {
+      "designator": "C154",
+      "footprint": "C2220",
+      "value": "1210-10uF-50V",
+      "x_mm": 62.5,
+      "y_mm": 82.5,
+      "rotation": 0.0,
+      "layer": "Top"
+    },
+    {
+      "designator": "R126",
+      "footprint": "R0402",
+      "value": "0603-10k",
+      "x_mm": 70.5,
+      "y_mm": 80.25,
+      "rotation": 0.0,
+      "layer": "Top"
+    },
+    {
+      "designator": "R128",
+      "footprint": "R0402",
+      "value": "0603-120k",
+      "x_mm": 76.5,
+      "y_mm": 80.25,
+      "rotation": 0.0,
+      "layer": "Top"
+    },
+    {
+      "designator": "R130",
+      "footprint": "R0402",
+      "value": "0603-30k",
+      "x_mm": 82.5,
+      "y_mm": 80.25,
+      "rotation": 0.0,
+      "layer": "Top"
+    },
+    {
+      "designator": "C178",
+      "footprint": "C2220",
+      "value": "1210-47uF-50V",
+      "x_mm": 12.5,
+      "y_mm": 92.5,
+      "rotation": 0.0,
+      "layer": "Top"
+    },
+    {
+      "designator": "C177",
+      "footprint": "C2220",
+      "value": "1210-1uF-100V",
+      "x_mm": 22.5,
+      "y_mm": 92.5,
+      "rotation": 0.0,
+      "layer": "Top"
+    },
+    {
+      "designator": "R125",
+      "footprint": "0603",
+      "value": "0805-0R",
+      "x_mm": 30.8,
+      "y_mm": 90.4,
+      "rotation": 0.0,
+      "layer": "Top"
+    },
+    {
+      "designator": "R124",
+      "footprint": "0603",
+      "value": "1210-10k",
+      "x_mm": 37.4,
+      "y_mm": 90.4,
+      "rotation": 0.0,
+      "layer": "Top"
+    },
+    {
+      "designator": "R129",
+      "footprint": "0603",
+      "value": "0805-100k",
+      "x_mm": 44.0,
+      "y_mm": 90.4,
+      "rotation": 0.0,
+      "layer": "Top"
+    },
+    {
+      "designator": "R127",
+      "footprint": "0603",
+      "value": "0805-270k",
+      "x_mm": 50.6,
+      "y_mm": 90.4,
+      "rotation": 0.0,
+      "layer": "Top"
+    },
+    {
+      "designator": "DY1",
+      "footprint": "LMF500-23B30UH",
+      "value": "LMF500-23B30UH",
+      "x_mm": 58.900000000000006,
+      "y_mm": 92.5,
+      "rotation": 0.0,
+      "layer": "Top"
+    },
+    {
+      "designator": "C167",
+      "footprint": "CAE-13.5X13.5X13.5mm(SMD)",
+      "value": "VMML1351J221MV",
+      "x_mm": 68.9,
+      "y_mm": 92.5,
+      "rotation": 0.0,
+      "layer": "Top"
+    },
+    {
+      "designator": "T6",
+      "footprint": "SOT-23",
+      "value": "BSS131",
+      "x_mm": 77.9,
+      "y_mm": 91.5,
+      "rotation": 0.0,
+      "layer": "Top"
+    },
+    {
+      "designator": "T4",
+      "footprint": "TO-263-2",
+      "value": "NCE70T360D",
+      "x_mm": 86.9,
+      "y_mm": 92.5,
+      "rotation": 0.0,
+      "layer": "Top"
+    },
+    {
+      "designator": "T3",
+      "footprint": "TO-263-2",
+      "value": "NCE70T360D",
+      "x_mm": 12.5,
+      "y_mm": 102.5,
+      "rotation": 0.0,
+      "layer": "Top"
+    },
+    {
+      "designator": "T5",
+      "footprint": "SOT-23",
+      "value": "BSR92P",
+      "x_mm": 21.5,
+      "y_mm": 101.5,
+      "rotation": 0.0,
+      "layer": "Top"
+    },
+    {
+      "designator": "D15",
+      "footprint": "SOD-523",
+      "value": "MM5Z10V1T1G",
+      "x_mm": 30.5,
+      "y_mm": 102.5,
+      "rotation": 0.0,
+      "layer": "Top"
+    },
+    {
+      "designator": "L21",
+      "footprint": "L7.8x7.0x5.0",
+      "value": "PIO75-470MT",
+      "x_mm": 40.5,
+      "y_mm": 102.5,
+      "rotation": 0.0,
+      "layer": "Top"
+    },
+    {
+      "designator": "D9",
+      "footprint": "SOD-523",
+      "value": "MM5Z10V1T1G",
+      "x_mm": 50.5,
+      "y_mm": 102.5,
+      "rotation": 0.0,
+      "layer": "Top"
+    },
+    {
+      "designator": "L18",
+      "footprint": "L7.8x7.0x5.0",
+      "value": "PIO75-6R8MT",
+      "x_mm": 60.5,
+      "y_mm": 102.5,
+      "rotation": 0.0,
+      "layer": "Top"
+    },
+    {
+      "designator": "D6",
+      "footprint": "SMC",
+      "value": "SM8100C",
+      "x_mm": 70.5,
+      "y_mm": 102.5,
+      "rotation": 0.0,
+      "layer": "Top"
+    },
+    {
+      "designator": "U8",
+      "footprint": "ESOP8L",
+      "value": "SCT2650",
+      "x_mm": 80.5,
+      "y_mm": 102.5,
+      "rotation": 0.0,
+      "layer": "Top"
+    },
+    {
+      "designator": "U7",
+      "footprint": "TO-252(1)",
+      "value": "78D05",
+      "x_mm": 12.5,
+      "y_mm": 112.5,
+      "rotation": 0.0,
+      "layer": "Top"
+    },
+    {
+      "designator": "U9",
+      "footprint": "TO-252(1)",
+      "value": "78D05",
+      "x_mm": 22.5,
+      "y_mm": 112.5,
+      "rotation": 0.0,
+      "layer": "Top"
+    },
+    {
+      "designator": "D7",
+      "footprint": "SOT-23",
+      "value": "LMBZ5236BLT1G",
+      "x_mm": 31.5,
+      "y_mm": 111.5,
+      "rotation": 0.0,
+      "layer": "Top"
+    },
+    {
+      "designator": "U6",
+      "footprint": "SOT-89",
+      "value": "LP3986H-33X3F",
+      "x_mm": 40.5,
+      "y_mm": 112.5,
+      "rotation": 0.0,
+      "layer": "Top"
+    },
+    {
+      "designator": "U11",
+      "footprint": "DW-PXXX-20XP1",
+      "value": "DW-P501-20FP1",
+      "x_mm": 50.5,
+      "y_mm": 112.5,
+      "rotation": 0.0,
+      "layer": "Top"
+    },
+    {
+      "designator": "U10",
+      "footprint": "TO-263-7",
+      "value": "LMZ14201TZ",
+      "x_mm": 60.5,
+      "y_mm": 112.5,
+      "rotation": 0.0,
+      "layer": "Top"
+    },
+    {
+      "designator": "L19",
+      "footprint": "L7.8x7.0x5.0",
+      "value": "PIO75-470MT",
+      "x_mm": 70.5,
+      "y_mm": 112.5,
+      "rotation": 0.0,
+      "layer": "Top"
+    },
+    {
+      "designator": "L20",
+      "footprint": "L7.8x7.0x5.0",
+      "value": "PIO75-470MT",
+      "x_mm": 80.5,
+      "y_mm": 112.5,
+      "rotation": 0.0,
+      "layer": "Top"
+    },
+    {
+      "designator": "L22",
+      "footprint": "T22*14*8",
+      "value": "T22*14*8-1MH 1.2?? 15A",
+      "x_mm": 12.5,
+      "y_mm": 122.5,
+      "rotation": 0.0,
+      "layer": "Top"
+    },
+    {
+      "designator": "U12",
+      "footprint": "SOT-23-5",
+      "value": "INA194AIDBVR",
+      "x_mm": 21.5,
+      "y_mm": 121.5,
+      "rotation": 0.0,
+      "layer": "Top"
+    },
+    {
+      "designator": "D10",
+      "footprint": "SOD-523",
+      "value": "MM5Z10V1T1G",
+      "x_mm": 30.5,
+      "y_mm": 122.5,
+      "rotation": 0.0,
+      "layer": "Top"
+    },
+    {
+      "designator": "D14",
+      "footprint": "SOD-523",
+      "value": "MM5Z10V1T1G",
+      "x_mm": 40.5,
+      "y_mm": 122.5,
+      "rotation": 0.0,
+      "layer": "Top"
+    },
+    {
+      "designator": "J29",
+      "footprint": "??????6?(2*3PIN??2?4.3)",
+      "value": "??????6?",
+      "x_mm": 50.5,
+      "y_mm": 122.5,
+      "rotation": 0.0,
+      "layer": "Top"
+    },
+    {
+      "designator": "D8",
+      "footprint": "SOD-523",
+      "value": "MM5Z8V2T1G",
+      "x_mm": 60.5,
+      "y_mm": 122.5,
+      "rotation": 0.0,
+      "layer": "Top"
+    },
+    {
+      "designator": "D13",
+      "footprint": "SOD-523",
+      "value": "MM5Z5V1T1G",
+      "x_mm": 70.5,
+      "y_mm": 122.5,
+      "rotation": 0.0,
+      "layer": "Top"
+    },
+    {
+      "designator": "C160",
+      "footprint": "C2512",
+      "value": "1210-1uF-100V",
+      "x_mm": 80.5,
+      "y_mm": 122.5,
+      "rotation": 0.0,
+      "layer": "Top"
+    },
+    {
+      "designator": "D45",
+      "footprint": "SOD-123FL",
+      "value": "SMF5.0A",
+      "x_mm": 12.5,
+      "y_mm": 132.5,
+      "rotation": 0.0,
+      "layer": "Top"
+    },
+    {
+      "designator": "D44",
+      "footprint": "SOD-123FL",
+      "value": "SMF6.5A",
+      "x_mm": 22.5,
+      "y_mm": 132.5,
+      "rotation": 0.0,
+      "layer": "Top"
+    },
+    {
+      "designator": "R222",
+      "footprint": "0603",
+      "value": "0805-1k",
+      "x_mm": 30.8,
+      "y_mm": 130.4,
+      "rotation": 0.0,
+      "layer": "Top"
+    },
+    {
+      "designator": "R121",
+      "footprint": "R2010",
+      "value": "PE2010FKF7W0R01L",
+      "x_mm": 39.1,
+      "y_mm": 132.5,
+      "rotation": 0.0,
+      "layer": "Top"
+    },
+    {
+      "designator": "R122",
+      "footprint": "R2010",
+      "value": "PE2010FKF7W0R01L",
+      "x_mm": 49.1,
+      "y_mm": 132.5,
+      "rotation": 0.0,
+      "layer": "Top"
+    },
+    {
+      "designator": "R123",
+      "footprint": "R2010",
+      "value": "PE2010FKF7W0R01L",
+      "x_mm": 59.1,
+      "y_mm": 132.5,
+      "rotation": 0.0,
+      "layer": "Top"
+    },
+    {
+      "designator": "R224",
+      "footprint": "R0402",
+      "value": "0603-1.5R",
+      "x_mm": 67.1,
+      "y_mm": 130.25,
+      "rotation": 0.0,
+      "layer": "Top"
+    },
+    {
+      "designator": "C392",
+      "footprint": "C2220",
+      "value": "0603-0.1uF-50V",
+      "x_mm": 75.1,
+      "y_mm": 132.5,
+      "rotation": 0.0,
+      "layer": "Top"
+    },
+    {
+      "designator": "C391",
+      "footprint": "C2220",
+      "value": "0603-1000pF-50V",
+      "x_mm": 85.1,
+      "y_mm": 132.5,
+      "rotation": 0.0,
+      "layer": "Top"
+    },
+    {
+      "designator": "C394",
+      "footprint": "C2220",
+      "value": "0603-1000pF-50V",
+      "x_mm": 12.5,
+      "y_mm": 142.5,
+      "rotation": 0.0,
+      "layer": "Top"
+    },
+    {
+      "designator": "C395",
+      "footprint": "C2220",
+      "value": "0603-1000pF-50V",
+      "x_mm": 22.5,
+      "y_mm": 142.5,
+      "rotation": 0.0,
+      "layer": "Top"
+    },
+    {
+      "designator": "C398",
+      "footprint": "C2220",
+      "value": "0603-1000pF-50V",
+      "x_mm": 32.5,
+      "y_mm": 142.5,
+      "rotation": 0.0,
+      "layer": "Top"
+    },
+    {
+      "designator": "C396",
+      "footprint": "C2220",
+      "value": "0603-0.1uF-50V",
+      "x_mm": 42.5,
+      "y_mm": 142.5,
+      "rotation": 0.0,
+      "layer": "Top"
+    },
+    {
+      "designator": "C397",
+      "footprint": "C2220",
+      "value": "0603-0.1uF-50V",
+      "x_mm": 52.5,
+      "y_mm": 142.5,
+      "rotation": 0.0,
+      "layer": "Top"
+    },
+    {
+      "designator": "C393",
+      "footprint": "C2220",
+      "value": "0603-0.1uF-50V",
+      "x_mm": 62.5,
+      "y_mm": 142.5,
+      "rotation": 0.0,
+      "layer": "Top"
+    },
+    {
+      "designator": "L17",
+      "footprint": "L0805",
+      "value": "CBG201209U310T",
+      "x_mm": 71.0,
+      "y_mm": 140.625,
+      "rotation": 0.0,
+      "layer": "Top"
+    },
+    {
+      "designator": "J28",
+      "footprint": "Y50DX-1404ZJ10S",
+      "value": "Y50DX-1404ZJ10S",
+      "x_mm": 79.5,
+      "y_mm": 142.5,
+      "rotation": 0.0,
+      "layer": "Top"
+    },
+    {
+      "designator": "DS1",
+      "footprint": "KN25-201",
+      "value": "KN25-201",
+      "x_mm": 12.5,
+      "y_mm": 152.5,
+      "rotation": 0.0,
+      "layer": "Top"
+    }
+  ],
+  "nets": [
+    {
+      "name": "NetR222_1",
+      "pins": [
+        {
+          "component": "1",
+          "pin": "1"
+        },
+        {
+          "component": "1",
+          "pin": "1"
+        }
+      ],
+      "is_power": false,
+      "is_ground": false
+    },
+    {
+      "name": "NetR127_2",
+      "pins": [
+        {
+          "component": "1",
+          "pin": "2"
+        },
+        {
+          "component": "1",
+          "pin": "1"
+        },
+        {
+          "component": "1",
+          "pin": "1"
+        }
+      ],
+      "is_power": false,
+      "is_ground": false
+    },
+    {
+      "name": "NetR127_1",
+      "pins": [
+        {
+          "component": "1",
+          "pin": "1"
+        },
+        {
+          "component": "1",
+          "pin": "3"
+        }
+      ],
+      "is_power": false,
+      "is_ground": false
+    },
+    {
+      "name": "NetR126_2",
+      "pins": [
+        {
+          "component": "1",
+          "pin": "2"
+        },
+        {
+          "component": "1",
+          "pin": "2"
+        },
+        {
+          "component": "1",
+          "pin": "2"
+        }
+      ],
+      "is_power": false,
+      "is_ground": false
+    },
+    {
+      "name": "NetR124_2",
+      "pins": [
+        {
+          "component": "1",
+          "pin": "2"
+        },
+        {
+          "component": "1",
+          "pin": "2"
+        }
+      ],
+      "is_power": false,
+      "is_ground": false
+    },
+    {
+      "name": "NetR124_1",
+      "pins": [
+        {
+          "component": "1",
+          "pin": "1"
+        },
+        {
+          "component": "1",
+          "pin": "3"
+        }
+      ],
+      "is_power": false,
+      "is_ground": false
+    },
+    {
+      "name": "NetR115_2",
+      "pins": [
+        {
+          "component": "1",
+          "pin": "2"
+        },
+        {
+          "component": "1",
+          "pin": "2"
+        },
+        {
+          "component": "1",
+          "pin": "3"
+        }
+      ],
+      "is_power": false,
+      "is_ground": false
+    },
+    {
+      "name": "NetR113_2",
+      "pins": [
+        {
+          "component": "1",
+          "pin": "2"
+        },
+        {
+          "component": "1",
+          "pin": "2"
+        },
+        {
+          "component": "1",
+          "pin": "3"
+        }
+      ],
+      "is_power": false,
+      "is_ground": false
+    },
+    {
+      "name": "NetR111_2",
+      "pins": [
+        {
+          "component": "1",
+          "pin": "2"
+        },
+        {
+          "component": "1",
+          "pin": "1"
+        }
+      ],
+      "is_power": false,
+      "is_ground": false
+    },
+    {
+      "name": "NetR110_2",
+      "pins": [
+        {
+          "component": "1",
+          "pin": "2"
+        },
+        {
+          "component": "1",
+          "pin": "1"
+        },
+        {
+          "component": "1",
+          "pin": "2"
+        }
+      ],
+      "is_power": false,
+      "is_ground": false
+    },
+    {
+      "name": "NetR110_1",
+      "pins": [
+        {
+          "component": "1",
+          "pin": "1"
+        },
+        {
+          "component": "1",
+          "pin": "4"
+        }
+      ],
+      "is_power": false,
+      "is_ground": false
+    },
+    {
+      "name": "NetR108_1",
+      "pins": [
+        {
+          "component": "1",
+          "pin": "1"
+        },
+        {
+          "component": "1",
+          "pin": "2"
+        }
+      ],
+      "is_power": false,
+      "is_ground": false
+    },
+    {
+      "name": "NetR106_2",
+      "pins": [
+        {
+          "component": "1",
+          "pin": "2"
+        },
+        {
+          "component": "1",
+          "pin": "4"
+        }
+      ],
+      "is_power": false,
+      "is_ground": false
+    },
+    {
+      "name": "NetR102_1",
+      "pins": [
+        {
+          "component": "1",
+          "pin": "1"
+        },
+        {
+          "component": "1",
+          "pin": "2"
+        },
+        {
+          "component": "1",
+          "pin": "3"
+        }
+      ],
+      "is_power": false,
+      "is_ground": false
+    },
+    {
+      "name": "NetR101_1",
+      "pins": [
+        {
+          "component": "1",
+          "pin": "1"
+        },
+        {
+          "component": "1",
+          "pin": "2"
+        }
+      ],
+      "is_power": false,
+      "is_ground": false
+    },
+    {
+      "name": "NetR98_1",
+      "pins": [
+        {
+          "component": "1",
+          "pin": "1"
+        },
+        {
+          "component": "1",
+          "pin": "2"
+        },
+        {
+          "component": "1",
+          "pin": "5"
+        }
+      ],
+      "is_power": false,
+      "is_ground": false
+    },
+    {
+      "name": "NetD14_1",
+      "pins": [
+        {
+          "component": "1",
+          "pin": "1"
+        },
+        {
+          "component": "1",
+          "pin": "2"
+        }
+      ],
+      "is_power": false,
+      "is_ground": false
+    },
+    {
+      "name": "NetD13_2",
+      "pins": [
+        {
+          "component": "1",
+          "pin": "2"
+        },
+        {
+          "component": "1",
+          "pin": "1"
+        }
+      ],
+      "is_power": false,
+      "is_ground": false
+    },
+    {
+      "name": "NetD13_1",
+      "pins": [
+        {
+          "component": "1",
+          "pin": "1"
+        },
+        {
+          "component": "1",
+          "pin": "1"
+        },
+        {
+          "component": "1",
+          "pin": "1"
+        },
+        {
+          "component": "1",
+          "pin": "1"
+        }
+      ],
+      "is_power": false,
+      "is_ground": false
+    },
+    {
+      "name": "NetD9_2",
+      "pins": [
+        {
+          "component": "1",
+          "pin": "2"
+        },
+        {
+          "component": "1",
+          "pin": "1"
+        }
+      ],
+      "is_power": false,
+      "is_ground": false
+    },
+    {
+      "name": "NetD8_2",
+      "pins": [
+        {
+          "component": "1",
+          "pin": "2"
+        },
+        {
+          "component": "1",
+          "pin": "1"
+        }
+      ],
+      "is_power": false,
+      "is_ground": false
+    },
+    {
+      "name": "NetD8_1",
+      "pins": [
+        {
+          "component": "1",
+          "pin": "1"
+        },
+        {
+          "component": "1",
+          "pin": "2"
+        },
+        {
+          "component": "1",
+          "pin": "1"
+        },
+        {
+          "component": "1",
+          "pin": "1"
+        }
+      ],
+      "is_power": false,
+      "is_ground": false
+    },
+    {
+      "name": "NetD7_2",
+      "pins": [
+        {
+          "component": "1",
+          "pin": "2"
+        }
+      ],
+      "is_power": false,
+      "is_ground": false
+    },
+    {
+      "name": "NetC173_1",
+      "pins": [
+        {
+          "component": "1",
+          "pin": "1"
+        },
+        {
+          "component": "1",
+          "pin": "1"
+        },
+        {
+          "component": "1",
+          "pin": "1"
+        },
+        {
+          "component": "1",
+          "pin": "1"
+        },
+        {
+          "component": "1",
+          "pin": "1"
+        },
+        {
+          "component": "1",
+          "pin": "1"
+        },
+        {
+          "component": "1",
+          "pin": "1"
+        },
+        {
+          "component": "1",
+          "pin": "3"
+        },
+        {
+          "component": "1",
+          "pin": "2"
+        },
+        {
+          "component": "1",
+          "pin": "2"
+        },
+        {
+          "component": "1",
+          "pin": "2"
+        },
+        {
+          "component": "1",
+          "pin": "3"
+        }
+      ],
+      "is_power": false,
+      "is_ground": false
+    },
+    {
+      "name": "NetC172_2",
+      "pins": [
+        {
+          "component": "1",
+          "pin": "2"
+        },
+        {
+          "component": "1",
+          "pin": "2"
+        },
+        {
+          "component": "1",
+          "pin": "1"
+        },
+        {
+          "component": "1",
+          "pin": "6"
+        }
+      ],
+      "is_power": false,
+      "is_ground": false
+    },
+    {
+      "name": "NetC170_1",
+      "pins": [
+        {
+          "component": "1",
+          "pin": "1"
+        },
+        {
+          "component": "1",
+          "pin": "1"
+        },
+        {
+          "component": "1",
+          "pin": "5"
+        }
+      ],
+      "is_power": false,
+      "is_ground": false
+    },
+    {
+      "name": "NetC169_1",
+      "pins": [
+        {
+          "component": "1",
+          "pin": "1"
+        },
+        {
+          "component": "1",
+          "pin": "1"
+        },
+        {
+          "component": "1",
+          "pin": "1"
+        },
+        {
+          "component": "1",
+          "pin": "3"
+        }
+      ],
+      "is_power": false,
+      "is_ground": false
+    },
+    {
+      "name": "NetC166_2",
+      "pins": [
+        {
+          "component": "1",
+          "pin": "2"
+        },
+        {
+          "component": "1",
+          "pin": "2"
+        },
+        {
+          "component": "1",
+          "pin": "2"
+        },
+        {
+          "component": "1",
+          "pin": "2"
+        },
+        {
+          "component": "1",
+          "pin": "2"
+        }
+      ],
+      "is_power": false,
+      "is_ground": false
+    },
+    {
+      "name": "NetC165_2",
+      "pins": [
+        {
+          "component": "1",
+          "pin": "2"
+        },
+        {
+          "component": "1",
+          "pin": "2"
+        },
+        {
+          "component": "1",
+          "pin": "7"
+        }
+      ],
+      "is_power": false,
+      "is_ground": false
+    },
+    {
+      "name": "NetC163_1",
+      "pins": [
+        {
+          "component": "1",
+          "pin": "1"
+        },
+        {
+          "component": "1",
+          "pin": "1"
+        },
+        {
+          "component": "1",
+          "pin": "2"
+        },
+        {
+          "component": "1",
+          "pin": "2"
+        },
+        {
+          "component": "1",
+          "pin": "6"
+        }
+      ],
+      "is_power": false,
+      "is_ground": false
+    },
+    {
+      "name": "NetC161_2",
+      "pins": [
+        {
+          "component": "1",
+          "pin": "2"
+        },
+        {
+          "component": "1",
+          "pin": "2"
+        },
+        {
+          "component": "1",
+          "pin": "2"
+        },
+        {
+          "component": "1",
+          "pin": "2"
+        },
+        {
+          "component": "1",
+          "pin": "1"
+        },
+        {
+          "component": "1",
+          "pin": "1"
+        }
+      ],
+      "is_power": false,
+      "is_ground": false
+    },
+    {
+      "name": "NetC158_2",
+      "pins": [
+        {
+          "component": "1",
+          "pin": "2"
+        },
+        {
+          "component": "1",
+          "pin": "2"
+        },
+        {
+          "component": "1",
+          "pin": "2"
+        },
+        {
+          "component": "1",
+          "pin": "2"
+        },
+        {
+          "component": "1",
+          "pin": "2"
+        },
+        {
+          "component": "1",
+          "pin": "2"
+        },
+        {
+          "component": "1",
+          "pin": "1"
+        },
+        {
+          "component": "1",
+          "pin": "1"
+        },
+        {
+          "component": "1",
+          "pin": "0"
+        },
+        {
+          "component": "1",
+          "pin": "4"
+        }
+      ],
+      "is_power": false,
+      "is_ground": false
+    },
+    {
+      "name": "NetC156_2",
+      "pins": [
+        {
+          "component": "1",
+          "pin": "2"
+        },
+        {
+          "component": "1",
+          "pin": "2"
+        },
+        {
+          "component": "1",
+          "pin": "6"
+        }
+      ],
+      "is_power": false,
+      "is_ground": false
+    },
+    {
+      "name": "NetC155_2",
+      "pins": [
+        {
+          "component": "1",
+          "pin": "2"
+        },
+        {
+          "component": "1",
+          "pin": "1"
+        }
+      ],
+      "is_power": false,
+      "is_ground": false
+    },
+    {
+      "name": "NetC149_2",
+      "pins": [
+        {
+          "component": "1",
+          "pin": "2"
+        },
+        {
+          "component": "1",
+          "pin": "2"
+        },
+        {
+          "component": "1",
+          "pin": "2"
+        },
+        {
+          "component": "1",
+          "pin": "3"
+        }
+      ],
+      "is_power": false,
+      "is_ground": false
+    },
+    {
+      "name": "NetC148_2",
+      "pins": [
+        {
+          "component": "1",
+          "pin": "2"
+        },
+        {
+          "component": "1",
+          "pin": "2"
+        },
+        {
+          "component": "1",
+          "pin": "1"
+        },
+        {
+          "component": "1",
+          "pin": "1"
+        }
+      ],
+      "is_power": false,
+      "is_ground": false
+    },
+    {
+      "name": "NetC147_2",
+      "pins": [
+        {
+          "component": "1",
+          "pin": "2"
+        },
+        {
+          "component": "1",
+          "pin": "1"
+        },
+        {
+          "component": "1",
+          "pin": "1"
+        },
+        {
+          "component": "1",
+          "pin": "8"
+        }
+      ],
+      "is_power": false,
+      "is_ground": false
+    },
+    {
+      "name": "NetC147_1",
+      "pins": [
+        {
+          "component": "1",
+          "pin": "1"
+        },
+        {
+          "component": "1",
+          "pin": "1"
+        }
+      ],
+      "is_power": false,
+      "is_ground": false
+    },
+    {
+      "name": "NetC139_2",
+      "pins": [
+        {
+          "component": "1",
+          "pin": "2"
+        },
+        {
+          "component": "1",
+          "pin": "2"
+        },
+        {
+          "component": "1",
+          "pin": "2"
+        },
+        {
+          "component": "1",
+          "pin": "3"
+        }
+      ],
+      "is_power": false,
+      "is_ground": false
+    },
+    {
+      "name": "NetC138_2",
+      "pins": [
+        {
+          "component": "1",
+          "pin": "2"
+        },
+        {
+          "component": "1",
+          "pin": "2"
+        },
+        {
+          "component": "1",
+          "pin": "1"
+        },
+        {
+          "component": "1",
+          "pin": "2"
+        }
+      ],
+      "is_power": false,
+      "is_ground": false
+    },
+    {
+      "name": "NetC136_2",
+      "pins": [
+        {
+          "component": "1",
+          "pin": "2"
+        },
+        {
+          "component": "1",
+          "pin": "2"
+        },
+        {
+          "component": "1",
+          "pin": "2"
+        },
+        {
+          "component": "1",
+          "pin": "3"
+        }
+      ],
+      "is_power": false,
+      "is_ground": false
+    },
+    {
+      "name": "NetC135_2",
+      "pins": [
+        {
+          "component": "1",
+          "pin": "2"
+        },
+        {
+          "component": "1",
+          "pin": "2"
+        },
+        {
+          "component": "1",
+          "pin": "1"
+        },
+        {
+          "component": "1",
+          "pin": "1"
+        }
+      ],
+      "is_power": false,
+      "is_ground": false
+    },
+    {
+      "name": "N",
+      "pins": [
+        {
+          "component": "1",
+          "pin": "4"
+        },
+        {
+          "component": "1",
+          "pin": "6"
+        },
+        {
+          "component": "1",
+          "pin": "2"
+        },
+        {
+          "component": "1",
+          "pin": "3"
+        },
+        {
+          "component": "1",
+          "pin": "4"
+        }
+      ],
+      "is_power": false,
+      "is_ground": false
+    },
+    {
+      "name": "L",
+      "pins": [
+        {
+          "component": "1",
+          "pin": "3"
+        },
+        {
+          "component": "1",
+          "pin": "5"
+        },
+        {
+          "component": "1",
+          "pin": "3"
+        },
+        {
+          "component": "1",
+          "pin": "1"
+        },
+        {
+          "component": "1",
+          "pin": "2"
+        }
+      ],
+      "is_power": false,
+      "is_ground": false
+    },
+    {
+      "name": "GND",
+      "pins": [
+        {
+          "component": "1",
+          "pin": "1"
+        },
+        {
+          "component": "1",
+          "pin": "1"
+        },
+        {
+          "component": "1",
+          "pin": "1"
+        },
+        {
+          "component": "1",
+          "pin": "1"
+        },
+        {
+          "component": "1",
+          "pin": "1"
+        },
+        {
+          "component": "1",
+          "pin": "1"
+        },
+        {
+          "component": "1",
+          "pin": "1"
+        },
+        {
+          "component": "1",
+          "pin": "1"
+        },
+        {
+          "component": "1",
+          "pin": "2"
+        },
+        {
+          "component": "1",
+          "pin": "2"
+        },
+        {
+          "component": "1",
+          "pin": "2"
+        },
+        {
+          "component": "1",
+          "pin": "2"
+        },
+        {
+          "component": "1",
+          "pin": "1"
+        },
+        {
+          "component": "1",
+          "pin": "1"
+        },
+        {
+          "component": "1",
+          "pin": "1"
+        },
+        {
+          "component": "1",
+          "pin": "1"
+        },
+        {
+          "component": "1",
+          "pin": "2"
+        },
+        {
+          "component": "1",
+          "pin": "2"
+        },
+        {
+          "component": "1",
+          "pin": "1"
+        },
+        {
+          "component": "1",
+          "pin": "1"
+        },
+        {
+          "component": "1",
+          "pin": "1"
+        },
+        {
+          "component": "1",
+          "pin": "1"
+        },
+        {
+          "component": "1",
+          "pin": "1"
+        },
+        {
+          "component": "1",
+          "pin": "1"
+        },
+        {
+          "component": "1",
+          "pin": "2"
+        },
+        {
+          "component": "1",
+          "pin": "1"
+        },
+        {
+          "component": "1",
+          "pin": "1"
+        },
+        {
+          "component": "1",
+          "pin": "1"
+        },
+        {
+          "component": "1",
+          "pin": "1"
+        },
+        {
+          "component": "1",
+          "pin": "1"
+        },
+        {
+          "component": "1",
+          "pin": "1"
+        },
+        {
+          "component": "1",
+          "pin": "2"
+        },
+        {
+          "component": "1",
+          "pin": "1"
+        },
+        {
+          "component": "1",
+          "pin": "2"
+        },
+        {
+          "component": "1",
+          "pin": "2"
+        },
+        {
+          "component": "1",
+          "pin": "2"
+        },
+        {
+          "component": "1",
+          "pin": "2"
+        },
+        {
+          "component": "1",
+          "pin": "2"
+        },
+        {
+          "component": "1",
+          "pin": "2"
+        },
+        {
+          "component": "1",
+          "pin": "1"
+        },
+        {
+          "component": "1",
+          "pin": "1"
+        },
+        {
+          "component": "1",
+          "pin": "1"
+        },
+        {
+          "component": "1",
+          "pin": "1"
+        },
+        {
+          "component": "1",
+          "pin": "1"
+        },
+        {
+          "component": "1",
+          "pin": "1"
+        },
+        {
+          "component": "1",
+          "pin": "1"
+        },
+        {
+          "component": "1",
+          "pin": "1"
+        },
+        {
+          "component": "1",
+          "pin": "2"
+        },
+        {
+          "component": "1",
+          "pin": "1"
+        },
+        {
+          "component": "1",
+          "pin": "2"
+        },
+        {
+          "component": "1",
+          "pin": "2"
+        },
+        {
+          "component": "1",
+          "pin": "2"
+        },
+        {
+          "component": "1",
+          "pin": "2"
+        },
+        {
+          "component": "1",
+          "pin": "2"
+        },
+        {
+          "component": "1",
+          "pin": "2"
+        },
+        {
+          "component": "1",
+          "pin": "1"
+        },
+        {
+          "component": "1",
+          "pin": "6"
+        },
+        {
+          "component": "1",
+          "pin": "7"
+        },
+        {
+          "component": "1",
+          "pin": "1"
+        },
+        {
+          "component": "1",
+          "pin": "1"
+        },
+        {
+          "component": "1",
+          "pin": "1"
+        },
+        {
+          "component": "1",
+          "pin": "1"
+        },
+        {
+          "component": "1",
+          "pin": "2"
+        },
+        {
+          "component": "1",
+          "pin": "1"
+        },
+        {
+          "component": "1",
+          "pin": "2"
+        },
+        {
+          "component": "1",
+          "pin": "1"
+        },
+        {
+          "component": "1",
+          "pin": "2"
+        },
+        {
+          "component": "1",
+          "pin": "2"
+        },
+        {
+          "component": "1",
+          "pin": "2"
+        },
+        {
+          "component": "1",
+          "pin": "1"
+        },
+        {
+          "component": "1",
+          "pin": "2"
+        },
+        {
+          "component": "1",
+          "pin": "0"
+        },
+        {
+          "component": "1",
+          "pin": "7"
+        },
+        {
+          "component": "1",
+          "pin": "2"
+        },
+        {
+          "component": "1",
+          "pin": "7"
+        },
+        {
+          "component": "1",
+          "pin": "5"
+        },
+        {
+          "component": "1",
+          "pin": "8"
+        },
+        {
+          "component": "1",
+          "pin": "2"
+        }
+      ],
+      "is_power": false,
+      "is_ground": true
+    },
+    {
+      "name": "FS",
+      "pins": [
+        {
+          "component": "1",
+          "pin": "4"
+        },
+        {
+          "component": "1",
+          "pin": "2"
+        }
+      ],
+      "is_power": false,
+      "is_ground": false
+    },
+    {
+      "name": "FLJC",
+      "pins": [
+        {
+          "component": "1",
+          "pin": "2"
+        },
+        {
+          "component": "1",
+          "pin": "2"
+        },
+        {
+          "component": "1",
+          "pin": "6"
+        },
+        {
+          "component": "1",
+          "pin": "2"
+        }
+      ],
+      "is_power": false,
+      "is_ground": false
+    },
+    {
+      "name": "-5V",
+      "pins": [
+        {
+          "component": "1",
+          "pin": "1"
+        }
+      ],
+      "is_power": false,
+      "is_ground": false
+    },
+    {
+      "name": "+200V",
+      "pins": [
+        {
+          "component": "1",
+          "pin": "1"
+        }
+      ],
+      "is_power": true,
+      "is_ground": false
+    },
+    {
+      "name": "+30VIN",
+      "pins": [
+        {
+          "component": "1",
+          "pin": "4"
+        },
+        {
+          "component": "1",
+          "pin": "5"
+        },
+        {
+          "component": "1",
+          "pin": "2"
+        },
+        {
+          "component": "1",
+          "pin": "4"
+        }
+      ],
+      "is_power": true,
+      "is_ground": false
+    },
+    {
+      "name": "+30V",
+      "pins": [
+        {
+          "component": "1",
+          "pin": "1"
+        },
+        {
+          "component": "1",
+          "pin": "1"
+        },
+        {
+          "component": "1",
+          "pin": "1"
+        },
+        {
+          "component": "1",
+          "pin": "1"
+        },
+        {
+          "component": "1",
+          "pin": "2"
+        },
+        {
+          "component": "1",
+          "pin": "1"
+        },
+        {
+          "component": "1",
+          "pin": "1"
+        },
+        {
+          "component": "1",
+          "pin": "1"
+        },
+        {
+          "component": "1",
+          "pin": "1"
+        },
+        {
+          "component": "1",
+          "pin": "1"
+        },
+        {
+          "component": "1",
+          "pin": "2"
+        },
+        {
+          "component": "1",
+          "pin": "2"
+        },
+        {
+          "component": "1",
+          "pin": "2"
+        },
+        {
+          "component": "1",
+          "pin": "4"
+        }
+      ],
+      "is_power": true,
+      "is_ground": false
+    },
+    {
+      "name": "+24V",
+      "pins": [],
+      "is_power": true,
+      "is_ground": false
+    },
+    {
+      "name": "+21V",
+      "pins": [
+        {
+          "component": "1",
+          "pin": "1"
+        },
+        {
+          "component": "1",
+          "pin": "1"
+        },
+        {
+          "component": "1",
+          "pin": "3"
+        }
+      ],
+      "is_power": true,
+      "is_ground": false
+    },
+    {
+      "name": "+5VIN",
+      "pins": [
+        {
+          "component": "1",
+          "pin": "2"
+        },
+        {
+          "component": "1",
+          "pin": "2"
+        },
+        {
+          "component": "1",
+          "pin": "1"
+        },
+        {
+          "component": "1",
+          "pin": "3"
+        },
+        {
+          "component": "1",
+          "pin": "1"
+        }
+      ],
+      "is_power": true,
+      "is_ground": false
+    },
+    {
+      "name": "+5V",
+      "pins": [
+        {
+          "component": "1",
+          "pin": "2"
+        },
+        {
+          "component": "1",
+          "pin": "2"
+        },
+        {
+          "component": "1",
+          "pin": "3"
+        },
+        {
+          "component": "1",
+          "pin": "1"
+        },
+        {
+          "component": "1",
+          "pin": "2"
+        },
+        {
+          "component": "1",
+          "pin": "1"
+        },
+        {
+          "component": "1",
+          "pin": "5"
+        }
+      ],
+      "is_power": true,
+      "is_ground": false
+    },
+    {
+      "name": "194out",
+      "pins": [
+        {
+          "component": "1",
+          "pin": "2"
+        },
+        {
+          "component": "1",
+          "pin": "2"
+        },
+        {
+          "component": "1",
+          "pin": "1"
+        },
+        {
+          "component": "1",
+          "pin": "1"
+        }
+      ],
+      "is_power": false,
+      "is_ground": false
+    },
+    {
+      "name": "12V",
+      "pins": [
+        {
+          "component": "1",
+          "pin": "1"
+        },
+        {
+          "component": "1",
+          "pin": "1"
+        },
+        {
+          "component": "1",
+          "pin": "1"
+        },
+        {
+          "component": "1",
+          "pin": "1"
+        },
+        {
+          "component": "1",
+          "pin": "2"
+        },
+        {
+          "component": "1",
+          "pin": "2"
+        },
+        {
+          "component": "1",
+          "pin": "5"
+        },
+        {
+          "component": "1",
+          "pin": "2"
+        },
+        {
+          "component": "1",
+          "pin": "1"
+        },
+        {
+          "component": "1",
+          "pin": "2"
+        },
+        {
+          "component": "1",
+          "pin": "2"
+        },
+        {
+          "component": "1",
+          "pin": "2"
+        }
+      ],
+      "is_power": false,
+      "is_ground": false
+    },
+    {
+      "name": "3.3VFSALC",
+      "pins": [
+        {
+          "component": "1",
+          "pin": "1"
+        },
+        {
+          "component": "1",
+          "pin": "2"
+        },
+        {
+          "component": "1",
+          "pin": "1"
+        }
+      ],
+      "is_power": false,
+      "is_ground": false
+    }
+  ],
+  "tracks": [],
+  "vias": [],
+  "pads": [
+    {
+      "component": "C153",
+      "pin": "1",
+      "x_mm": 12.5,
+      "y_mm": 12.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "C153",
+      "pin": "2",
+      "x_mm": 12.5,
+      "y_mm": 12.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "C152",
+      "pin": "1",
+      "x_mm": 22.5,
+      "y_mm": 12.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "C152",
+      "pin": "2",
+      "x_mm": 22.5,
+      "y_mm": 12.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "C147",
+      "pin": "1",
+      "x_mm": 32.5,
+      "y_mm": 12.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "C147",
+      "pin": "2",
+      "x_mm": 32.5,
+      "y_mm": 12.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "C143",
+      "pin": "1",
+      "x_mm": 42.5,
+      "y_mm": 12.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "C143",
+      "pin": "2",
+      "x_mm": 42.5,
+      "y_mm": 12.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "C144",
+      "pin": "1",
+      "x_mm": 52.5,
+      "y_mm": 12.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "C144",
+      "pin": "2",
+      "x_mm": 52.5,
+      "y_mm": 12.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "C145",
+      "pin": "1",
+      "x_mm": 62.5,
+      "y_mm": 12.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "C145",
+      "pin": "2",
+      "x_mm": 62.5,
+      "y_mm": 12.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "C146",
+      "pin": "1",
+      "x_mm": 72.5,
+      "y_mm": 12.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "C146",
+      "pin": "2",
+      "x_mm": 72.5,
+      "y_mm": 12.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "C155",
+      "pin": "1",
+      "x_mm": 82.5,
+      "y_mm": 12.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "C155",
+      "pin": "2",
+      "x_mm": 82.5,
+      "y_mm": 12.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "C156",
+      "pin": "1",
+      "x_mm": 12.5,
+      "y_mm": 22.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "C156",
+      "pin": "2",
+      "x_mm": 12.5,
+      "y_mm": 22.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "R106",
+      "pin": "1",
+      "x_mm": 20.5,
+      "y_mm": 20.25,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "R106",
+      "pin": "2",
+      "x_mm": 20.5,
+      "y_mm": 20.25,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "R103",
+      "pin": "1",
+      "x_mm": 26.5,
+      "y_mm": 20.25,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "R103",
+      "pin": "2",
+      "x_mm": 26.5,
+      "y_mm": 20.25,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "R102",
+      "pin": "1",
+      "x_mm": 32.5,
+      "y_mm": 20.25,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "R102",
+      "pin": "2",
+      "x_mm": 32.5,
+      "y_mm": 20.25,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "R104",
+      "pin": "1",
+      "x_mm": 38.5,
+      "y_mm": 20.25,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "R104",
+      "pin": "2",
+      "x_mm": 38.5,
+      "y_mm": 20.25,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "R105",
+      "pin": "1",
+      "x_mm": 44.5,
+      "y_mm": 20.25,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "R105",
+      "pin": "2",
+      "x_mm": 44.5,
+      "y_mm": 20.25,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "R101",
+      "pin": "1",
+      "x_mm": 50.5,
+      "y_mm": 20.25,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "R101",
+      "pin": "2",
+      "x_mm": 50.5,
+      "y_mm": 20.25,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "R98",
+      "pin": "1",
+      "x_mm": 56.5,
+      "y_mm": 20.25,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "R98",
+      "pin": "2",
+      "x_mm": 56.5,
+      "y_mm": 20.25,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "C141",
+      "pin": "1",
+      "x_mm": 64.5,
+      "y_mm": 22.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "C141",
+      "pin": "2",
+      "x_mm": 64.5,
+      "y_mm": 22.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "C135",
+      "pin": "1",
+      "x_mm": 74.5,
+      "y_mm": 22.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "C135",
+      "pin": "2",
+      "x_mm": 74.5,
+      "y_mm": 22.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "C136",
+      "pin": "1",
+      "x_mm": 84.5,
+      "y_mm": 22.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "C136",
+      "pin": "2",
+      "x_mm": 84.5,
+      "y_mm": 22.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "C137",
+      "pin": "1",
+      "x_mm": 12.5,
+      "y_mm": 32.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "C137",
+      "pin": "2",
+      "x_mm": 12.5,
+      "y_mm": 32.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "R96",
+      "pin": "1",
+      "x_mm": 20.5,
+      "y_mm": 30.25,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "R96",
+      "pin": "2",
+      "x_mm": 20.5,
+      "y_mm": 30.25,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "R97",
+      "pin": "1",
+      "x_mm": 26.5,
+      "y_mm": 30.25,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "R97",
+      "pin": "2",
+      "x_mm": 26.5,
+      "y_mm": 30.25,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "C151",
+      "pin": "1",
+      "x_mm": 34.5,
+      "y_mm": 32.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "C151",
+      "pin": "2",
+      "x_mm": 34.5,
+      "y_mm": 32.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "C148",
+      "pin": "1",
+      "x_mm": 44.5,
+      "y_mm": 32.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "C148",
+      "pin": "2",
+      "x_mm": 44.5,
+      "y_mm": 32.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "C149",
+      "pin": "1",
+      "x_mm": 54.5,
+      "y_mm": 32.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "C149",
+      "pin": "2",
+      "x_mm": 54.5,
+      "y_mm": 32.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "C150",
+      "pin": "1",
+      "x_mm": 64.5,
+      "y_mm": 32.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "C150",
+      "pin": "2",
+      "x_mm": 64.5,
+      "y_mm": 32.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "R99",
+      "pin": "1",
+      "x_mm": 72.5,
+      "y_mm": 30.25,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "R99",
+      "pin": "2",
+      "x_mm": 72.5,
+      "y_mm": 30.25,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "R100",
+      "pin": "1",
+      "x_mm": 78.5,
+      "y_mm": 30.25,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "R100",
+      "pin": "2",
+      "x_mm": 78.5,
+      "y_mm": 30.25,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "D11",
+      "pin": "1",
+      "x_mm": 86.5,
+      "y_mm": 32.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "D11",
+      "pin": "2",
+      "x_mm": 86.5,
+      "y_mm": 32.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "D12",
+      "pin": "1",
+      "x_mm": 12.5,
+      "y_mm": 42.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "D12",
+      "pin": "2",
+      "x_mm": 12.5,
+      "y_mm": 42.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "C142",
+      "pin": "1",
+      "x_mm": 22.5,
+      "y_mm": 42.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "C142",
+      "pin": "2",
+      "x_mm": 22.5,
+      "y_mm": 42.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "C140",
+      "pin": "1",
+      "x_mm": 32.5,
+      "y_mm": 42.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "C140",
+      "pin": "2",
+      "x_mm": 32.5,
+      "y_mm": 42.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "C138",
+      "pin": "1",
+      "x_mm": 42.5,
+      "y_mm": 42.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "C138",
+      "pin": "2",
+      "x_mm": 42.5,
+      "y_mm": 42.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "C139",
+      "pin": "1",
+      "x_mm": 52.5,
+      "y_mm": 42.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "C139",
+      "pin": "2",
+      "x_mm": 52.5,
+      "y_mm": 42.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "R95",
+      "pin": "1",
+      "x_mm": 60.5,
+      "y_mm": 40.25,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "R95",
+      "pin": "2",
+      "x_mm": 60.5,
+      "y_mm": 40.25,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "C176",
+      "pin": "1",
+      "x_mm": 68.5,
+      "y_mm": 42.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "C176",
+      "pin": "2",
+      "x_mm": 68.5,
+      "y_mm": 42.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "C175",
+      "pin": "1",
+      "x_mm": 78.5,
+      "y_mm": 42.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "C175",
+      "pin": "2",
+      "x_mm": 78.5,
+      "y_mm": 42.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "C174",
+      "pin": "1",
+      "x_mm": 12.5,
+      "y_mm": 52.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "C174",
+      "pin": "2",
+      "x_mm": 12.5,
+      "y_mm": 52.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "C173",
+      "pin": "1",
+      "x_mm": 22.5,
+      "y_mm": 52.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "C173",
+      "pin": "2",
+      "x_mm": 22.5,
+      "y_mm": 52.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "C172",
+      "pin": "1",
+      "x_mm": 32.5,
+      "y_mm": 52.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "C172",
+      "pin": "2",
+      "x_mm": 32.5,
+      "y_mm": 52.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "R110",
+      "pin": "1",
+      "x_mm": 42.5,
+      "y_mm": 52.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "R110",
+      "pin": "2",
+      "x_mm": 42.5,
+      "y_mm": 52.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "R111",
+      "pin": "1",
+      "x_mm": 52.5,
+      "y_mm": 52.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "R111",
+      "pin": "2",
+      "x_mm": 52.5,
+      "y_mm": 52.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "R113",
+      "pin": "1",
+      "x_mm": 62.5,
+      "y_mm": 52.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "R113",
+      "pin": "2",
+      "x_mm": 62.5,
+      "y_mm": 52.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "R118",
+      "pin": "1",
+      "x_mm": 72.5,
+      "y_mm": 52.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "R118",
+      "pin": "2",
+      "x_mm": 72.5,
+      "y_mm": 52.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "C165",
+      "pin": "1",
+      "x_mm": 82.5,
+      "y_mm": 52.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "C165",
+      "pin": "2",
+      "x_mm": 82.5,
+      "y_mm": 52.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "R107",
+      "pin": "1",
+      "x_mm": 10.5,
+      "y_mm": 60.25,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "R107",
+      "pin": "2",
+      "x_mm": 10.5,
+      "y_mm": 60.25,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "R114",
+      "pin": "1",
+      "x_mm": 16.5,
+      "y_mm": 60.25,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "R114",
+      "pin": "2",
+      "x_mm": 16.5,
+      "y_mm": 60.25,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "R119",
+      "pin": "1",
+      "x_mm": 22.5,
+      "y_mm": 60.25,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "R119",
+      "pin": "2",
+      "x_mm": 22.5,
+      "y_mm": 60.25,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "C169",
+      "pin": "1",
+      "x_mm": 30.5,
+      "y_mm": 62.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "C169",
+      "pin": "2",
+      "x_mm": 30.5,
+      "y_mm": 62.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "R112",
+      "pin": "1",
+      "x_mm": 40.5,
+      "y_mm": 62.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "R112",
+      "pin": "2",
+      "x_mm": 40.5,
+      "y_mm": 62.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "C159",
+      "pin": "1",
+      "x_mm": 50.5,
+      "y_mm": 62.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "C159",
+      "pin": "2",
+      "x_mm": 50.5,
+      "y_mm": 62.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "C158",
+      "pin": "1",
+      "x_mm": 60.5,
+      "y_mm": 62.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "C158",
+      "pin": "2",
+      "x_mm": 60.5,
+      "y_mm": 62.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "C170",
+      "pin": "1",
+      "x_mm": 70.5,
+      "y_mm": 62.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "C170",
+      "pin": "2",
+      "x_mm": 70.5,
+      "y_mm": 62.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "C161",
+      "pin": "1",
+      "x_mm": 80.5,
+      "y_mm": 62.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "C161",
+      "pin": "2",
+      "x_mm": 80.5,
+      "y_mm": 62.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "C162",
+      "pin": "1",
+      "x_mm": 12.5,
+      "y_mm": 72.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "C162",
+      "pin": "2",
+      "x_mm": 12.5,
+      "y_mm": 72.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "R115",
+      "pin": "1",
+      "x_mm": 22.5,
+      "y_mm": 72.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "R115",
+      "pin": "2",
+      "x_mm": 22.5,
+      "y_mm": 72.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "R117",
+      "pin": "1",
+      "x_mm": 32.5,
+      "y_mm": 72.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "R117",
+      "pin": "2",
+      "x_mm": 32.5,
+      "y_mm": 72.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "R108",
+      "pin": "1",
+      "x_mm": 42.5,
+      "y_mm": 72.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "R108",
+      "pin": "2",
+      "x_mm": 42.5,
+      "y_mm": 72.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "C171",
+      "pin": "1",
+      "x_mm": 52.5,
+      "y_mm": 72.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "C171",
+      "pin": "2",
+      "x_mm": 52.5,
+      "y_mm": 72.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "R116",
+      "pin": "1",
+      "x_mm": 62.5,
+      "y_mm": 72.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "R116",
+      "pin": "2",
+      "x_mm": 62.5,
+      "y_mm": 72.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "R120",
+      "pin": "1",
+      "x_mm": 72.5,
+      "y_mm": 72.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "R120",
+      "pin": "2",
+      "x_mm": 72.5,
+      "y_mm": 72.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "C164",
+      "pin": "1",
+      "x_mm": 82.5,
+      "y_mm": 72.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "C164",
+      "pin": "2",
+      "x_mm": 82.5,
+      "y_mm": 72.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "C163",
+      "pin": "1",
+      "x_mm": 12.5,
+      "y_mm": 82.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "C163",
+      "pin": "2",
+      "x_mm": 12.5,
+      "y_mm": 82.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "C168",
+      "pin": "1",
+      "x_mm": 22.5,
+      "y_mm": 82.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "C168",
+      "pin": "2",
+      "x_mm": 22.5,
+      "y_mm": 82.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "C157",
+      "pin": "1",
+      "x_mm": 32.5,
+      "y_mm": 82.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "C157",
+      "pin": "2",
+      "x_mm": 32.5,
+      "y_mm": 82.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "R109",
+      "pin": "1",
+      "x_mm": 42.5,
+      "y_mm": 82.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "R109",
+      "pin": "2",
+      "x_mm": 42.5,
+      "y_mm": 82.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "C166",
+      "pin": "1",
+      "x_mm": 52.5,
+      "y_mm": 82.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "C166",
+      "pin": "2",
+      "x_mm": 52.5,
+      "y_mm": 82.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "C154",
+      "pin": "1",
+      "x_mm": 62.5,
+      "y_mm": 82.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "C154",
+      "pin": "2",
+      "x_mm": 62.5,
+      "y_mm": 82.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "R126",
+      "pin": "1",
+      "x_mm": 70.5,
+      "y_mm": 80.25,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "R126",
+      "pin": "2",
+      "x_mm": 70.5,
+      "y_mm": 80.25,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "R128",
+      "pin": "1",
+      "x_mm": 76.5,
+      "y_mm": 80.25,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "R128",
+      "pin": "2",
+      "x_mm": 76.5,
+      "y_mm": 80.25,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "R130",
+      "pin": "1",
+      "x_mm": 82.5,
+      "y_mm": 80.25,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "R130",
+      "pin": "2",
+      "x_mm": 82.5,
+      "y_mm": 80.25,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "C178",
+      "pin": "1",
+      "x_mm": 12.5,
+      "y_mm": 92.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "C178",
+      "pin": "2",
+      "x_mm": 12.5,
+      "y_mm": 92.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "C177",
+      "pin": "1",
+      "x_mm": 22.5,
+      "y_mm": 92.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "C177",
+      "pin": "2",
+      "x_mm": 22.5,
+      "y_mm": 92.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "R125",
+      "pin": "1",
+      "x_mm": 30.8,
+      "y_mm": 90.4,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "R125",
+      "pin": "2",
+      "x_mm": 30.8,
+      "y_mm": 90.4,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "R124",
+      "pin": "1",
+      "x_mm": 37.4,
+      "y_mm": 90.4,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "R124",
+      "pin": "2",
+      "x_mm": 37.4,
+      "y_mm": 90.4,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "R129",
+      "pin": "1",
+      "x_mm": 44.0,
+      "y_mm": 90.4,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "R129",
+      "pin": "2",
+      "x_mm": 44.0,
+      "y_mm": 90.4,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "R127",
+      "pin": "1",
+      "x_mm": 50.6,
+      "y_mm": 90.4,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "R127",
+      "pin": "2",
+      "x_mm": 50.6,
+      "y_mm": 90.4,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "DY1",
+      "pin": "3",
+      "x_mm": 58.900000000000006,
+      "y_mm": 92.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "DY1",
+      "pin": "1",
+      "x_mm": 58.900000000000006,
+      "y_mm": 92.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "DY1",
+      "pin": "2",
+      "x_mm": 58.900000000000006,
+      "y_mm": 92.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "DY1",
+      "pin": "4",
+      "x_mm": 58.900000000000006,
+      "y_mm": 92.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "DY1",
+      "pin": "5",
+      "x_mm": 58.900000000000006,
+      "y_mm": 92.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "DY1",
+      "pin": "6",
+      "x_mm": 58.900000000000006,
+      "y_mm": 92.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "DY1",
+      "pin": "7",
+      "x_mm": 58.900000000000006,
+      "y_mm": 92.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "C167",
+      "pin": "1",
+      "x_mm": 68.9,
+      "y_mm": 92.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "C167",
+      "pin": "2",
+      "x_mm": 68.9,
+      "y_mm": 92.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "T6",
+      "pin": "1",
+      "x_mm": 77.9,
+      "y_mm": 91.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "T6",
+      "pin": "2",
+      "x_mm": 77.9,
+      "y_mm": 91.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "T6",
+      "pin": "3",
+      "x_mm": 77.9,
+      "y_mm": 91.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "T4",
+      "pin": "1",
+      "x_mm": 86.9,
+      "y_mm": 92.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "T4",
+      "pin": "3",
+      "x_mm": 86.9,
+      "y_mm": 92.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "T4",
+      "pin": "2",
+      "x_mm": 86.9,
+      "y_mm": 92.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "T3",
+      "pin": "1",
+      "x_mm": 12.5,
+      "y_mm": 102.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "T3",
+      "pin": "3",
+      "x_mm": 12.5,
+      "y_mm": 102.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "T3",
+      "pin": "2",
+      "x_mm": 12.5,
+      "y_mm": 102.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "T5",
+      "pin": "1",
+      "x_mm": 21.5,
+      "y_mm": 101.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "T5",
+      "pin": "2",
+      "x_mm": 21.5,
+      "y_mm": 101.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "T5",
+      "pin": "3",
+      "x_mm": 21.5,
+      "y_mm": 101.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "D15",
+      "pin": "1",
+      "x_mm": 30.5,
+      "y_mm": 102.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "D15",
+      "pin": "2",
+      "x_mm": 30.5,
+      "y_mm": 102.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "L21",
+      "pin": "1",
+      "x_mm": 40.5,
+      "y_mm": 102.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "L21",
+      "pin": "2",
+      "x_mm": 40.5,
+      "y_mm": 102.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "D9",
+      "pin": "1",
+      "x_mm": 50.5,
+      "y_mm": 102.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "D9",
+      "pin": "2",
+      "x_mm": 50.5,
+      "y_mm": 102.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "L18",
+      "pin": "1",
+      "x_mm": 60.5,
+      "y_mm": 102.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "L18",
+      "pin": "2",
+      "x_mm": 60.5,
+      "y_mm": 102.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "D6",
+      "pin": "1",
+      "x_mm": 70.5,
+      "y_mm": 102.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "D6",
+      "pin": "2",
+      "x_mm": 70.5,
+      "y_mm": 102.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "U8",
+      "pin": "7",
+      "x_mm": 80.5,
+      "y_mm": 102.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "U8",
+      "pin": "2",
+      "x_mm": 80.5,
+      "y_mm": 102.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "U8",
+      "pin": "3",
+      "x_mm": 80.5,
+      "y_mm": 102.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "U8",
+      "pin": "5",
+      "x_mm": 80.5,
+      "y_mm": 102.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "U8",
+      "pin": "6",
+      "x_mm": 80.5,
+      "y_mm": 102.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "U8",
+      "pin": "4",
+      "x_mm": 80.5,
+      "y_mm": 102.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "U8",
+      "pin": "1",
+      "x_mm": 80.5,
+      "y_mm": 102.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "U8",
+      "pin": "8",
+      "x_mm": 80.5,
+      "y_mm": 102.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "U8",
+      "pin": "0",
+      "x_mm": 80.5,
+      "y_mm": 102.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "U7",
+      "pin": "1",
+      "x_mm": 12.5,
+      "y_mm": 112.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "U7",
+      "pin": "3",
+      "x_mm": 12.5,
+      "y_mm": 112.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "U7",
+      "pin": "2",
+      "x_mm": 12.5,
+      "y_mm": 112.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "U9",
+      "pin": "1",
+      "x_mm": 22.5,
+      "y_mm": 112.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "U9",
+      "pin": "3",
+      "x_mm": 22.5,
+      "y_mm": 112.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "U9",
+      "pin": "2",
+      "x_mm": 22.5,
+      "y_mm": 112.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "D7",
+      "pin": "3",
+      "x_mm": 31.5,
+      "y_mm": 111.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "D7",
+      "pin": "1",
+      "x_mm": 31.5,
+      "y_mm": 111.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "D7",
+      "pin": "2",
+      "x_mm": 31.5,
+      "y_mm": 111.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "U6",
+      "pin": "3",
+      "x_mm": 40.5,
+      "y_mm": 112.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "U6",
+      "pin": "2",
+      "x_mm": 40.5,
+      "y_mm": 112.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "U6",
+      "pin": "1",
+      "x_mm": 40.5,
+      "y_mm": 112.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "U11",
+      "pin": "1",
+      "x_mm": 50.5,
+      "y_mm": 112.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "U11",
+      "pin": "2",
+      "x_mm": 50.5,
+      "y_mm": 112.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "U11",
+      "pin": "3",
+      "x_mm": 50.5,
+      "y_mm": 112.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "U11",
+      "pin": "4",
+      "x_mm": 50.5,
+      "y_mm": 112.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "U11",
+      "pin": "5",
+      "x_mm": 50.5,
+      "y_mm": 112.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "U11",
+      "pin": "6",
+      "x_mm": 50.5,
+      "y_mm": 112.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "U11",
+      "pin": "7",
+      "x_mm": 50.5,
+      "y_mm": 112.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "U11",
+      "pin": "8",
+      "x_mm": 50.5,
+      "y_mm": 112.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "U10",
+      "pin": "1",
+      "x_mm": 60.5,
+      "y_mm": 112.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "U10",
+      "pin": "2",
+      "x_mm": 60.5,
+      "y_mm": 112.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "U10",
+      "pin": "3",
+      "x_mm": 60.5,
+      "y_mm": 112.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "U10",
+      "pin": "4",
+      "x_mm": 60.5,
+      "y_mm": 112.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "U10",
+      "pin": "5",
+      "x_mm": 60.5,
+      "y_mm": 112.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "U10",
+      "pin": "6",
+      "x_mm": 60.5,
+      "y_mm": 112.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "U10",
+      "pin": "7",
+      "x_mm": 60.5,
+      "y_mm": 112.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "U10",
+      "pin": "0",
+      "x_mm": 60.5,
+      "y_mm": 112.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "L19",
+      "pin": "1",
+      "x_mm": 70.5,
+      "y_mm": 112.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "L19",
+      "pin": "2",
+      "x_mm": 70.5,
+      "y_mm": 112.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "L20",
+      "pin": "1",
+      "x_mm": 80.5,
+      "y_mm": 112.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "L20",
+      "pin": "2",
+      "x_mm": 80.5,
+      "y_mm": 112.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "L22",
+      "pin": "1",
+      "x_mm": 12.5,
+      "y_mm": 122.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "L22",
+      "pin": "2",
+      "x_mm": 12.5,
+      "y_mm": 122.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "L22",
+      "pin": "4",
+      "x_mm": 12.5,
+      "y_mm": 122.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "L22",
+      "pin": "3",
+      "x_mm": 12.5,
+      "y_mm": 122.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "U12",
+      "pin": "2",
+      "x_mm": 21.5,
+      "y_mm": 121.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "U12",
+      "pin": "3",
+      "x_mm": 21.5,
+      "y_mm": 121.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "U12",
+      "pin": "5",
+      "x_mm": 21.5,
+      "y_mm": 121.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "U12",
+      "pin": "4",
+      "x_mm": 21.5,
+      "y_mm": 121.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "U12",
+      "pin": "1",
+      "x_mm": 21.5,
+      "y_mm": 121.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "D10",
+      "pin": "1",
+      "x_mm": 30.5,
+      "y_mm": 122.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "D10",
+      "pin": "2",
+      "x_mm": 30.5,
+      "y_mm": 122.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "D14",
+      "pin": "1",
+      "x_mm": 40.5,
+      "y_mm": 122.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "D14",
+      "pin": "2",
+      "x_mm": 40.5,
+      "y_mm": 122.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "J29",
+      "pin": "1",
+      "x_mm": 50.5,
+      "y_mm": 122.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "J29",
+      "pin": "2",
+      "x_mm": 50.5,
+      "y_mm": 122.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "J29",
+      "pin": "3",
+      "x_mm": 50.5,
+      "y_mm": 122.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "J29",
+      "pin": "4",
+      "x_mm": 50.5,
+      "y_mm": 122.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "J29",
+      "pin": "5",
+      "x_mm": 50.5,
+      "y_mm": 122.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "J29",
+      "pin": "6",
+      "x_mm": 50.5,
+      "y_mm": 122.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "D8",
+      "pin": "1",
+      "x_mm": 60.5,
+      "y_mm": 122.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "D8",
+      "pin": "2",
+      "x_mm": 60.5,
+      "y_mm": 122.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "D13",
+      "pin": "1",
+      "x_mm": 70.5,
+      "y_mm": 122.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "D13",
+      "pin": "2",
+      "x_mm": 70.5,
+      "y_mm": 122.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "C160",
+      "pin": "1",
+      "x_mm": 80.5,
+      "y_mm": 122.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "C160",
+      "pin": "2",
+      "x_mm": 80.5,
+      "y_mm": 122.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "D45",
+      "pin": "1",
+      "x_mm": 12.5,
+      "y_mm": 132.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "D45",
+      "pin": "2",
+      "x_mm": 12.5,
+      "y_mm": 132.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "D44",
+      "pin": "1",
+      "x_mm": 22.5,
+      "y_mm": 132.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "D44",
+      "pin": "2",
+      "x_mm": 22.5,
+      "y_mm": 132.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "R222",
+      "pin": "1",
+      "x_mm": 30.8,
+      "y_mm": 130.4,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "R222",
+      "pin": "2",
+      "x_mm": 30.8,
+      "y_mm": 130.4,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "R121",
+      "pin": "1",
+      "x_mm": 39.1,
+      "y_mm": 132.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "R121",
+      "pin": "2",
+      "x_mm": 39.1,
+      "y_mm": 132.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "R122",
+      "pin": "1",
+      "x_mm": 49.1,
+      "y_mm": 132.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "R122",
+      "pin": "2",
+      "x_mm": 49.1,
+      "y_mm": 132.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "R123",
+      "pin": "1",
+      "x_mm": 59.1,
+      "y_mm": 132.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "R123",
+      "pin": "2",
+      "x_mm": 59.1,
+      "y_mm": 132.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "R224",
+      "pin": "1",
+      "x_mm": 67.1,
+      "y_mm": 130.25,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "R224",
+      "pin": "2",
+      "x_mm": 67.1,
+      "y_mm": 130.25,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "C392",
+      "pin": "1",
+      "x_mm": 75.1,
+      "y_mm": 132.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "C392",
+      "pin": "2",
+      "x_mm": 75.1,
+      "y_mm": 132.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "C391",
+      "pin": "1",
+      "x_mm": 85.1,
+      "y_mm": 132.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "C391",
+      "pin": "2",
+      "x_mm": 85.1,
+      "y_mm": 132.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "C394",
+      "pin": "1",
+      "x_mm": 12.5,
+      "y_mm": 142.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "C394",
+      "pin": "2",
+      "x_mm": 12.5,
+      "y_mm": 142.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "C395",
+      "pin": "1",
+      "x_mm": 22.5,
+      "y_mm": 142.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "C395",
+      "pin": "2",
+      "x_mm": 22.5,
+      "y_mm": 142.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "C398",
+      "pin": "1",
+      "x_mm": 32.5,
+      "y_mm": 142.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "C398",
+      "pin": "2",
+      "x_mm": 32.5,
+      "y_mm": 142.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "C396",
+      "pin": "1",
+      "x_mm": 42.5,
+      "y_mm": 142.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "C396",
+      "pin": "2",
+      "x_mm": 42.5,
+      "y_mm": 142.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "C397",
+      "pin": "1",
+      "x_mm": 52.5,
+      "y_mm": 142.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "C397",
+      "pin": "2",
+      "x_mm": 52.5,
+      "y_mm": 142.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "C393",
+      "pin": "1",
+      "x_mm": 62.5,
+      "y_mm": 142.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "C393",
+      "pin": "2",
+      "x_mm": 62.5,
+      "y_mm": 142.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "L17",
+      "pin": "1",
+      "x_mm": 71.0,
+      "y_mm": 140.625,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "L17",
+      "pin": "2",
+      "x_mm": 71.0,
+      "y_mm": 140.625,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "J28",
+      "pin": "2",
+      "x_mm": 79.5,
+      "y_mm": 142.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "J28",
+      "pin": "1",
+      "x_mm": 79.5,
+      "y_mm": 142.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "J28",
+      "pin": "3",
+      "x_mm": 79.5,
+      "y_mm": 142.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "J28",
+      "pin": "4",
+      "x_mm": 79.5,
+      "y_mm": 142.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "DS1",
+      "pin": "3",
+      "x_mm": 12.5,
+      "y_mm": 152.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "DS1",
+      "pin": "4",
+      "x_mm": 12.5,
+      "y_mm": 152.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "DS1",
+      "pin": "6",
+      "x_mm": 12.5,
+      "y_mm": 152.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    },
+    {
+      "component": "DS1",
+      "pin": "5",
+      "x_mm": 12.5,
+      "y_mm": 152.5,
+      "diameter_mm": 1.5,
+      "hole_mm": 0.0,
+      "layer": "Top",
+      "shape": "round"
+    }
+  ],
+  "statistics": {
+    "component_count": 123,
+    "net_count": 58,
+    "track_count": 0,
+    "via_count": 0,
+    "pad_count": 291
+  }
+}
