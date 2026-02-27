@@ -1824,10 +1824,11 @@ End;
 {..............................................................................}
 Procedure CreatePCBLibraries;
 Var
-    LibFilePath, FootprintFile, Line, FootprintName, TmpStr : String;
+    LibFilePath, FootprintFile, Line, FootprintName, TmpStr, ProjectPath : String;
     F : TextFile;
     LibDoc : IPCB_Library;
     ServerDoc : IServerDocument;
+    Project : IProject;
     FootprintCount, I, PinCount, GlobalBraceDepth, PrevBraceDepth, RetryCount : Integer;
     SquareBracketDepth, PrevSquareDepth, ColonPos : Integer;
     InFootprints, InFootprintObject, InPadsArray, InSilkscreenObject : Boolean;
@@ -1843,8 +1844,17 @@ Begin
         Exit;
     End;
     
-    // Create a new PCB library file
-    LibFilePath := BasePath + 'PCB_Project\GeneratedFootprints.PcbLib';
+    // Get the project to determine the project directory
+    Project := GetWorkspace.DM_FocusedProject;
+    If Project = Nil Then
+    Begin
+        WriteRes(False, 'No project found');
+        Exit;
+    End;
+    
+    // Create a new PCB library file in the project directory
+    ProjectPath := ExtractFilePath(Project.DM_ProjectFullPath);
+    LibFilePath := ProjectPath + 'GeneratedFootprints.PcbLib';
     
     // Create new PCB library document
     ResetParameters;
@@ -2079,6 +2089,31 @@ Begin
         Sleep(1000);
     Except
         // Continue even if save fails
+    End;
+    
+    // Add library to the project (Project is already obtained earlier)
+    Try
+        If Project <> Nil Then
+        Begin
+            // Ensure the library file is in the project directory before adding
+            Project.DM_AddSourceDocument(LibFilePath);
+            // Force project refresh
+            Project.DM_Compile;
+            // Save the project to persist the change
+            Try
+                ServerDoc := Client.GetDocumentByPath(Project.DM_ProjectFullPath);
+                If ServerDoc <> Nil Then
+                Begin
+                    ServerDoc.DoFileSave(Project.DM_ProjectFullPath);
+                    Application.ProcessMessages;
+                    Sleep(500);
+                End;
+            Except
+                // Continue even if project save fails
+            End;
+        End;
+    Except
+        // Continue even if adding to project fails
     End;
     
     WriteRes(True, 'Created ' + IntToStr(FootprintCount) + ' footprints in library');
