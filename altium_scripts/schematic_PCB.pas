@@ -2082,23 +2082,89 @@ Begin
     
     CloseFile(F);
     
-    // Save the library
+    // CRITICAL: Save the library document before adding to project
+    // First ensure the library document is still valid
+    If LibDoc = Nil Then
+    Begin
+        WriteRes(False, 'Library document became invalid before saving');
+        Exit;
+    End;
+    
+    // Save the library using the document interface
     Try
-        ServerDoc.DoFileSave(LibFilePath);
+        // Refresh library to ensure all changes are committed
+        PCBServer.PostProcess;
         Application.ProcessMessages;
         Sleep(1000);
+        
+        // CRITICAL: Ensure library is saved and added to project
+        // First, get the library document
+        ServerDoc := Client.GetDocumentByPath(LibFilePath);
+        If ServerDoc = Nil Then
+        Begin
+            // Try to open the library document if it's not already open
+            Try
+                ServerDoc := Client.OpenDocument('PCBLIB', LibFilePath);
+                Application.ProcessMessages;
+                Sleep(1000);
+            Except
+                WriteRes(False, 'Could not open library document: ' + LibFilePath);
+                Exit;
+            End;
+        End;
+        
+        If ServerDoc <> Nil Then
+        Begin
+            // Show the document to ensure it's active
+            Client.ShowDocument(ServerDoc);
+            Application.ProcessMessages;
+            Sleep(500);
+            
+            // Save the library file
+            ServerDoc.DoFileSave(LibFilePath);
+            Application.ProcessMessages;
+            Sleep(2000);  // Increased wait time
+            
+            // Verify file was saved
+            If Not FileExists(LibFilePath) Then
+            Begin
+                // Try saving again
+                ServerDoc.DoFileSave(LibFilePath);
+                Application.ProcessMessages;
+                Sleep(2000);
+                
+                If Not FileExists(LibFilePath) Then
+                Begin
+                    WriteRes(False, 'Library file was not saved after retry: ' + LibFilePath);
+                    Exit;
+                End;
+            End;
+        End
+        Else
+        Begin
+            WriteRes(False, 'Could not get library document for saving: ' + LibFilePath);
+            Exit;
+        End;
     Except
-        // Continue even if save fails
+        WriteRes(False, 'Error saving library file');
+        Exit;
     End;
     
     // Add library to the project (Project is already obtained earlier)
     Try
         If Project <> Nil Then
         Begin
-            // Ensure the library file is in the project directory before adding
+            // Check if library is already in project
+            // If not, add it
             Project.DM_AddSourceDocument(LibFilePath);
-            // Force project refresh
+            Application.ProcessMessages;
+            Sleep(500);
+            
+            // Force project refresh to recognize the new library
             Project.DM_Compile;
+            Application.ProcessMessages;
+            Sleep(500);
+            
             // Save the project to persist the change
             Try
                 ServerDoc := Client.GetDocumentByPath(Project.DM_ProjectFullPath);
@@ -2109,14 +2175,21 @@ Begin
                     Sleep(500);
                 End;
             Except
+                // Log but don't fail - project save is less critical
                 // Continue even if project save fails
             End;
+        End
+        Else
+        Begin
+            WriteRes(False, 'No project available to add library to');
+            Exit;
         End;
     Except
-        // Continue even if adding to project fails
+        WriteRes(False, 'Error adding library to project');
+        Exit;
     End;
     
-    WriteRes(True, 'Created ' + IntToStr(FootprintCount) + ' footprints in library');
+    WriteRes(True, 'PCB_LIBRARIES_CREATED|' + IntToStr(FootprintCount) + '|' + LibFilePath);
 End;
 
 {..............................................................................}
