@@ -8,61 +8,61 @@
       "pads": [
         {
           "name": "1",
-          "x": -3.05,
+          "x": -3.02,
           "y": 0.0,
-          "width": 2.45,
-          "height": 3.05,
+          "width": 1.11,
+          "height": 3.43,
           "shape": "rectangular",
           "layer": "top",
           "hole_size": 0.0
         },
         {
           "name": "2",
-          "x": 3.05,
+          "x": 3.02,
           "y": 0.0,
-          "width": 2.45,
-          "height": 3.05,
+          "width": 1.11,
+          "height": 3.43,
           "shape": "rectangular",
           "layer": "top",
           "hole_size": 0.0
         }
       ],
       "silkscreen": {
-        "width": 7.0,
-        "height": 3.5
+        "width": 7.550000000000001,
+        "height": 3.83
       },
       "component_count": 22
     },
     {
-      "footprint_name": "0603",
+      "footprint_name": "R0402",
       "pin_count": 2,
       "component_type": "resistor",
       "package_type": "smd",
       "pads": [
         {
           "name": "1",
-          "x": -0.875,
+          "x": -0.425,
           "y": 0.0,
-          "width": 0.95,
-          "height": 1.0,
+          "width": 0.7,
+          "height": 0.73,
           "shape": "rectangular",
           "layer": "top",
           "hole_size": 0.0
         },
         {
           "name": "2",
-          "x": 0.875,
+          "x": 0.425,
           "y": 0.0,
-          "width": 0.95,
-          "height": 1.0,
+          "width": 0.7,
+          "height": 0.73,
           "shape": "rectangular",
           "layer": "top",
           "hole_size": 0.0
         }
       ],
       "silkscreen": {
-        "width": 2.3,
-        "height": 1.5
+        "width": 1.9499999999999997,
+        "height": 1.13
       },
       "component_count": 19
     },
@@ -74,28 +74,28 @@
       "pads": [
         {
           "name": "1",
-          "x": -1.9,
+          "x": -1.525,
           "y": 0.0,
-          "width": 2.3,
-          "height": 2.7,
+          "width": 1.25,
+          "height": 2.3,
           "shape": "rectangular",
           "layer": "top",
           "hole_size": 0.0
         },
         {
           "name": "2",
-          "x": 1.9,
+          "x": 1.525,
           "y": 0.0,
-          "width": 2.3,
-          "height": 2.7,
+          "width": 1.25,
+          "height": 2.3,
           "shape": "rectangular",
           "layer": "top",
           "hole_size": 0.0
         }
       ],
       "silkscreen": {
-        "width": 5.3,
-        "height": 3.9
+        "width": 4.7,
+        "height": 2.6999999999999997
       },
       "component_count": 1
     },
@@ -107,28 +107,28 @@
       "pads": [
         {
           "name": "1",
-          "x": -3.05,
+          "x": -2.825,
           "y": 0.0,
-          "width": 2.6,
-          "height": 3.7,
+          "width": 1.25,
+          "height": 3.3,
           "shape": "rectangular",
           "layer": "top",
           "hole_size": 0.0
         },
         {
           "name": "2",
-          "x": 3.05,
+          "x": 2.825,
           "y": 0.0,
-          "width": 2.6,
-          "height": 3.7,
+          "width": 1.25,
+          "height": 3.3,
           "shape": "rectangular",
           "layer": "top",
           "hole_size": 0.0
         }
       ],
       "silkscreen": {
-        "width": 7.5,
-        "height": 4.5
+        "width": 7.300000000000001,
+        "height": 3.6999999999999997
       },
       "component_count": 2
     },
@@ -143,7 +143,7 @@
           "x": -6.75,
           "y": 0.0,
           "width": 3.0,
-          "height": 13.5,
+          "height": 3.0,
           "shape": "rectangular",
           "layer": "top",
           "hole_size": 0.0
@@ -153,15 +153,15 @@
           "x": 6.75,
           "y": 0.0,
           "width": 3.0,
-          "height": 13.5,
+          "height": 3.0,
           "shape": "rectangular",
           "layer": "top",
           "hole_size": 0.0
         }
       ],
       "silkscreen": {
-        "width": 14.0,
-        "height": 14.0
+        "width": 13.5,
+        "height": 13.5
       },
       "component_count": 5
     },
@@ -173,75 +173,290 @@
       "pads": [
         {
           "name": "1",
-          "x": -2.5,
+          "x": -2.1,
           "y": 0.0,
-          "width": 2.5,
-          "height": 3.2,
+          "width": 1.5,
+          "height": 3.0,
           "shape": "rectangular",
           "layer": "top",
           "hole_size": 0.0
         },
         {
           "name": "2",
-          "x": 2.5,
+          "x": 2.1,
           "y": 0.0,
-          "width": 2.5,
-          "height": 3.2,
+          "width": 1.5,
+          "height": 3.0,
           "shape": "rectangular",
           "layer": "top",
           "hole_size": 0.0
         }
       ],
       "silkscreen": {
-        "width": 6.0,
-        "height": 3.5
+        "width": 6.1000000000000005,
+        "height": 3.4
       },
       "component_count": 25
     },
     {
-      "footprint_name": "0603",
+      "footprint_name": "R2010",
       "pin_count": 2,
       "component_type": "resistor",
       "package_type": "smd",
       "pads": [
         {
           "name": "1",
-          "x": -0.475,
+          "x": -1.75,
           "y": 0.0,
-          "width": 0.95,
-          "height": 1.0,
+          "width": 2.5,
+          "height": 2.5,
           "shape": "rectangular",
           "layer": "top",
           "hole_size": 0.0
         },
         {
           "name": "2",
-          "x": 0.475,
+          "x": 1.75,
           "y": 0.0,
-          "width": 0.95,
-          "height": 1.0,
+          "width": 2.5,
+          "height": 2.5,
           "shape": "rectangular",
           "layer": "top",
           "hole_size": 0.0
         }
       ],
       "silkscreen": {
-        "width": 2.3,
-        "height": 1.3
+        "width": 6.4,
+        "height": 2.9
       },
       "component_count": 14
     },
     {
-      "footprint_name": "0603",
+      "footprint_name": "C0603",
       "pin_count": 2,
       "component_type": "resistor",
       "package_type": "smd",
       "pads": [
         {
           "name": "1",
-          "x": -0.75,
+          "x": -0.68,
           "y": 0.0,
-          "width": 0.7,
+          "width": 1.01,
+          "height": 0.98,
+          "shape": "rectangular",
+          "layer": "top",
+          "hole_size": 0.0
+        },
+        {
+          "name": "2",
+          "x": 0.68,
+          "y": 0.0,
+          "width": 1.01,
+          "height": 0.98,
+          "shape": "rectangular",
+          "layer": "top",
+          "hole_size": 0.0
+        }
+      ],
+      "silkscreen": {
+        "width": 2.77,
+        "height": 1.38
+      },
+      "component_count": 0
+    },
+    {
+      "footprint_name": "R0603",
+      "pin_count": 2,
+      "component_type": "resistor",
+      "package_type": "smd",
+      "pads": [
+        {
+          "name": "1",
+          "x": -0.68,
+          "y": 0.0,
+          "width": 1.01,
+          "height": 0.98,
+          "shape": "rectangular",
+          "layer": "top",
+          "hole_size": 0.0
+        },
+        {
+          "name": "2",
+          "x": 0.68,
+          "y": 0.0,
+          "width": 1.01,
+          "height": 0.98,
+          "shape": "rectangular",
+          "layer": "top",
+          "hole_size": 0.0
+        }
+      ],
+      "silkscreen": {
+        "width": 2.77,
+        "height": 1.38
+      },
+      "component_count": 5
+    },
+    {
+      "footprint_name": "L0603",
+      "pin_count": 2,
+      "component_type": "resistor",
+      "package_type": "smd",
+      "pads": [
+        {
+          "name": "1",
+          "x": -0.68,
+          "y": 0.0,
+          "width": 1.01,
+          "height": 0.98,
+          "shape": "rectangular",
+          "layer": "top",
+          "hole_size": 0.0
+        },
+        {
+          "name": "2",
+          "x": 0.68,
+          "y": 0.0,
+          "width": 1.01,
+          "height": 0.98,
+          "shape": "rectangular",
+          "layer": "top",
+          "hole_size": 0.0
+        }
+      ],
+      "silkscreen": {
+        "width": 2.77,
+        "height": 1.38
+      },
+      "component_count": 0
+    },
+    {
+      "footprint_name": "D0603",
+      "pin_count": 2,
+      "component_type": "resistor",
+      "package_type": "smd",
+      "pads": [
+        {
+          "name": "1",
+          "x": -0.68,
+          "y": 0.0,
+          "width": 1.01,
+          "height": 0.98,
+          "shape": "rectangular",
+          "layer": "top",
+          "hole_size": 0.0
+        },
+        {
+          "name": "2",
+          "x": 0.68,
+          "y": 0.0,
+          "width": 1.01,
+          "height": 0.98,
+          "shape": "rectangular",
+          "layer": "top",
+          "hole_size": 0.0
+        }
+      ],
+      "silkscreen": {
+        "width": 2.77,
+        "height": 1.38
+      },
+      "component_count": 0
+    },
+    {
+      "footprint_name": "LMF500-23B30UH",
+      "pin_count": 7,
+      "component_type": "diode",
+      "package_type": "smd",
+      "pads": [
+        {
+          "name": "1",
+          "x": -3.75,
+          "y": -2.0,
+          "width": 0.9,
+          "height": 1.5,
+          "shape": "rectangular",
+          "layer": "top",
+          "hole_size": 0.0
+        },
+        {
+          "name": "2",
+          "x": -2.25,
+          "y": -2.0,
+          "width": 0.9,
+          "height": 1.5,
+          "shape": "rectangular",
+          "layer": "top",
+          "hole_size": 0.0
+        },
+        {
+          "name": "3",
+          "x": -0.75,
+          "y": -2.0,
+          "width": 0.9,
+          "height": 1.5,
+          "shape": "rectangular",
+          "layer": "top",
+          "hole_size": 0.0
+        },
+        {
+          "name": "4",
+          "x": 0.75,
+          "y": -2.0,
+          "width": 0.9,
+          "height": 1.5,
+          "shape": "rectangular",
+          "layer": "top",
+          "hole_size": 0.0
+        },
+        {
+          "name": "5",
+          "x": 2.25,
+          "y": -2.0,
+          "width": 0.9,
+          "height": 1.5,
+          "shape": "rectangular",
+          "layer": "top",
+          "hole_size": 0.0
+        },
+        {
+          "name": "6",
+          "x": 3.75,
+          "y": -2.0,
+          "width": 0.9,
+          "height": 1.5,
+          "shape": "rectangular",
+          "layer": "top",
+          "hole_size": 0.0
+        },
+        {
+          "name": "Tab",
+          "x": 0.0,
+          "y": 2.0,
+          "width": 10.0,
+          "height": 7.5,
+          "shape": "rectangular",
+          "layer": "top",
+          "hole_size": 0.0
+        }
+      ],
+      "silkscreen": {
+        "width": 12.0,
+        "height": 10.0
+      },
+      "component_count": 1
+    },
+    {
+      "footprint_name": "SOT-23",
+      "pin_count": 3,
+      "component_type": "ic",
+      "package_type": "smd",
+      "pads": [
+        {
+          "name": "1",
+          "x": -1.45,
+          "y": -0.475,
+          "width": 0.8,
           "height": 0.9,
           "shape": "rectangular",
           "layer": "top",
@@ -249,9 +464,19 @@
         },
         {
           "name": "2",
-          "x": 0.75,
+          "x": -1.45,
+          "y": 0.475,
+          "width": 0.8,
+          "height": 0.9,
+          "shape": "rectangular",
+          "layer": "top",
+          "hole_size": 0.0
+        },
+        {
+          "name": "3",
+          "x": 1.45,
           "y": 0.0,
-          "width": 0.7,
+          "width": 0.8,
           "height": 0.9,
           "shape": "rectangular",
           "layer": "top",
@@ -259,64 +484,319 @@
         }
       ],
       "silkscreen": {
-        "width": 1.6,
-        "height": 0.8
+        "width": 4.1000000000000005,
+        "height": 2.25
       },
-      "component_count": 5
+      "component_count": 3
     },
     {
-      "footprint_name": "SOT-23",
+      "footprint_name": "TO-263-2",
+      "pin_count": 2,
+      "component_type": "transistor",
+      "package_type": "smd",
+      "pads": [
+        {
+          "name": "1",
+          "x": -2.25,
+          "y": 0.0,
+          "width": 1.5,
+          "height": 3.0,
+          "shape": "rectangular",
+          "layer": "top",
+          "hole_size": 0.0
+        },
+        {
+          "name": "2",
+          "x": 2.25,
+          "y": 0.0,
+          "width": 1.5,
+          "height": 3.0,
+          "shape": "rectangular",
+          "layer": "top",
+          "hole_size": 0.0
+        }
+      ],
+      "silkscreen": {
+        "width": 6.4,
+        "height": 3.4
+      },
+      "component_count": 2
+    },
+    {
+      "footprint_name": "SOD-523",
+      "pin_count": 2,
+      "component_type": "diode",
+      "package_type": "smd",
+      "pads": [
+        {
+          "name": "1",
+          "x": -0.48,
+          "y": 0.0,
+          "width": 0.6,
+          "height": 0.8,
+          "shape": "rectangular",
+          "layer": "top",
+          "hole_size": 0.0
+        },
+        {
+          "name": "2",
+          "x": 0.48,
+          "y": 0.0,
+          "width": 0.6,
+          "height": 0.8,
+          "shape": "rectangular",
+          "layer": "top",
+          "hole_size": 0.0
+        }
+      ],
+      "silkscreen": {
+        "width": 1.96,
+        "height": 1.2000000000000002
+      },
+      "component_count": 6
+    },
+    {
+      "footprint_name": "L7.8x7.0x5.0",
+      "pin_count": 2,
+      "component_type": "inductor",
+      "package_type": "smd",
+      "pads": [
+        {
+          "name": "1",
+          "x": -3.12,
+          "y": 0.0,
+          "width": 2.0,
+          "height": 3.0,
+          "shape": "rectangular",
+          "layer": "top",
+          "hole_size": 0.0
+        },
+        {
+          "name": "2",
+          "x": 3.12,
+          "y": 0.0,
+          "width": 2.0,
+          "height": 3.0,
+          "shape": "rectangular",
+          "layer": "top",
+          "hole_size": 0.0
+        }
+      ],
+      "silkscreen": {
+        "width": 8.64,
+        "height": 3.4
+      },
+      "component_count": 4
+    },
+    {
+      "footprint_name": "ESOP8L",
+      "pin_count": 9,
+      "component_type": "ic",
+      "package_type": "smd",
+      "pads": [
+        {
+          "name": "1",
+          "x": -2.2,
+          "y": -0.9750000000000001,
+          "width": 0.5,
+          "height": 1.5,
+          "shape": "rectangular",
+          "layer": "top",
+          "hole_size": 0.0
+        },
+        {
+          "name": "2",
+          "x": -2.2,
+          "y": -0.32500000000000007,
+          "width": 0.5,
+          "height": 1.5,
+          "shape": "rectangular",
+          "layer": "top",
+          "hole_size": 0.0
+        },
+        {
+          "name": "3",
+          "x": -2.2,
+          "y": 0.32499999999999996,
+          "width": 0.5,
+          "height": 1.5,
+          "shape": "rectangular",
+          "layer": "top",
+          "hole_size": 0.0
+        },
+        {
+          "name": "4",
+          "x": -2.2,
+          "y": 0.9750000000000001,
+          "width": 0.5,
+          "height": 1.5,
+          "shape": "rectangular",
+          "layer": "top",
+          "hole_size": 0.0
+        },
+        {
+          "name": "5",
+          "x": 2.2,
+          "y": -0.9750000000000001,
+          "width": 0.5,
+          "height": 1.5,
+          "shape": "rectangular",
+          "layer": "top",
+          "hole_size": 0.0
+        },
+        {
+          "name": "6",
+          "x": 2.2,
+          "y": -0.32500000000000007,
+          "width": 0.5,
+          "height": 1.5,
+          "shape": "rectangular",
+          "layer": "top",
+          "hole_size": 0.0
+        },
+        {
+          "name": "7",
+          "x": 2.2,
+          "y": 0.32499999999999996,
+          "width": 0.5,
+          "height": 1.5,
+          "shape": "rectangular",
+          "layer": "top",
+          "hole_size": 0.0
+        },
+        {
+          "name": "8",
+          "x": 2.2,
+          "y": 0.9750000000000001,
+          "width": 0.5,
+          "height": 1.5,
+          "shape": "rectangular",
+          "layer": "top",
+          "hole_size": 0.0
+        },
+        {
+          "name": "Tab",
+          "x": 0.0,
+          "y": 0.0,
+          "width": 2.5,
+          "height": 2.5,
+          "shape": "rectangular",
+          "layer": "top",
+          "hole_size": 0.0
+        }
+      ],
+      "silkscreen": {
+        "width": 5.300000000000001,
+        "height": 3.85
+      },
+      "component_count": 1
+    },
+    {
+      "footprint_name": "TO-252(1)",
       "pin_count": 3,
       "component_type": "transistor",
       "package_type": "smd",
       "pads": [
         {
           "name": "1",
-          "x": -1.05,
-          "y": -0.95,
-          "width": 0.6,
-          "height": 0.7,
-          "shape": "rectangular",
-          "layer": "top",
-          "hole_size": 0.0
-        },
-        {
-          "name": "2",
-          "x": 1.05,
-          "y": -0.95,
-          "width": 0.6,
-          "height": 0.7,
+          "x": -3.8,
+          "y": -2.54,
+          "width": 1.5,
+          "height": 2.5,
           "shape": "rectangular",
           "layer": "top",
           "hole_size": 0.0
         },
         {
           "name": "3",
+          "x": -3.8,
+          "y": 2.54,
+          "width": 1.5,
+          "height": 2.5,
+          "shape": "rectangular",
+          "layer": "top",
+          "hole_size": 0.0
+        },
+        {
+          "name": "Tab",
           "x": 0.0,
-          "y": 1.05,
-          "width": 0.6,
-          "height": 0.7,
+          "y": 0.0,
+          "width": 8.0,
+          "height": 6.5,
           "shape": "rectangular",
           "layer": "top",
           "hole_size": 0.0
         }
       ],
       "silkscreen": {
-        "width": 3.0,
-        "height": 2.5
+        "width": 8.950000000000001,
+        "height": 7.98
       },
-      "component_count": 3
+      "component_count": 2
     },
     {
-      "footprint_name": "TO-263-2",
+      "footprint_name": "SOT-89",
       "pin_count": 4,
-      "component_type": "transistor",
+      "component_type": "integrated_circuit",
       "package_type": "smd",
       "pads": [
         {
           "name": "1",
-          "x": -2.54,
-          "y": -4.5,
+          "x": -1.5,
+          "y": 0.95,
+          "width": 1.5,
+          "height": 1.5,
+          "shape": "rectangular",
+          "layer": "top",
+          "hole_size": 0.0
+        },
+        {
+          "name": "2",
+          "x": 0.0,
+          "y": 0.95,
+          "width": 1.5,
+          "height": 1.5,
+          "shape": "rectangular",
+          "layer": "top",
+          "hole_size": 0.0
+        },
+        {
+          "name": "3",
+          "x": 1.5,
+          "y": 0.95,
+          "width": 1.5,
+          "height": 1.5,
+          "shape": "rectangular",
+          "layer": "top",
+          "hole_size": 0.0
+        },
+        {
+          "name": "Tab",
+          "x": 0.0,
+          "y": -1.5,
+          "width": 4.5,
+          "height": 2.5,
+          "shape": "rectangular",
+          "layer": "top",
+          "hole_size": 0.0
+        }
+      ],
+      "silkscreen": {
+        "width": 4.5,
+        "height": 4.5
+      },
+      "component_count": 1
+    },
+    {
+      "footprint_name": "DW-PXXX-20XP1",
+      "pin_count": 8,
+      "component_type": "integrated_circuit",
+      "package_type": "smd",
+      "pads": [
+        {
+          "name": "1",
+          "x": -3.8,
+          "y": -2.85,
           "width": 0.9,
           "height": 2.0,
           "shape": "rectangular",
@@ -325,8 +805,8 @@
         },
         {
           "name": "2",
-          "x": 0.0,
-          "y": -4.5,
+          "x": -3.8,
+          "y": -1.9,
           "width": 0.9,
           "height": 2.0,
           "shape": "rectangular",
@@ -335,8 +815,48 @@
         },
         {
           "name": "3",
-          "x": 2.54,
-          "y": -4.5,
+          "x": -3.8,
+          "y": -0.95,
+          "width": 0.9,
+          "height": 2.0,
+          "shape": "rectangular",
+          "layer": "top",
+          "hole_size": 0.0
+        },
+        {
+          "name": "4",
+          "x": -3.8,
+          "y": 0.0,
+          "width": 0.9,
+          "height": 2.0,
+          "shape": "rectangular",
+          "layer": "top",
+          "hole_size": 0.0
+        },
+        {
+          "name": "5",
+          "x": -3.8,
+          "y": 0.95,
+          "width": 0.9,
+          "height": 2.0,
+          "shape": "rectangular",
+          "layer": "top",
+          "hole_size": 0.0
+        },
+        {
+          "name": "6",
+          "x": -3.8,
+          "y": 1.9,
+          "width": 0.9,
+          "height": 2.0,
+          "shape": "rectangular",
+          "layer": "top",
+          "hole_size": 0.0
+        },
+        {
+          "name": "7",
+          "x": -3.8,
+          "y": 2.85,
           "width": 0.9,
           "height": 2.0,
           "shape": "rectangular",
@@ -358,63 +878,279 @@
         "width": 12.0,
         "height": 10.0
       },
-      "component_count": 2
+      "component_count": 1
     },
     {
-      "footprint_name": "SOD-523",
-      "pin_count": 2,
-      "component_type": "diode",
+      "footprint_name": "TO-263-7",
+      "pin_count": 8,
+      "component_type": "transistor",
       "package_type": "smd",
       "pads": [
         {
           "name": "1",
-          "x": -0.65,
-          "y": 0.0,
-          "width": 0.6,
-          "height": 0.8,
+          "x": -3.8,
+          "y": -2.85,
+          "width": 0.9,
+          "height": 2.0,
           "shape": "rectangular",
           "layer": "top",
           "hole_size": 0.0
         },
         {
           "name": "2",
-          "x": 0.65,
-          "y": 0.0,
-          "width": 0.6,
-          "height": 0.8,
+          "x": -3.8,
+          "y": -1.9000000000000001,
+          "width": 0.9,
+          "height": 2.0,
+          "shape": "rectangular",
+          "layer": "top",
+          "hole_size": 0.0
+        },
+        {
+          "name": "3",
+          "x": -3.8,
+          "y": -0.9500000000000002,
+          "width": 0.9,
+          "height": 2.0,
+          "shape": "rectangular",
+          "layer": "top",
+          "hole_size": 0.0
+        },
+        {
+          "name": "4",
+          "x": -3.8,
+          "y": -4.440892098500626e-16,
+          "width": 0.9,
+          "height": 2.0,
+          "shape": "rectangular",
+          "layer": "top",
+          "hole_size": 0.0
+        },
+        {
+          "name": "5",
+          "x": -3.8,
+          "y": 0.9499999999999997,
+          "width": 0.9,
+          "height": 2.0,
+          "shape": "rectangular",
+          "layer": "top",
+          "hole_size": 0.0
+        },
+        {
+          "name": "6",
+          "x": -3.8,
+          "y": 1.9,
+          "width": 0.9,
+          "height": 2.0,
+          "shape": "rectangular",
+          "layer": "top",
+          "hole_size": 0.0
+        },
+        {
+          "name": "7",
+          "x": -3.8,
+          "y": 2.849999999999999,
+          "width": 0.9,
+          "height": 2.0,
+          "shape": "rectangular",
+          "layer": "top",
+          "hole_size": 0.0
+        },
+        {
+          "name": "Tab",
+          "x": 0.0,
+          "y": 2.0,
+          "width": 10.0,
+          "height": 7.5,
           "shape": "rectangular",
           "layer": "top",
           "hole_size": 0.0
         }
       ],
       "silkscreen": {
-        "width": 1.8,
-        "height": 1.35
+        "width": 10.4,
+        "height": 10.0
       },
-      "component_count": 6
+      "component_count": 1
     },
     {
-      "footprint_name": "L7.8x7.0x5.0",
-      "pin_count": 2,
+      "footprint_name": "T22*14*8",
+      "pin_count": 4,
       "component_type": "inductor",
       "package_type": "smd",
       "pads": [
         {
           "name": "1",
-          "x": -3.9,
-          "y": 0.0,
+          "x": -5.0,
+          "y": -7.0,
           "width": 2.0,
-          "height": 3.0,
+          "height": 2.0,
+          "shape": "rectangular",
+          "layer": "top",
+          "hole_size": 0.0
+        },
+        {
+          "name": "3",
+          "x": -5.0,
+          "y": 7.0,
+          "width": 2.0,
+          "height": 2.0,
           "shape": "rectangular",
           "layer": "top",
           "hole_size": 0.0
         },
         {
           "name": "2",
-          "x": 3.9,
-          "y": 0.0,
+          "x": 5.0,
+          "y": -7.0,
           "width": 2.0,
-          "height": 3.0,
+          "height": 2.0,
+          "shape": "rectangular",
+          "layer": "top",
+          "hole_size": 0.0
+        },
+        {
+          "name": "4",
+          "x": 5.0,
+          "y": 7.0,
+          "width": 2.0,
+          "height": 2.0,
+          "shape": "rectangular",
+          "layer": "top",
+          "hole_size": 0.0
+        }
+      ],
+      "silkscreen": {
+        "width": 22.0,
+        "height": 14.0
+      },
+      "component_count": 1
+    },
+    {
+      "footprint_name": "SOT-23-5",
+      "pin_count": 5,
+      "component_type": "ic",
+      "package_type": "smd",
+      "pads": [
+        {
+          "name": "1",
+          "x": -1.3,
+          "y": -0.95,
+          "width": 0.7,
+          "height": 1.0,
+          "shape": "rectangular",
+          "layer": "top",
+          "hole_size": 0.0
+        },
+        {
+          "name": "2",
+          "x": -1.3,
+          "y": 0.0,
+          "width": 0.7,
+          "height": 1.0,
+          "shape": "rectangular",
+          "layer": "top",
+          "hole_size": 0.0
+        },
+        {
+          "name": "3",
+          "x": -1.3,
+          "y": 0.95,
+          "width": 0.7,
+          "height": 1.0,
+          "shape": "rectangular",
+          "layer": "top",
+          "hole_size": 0.0
+        },
+        {
+          "name": "4",
+          "x": 1.3,
+          "y": -0.475,
+          "width": 0.7,
+          "height": 1.0,
+          "shape": "rectangular",
+          "layer": "top",
+          "hole_size": 0.0
+        },
+        {
+          "name": "5",
+          "x": 1.3,
+          "y": 0.475,
+          "width": 0.7,
+          "height": 1.0,
+          "shape": "rectangular",
+          "layer": "top",
+          "hole_size": 0.0
+        }
+      ],
+      "silkscreen": {
+        "width": 3.6999999999999997,
+        "height": 3.3
+      },
+      "component_count": 1
+    },
+    {
+      "footprint_name": "??????6?(2*3PIN??2?4.3)",
+      "pin_count": 6,
+      "component_type": "connector",
+      "package_type": "smd",
+      "pads": [
+        {
+          "name": "1",
+          "x": -2.15,
+          "y": -2.15,
+          "width": 1.0,
+          "height": 1.5,
+          "shape": "rectangular",
+          "layer": "top",
+          "hole_size": 0.0
+        },
+        {
+          "name": "2",
+          "x": -2.15,
+          "y": 0.0,
+          "width": 1.0,
+          "height": 1.5,
+          "shape": "rectangular",
+          "layer": "top",
+          "hole_size": 0.0
+        },
+        {
+          "name": "3",
+          "x": -2.15,
+          "y": 2.15,
+          "width": 1.0,
+          "height": 1.5,
+          "shape": "rectangular",
+          "layer": "top",
+          "hole_size": 0.0
+        },
+        {
+          "name": "4",
+          "x": 2.15,
+          "y": -2.15,
+          "width": 1.0,
+          "height": 1.5,
+          "shape": "rectangular",
+          "layer": "top",
+          "hole_size": 0.0
+        },
+        {
+          "name": "5",
+          "x": 2.15,
+          "y": 0.0,
+          "width": 1.0,
+          "height": 1.5,
+          "shape": "rectangular",
+          "layer": "top",
+          "hole_size": 0.0
+        },
+        {
+          "name": "6",
+          "x": 2.15,
+          "y": 2.15,
+          "width": 1.0,
+          "height": 1.5,
           "shape": "rectangular",
           "layer": "top",
           "hole_size": 0.0
@@ -422,113 +1158,7 @@
       ],
       "silkscreen": {
         "width": 8.3,
-        "height": 7.5
-      },
-      "component_count": 4
-    },
-    {
-      "footprint_name": "TO-252",
-      "pin_count": 4,
-      "component_type": "ic",
-      "package_type": "smd",
-      "pads": [
-        {
-          "name": "1",
-          "x": -1.27,
-          "y": -3.4,
-          "width": 0.9,
-          "height": 1.5,
-          "shape": "rectangular",
-          "layer": "top",
-          "hole_size": 0.0
-        },
-        {
-          "name": "2",
-          "x": 0.0,
-          "y": -3.4,
-          "width": 0.9,
-          "height": 1.5,
-          "shape": "rectangular",
-          "layer": "top",
-          "hole_size": 0.0
-        },
-        {
-          "name": "3",
-          "x": 1.27,
-          "y": -3.4,
-          "width": 0.9,
-          "height": 1.5,
-          "shape": "rectangular",
-          "layer": "top",
-          "hole_size": 0.0
-        },
-        {
-          "name": "Tab",
-          "x": 0.0,
-          "y": 1.5,
-          "width": 6.0,
-          "height": 5.6,
-          "shape": "rectangular",
-          "layer": "top",
-          "hole_size": 0.0
-        }
-      ],
-      "silkscreen": {
-        "width": 7.0,
-        "height": 6.0
-      },
-      "component_count": 2
-    },
-    {
-      "footprint_name": "SOT-89",
-      "pin_count": 4,
-      "component_type": "ic",
-      "package_type": "smd",
-      "pads": [
-        {
-          "name": "1",
-          "x": -1.5,
-          "y": -1.5,
-          "width": 0.6,
-          "height": 1.0,
-          "shape": "rectangular",
-          "layer": "top",
-          "hole_size": 0.0
-        },
-        {
-          "name": "2",
-          "x": 0.0,
-          "y": -1.5,
-          "width": 0.6,
-          "height": 1.0,
-          "shape": "rectangular",
-          "layer": "top",
-          "hole_size": 0.0
-        },
-        {
-          "name": "3",
-          "x": 1.5,
-          "y": -1.5,
-          "width": 0.6,
-          "height": 1.0,
-          "shape": "rectangular",
-          "layer": "top",
-          "hole_size": 0.0
-        },
-        {
-          "name": "Tab",
-          "x": 0.0,
-          "y": 1.0,
-          "width": 1.5,
-          "height": 2.5,
-          "shape": "rectangular",
-          "layer": "top",
-          "hole_size": 0.0
-        }
-      ],
-      "silkscreen": {
-        "width": 4.5,
-        "height": 4.0
+        "height": 8.3
       },
       "component_count": 1
     },
@@ -540,61 +1170,114 @@
       "pads": [
         {
           "name": "1",
-          "x": -1.05,
+          "x": -1.18,
           "y": 0.0,
-          "width": 1.4,
-          "height": 1.0,
+          "width": 0.91,
+          "height": 1.22,
           "shape": "rectangular",
           "layer": "top",
           "hole_size": 0.0
         },
         {
           "name": "2",
-          "x": 1.05,
+          "x": 1.18,
           "y": 0.0,
-          "width": 1.4,
-          "height": 1.0,
+          "width": 0.91,
+          "height": 1.22,
           "shape": "rectangular",
           "layer": "top",
           "hole_size": 0.0
         }
       ],
       "silkscreen": {
-        "width": 3.7,
-        "height": 1.8
+        "width": 3.67,
+        "height": 1.62
       },
       "component_count": 2
     },
     {
-      "footprint_name": "0805",
+      "footprint_name": "L0805",
       "pin_count": 2,
       "component_type": "inductor",
       "package_type": "smd",
       "pads": [
         {
           "name": "1",
-          "x": -0.95,
+          "x": -0.8,
           "y": 0.0,
           "width": 1.2,
-          "height": 1.4,
+          "height": 1.2,
           "shape": "rectangular",
           "layer": "top",
           "hole_size": 0.0
         },
         {
           "name": "2",
-          "x": 0.95,
+          "x": 0.8,
           "y": 0.0,
           "width": 1.2,
-          "height": 1.4,
+          "height": 1.2,
           "shape": "rectangular",
           "layer": "top",
           "hole_size": 0.0
         }
       ],
       "silkscreen": {
-        "width": 2.3,
-        "height": 1.7
+        "width": 3.1999999999999997,
+        "height": 1.6
+      },
+      "component_count": 1
+    },
+    {
+      "footprint_name": "Y50DX-1404ZJ10S",
+      "pin_count": 4,
+      "component_type": "connector",
+      "package_type": "smd",
+      "pads": [
+        {
+          "name": "1",
+          "x": -2.0,
+          "y": -1.5,
+          "width": 1.0,
+          "height": 2.0,
+          "shape": "rectangular",
+          "layer": "top",
+          "hole_size": 0.0
+        },
+        {
+          "name": "2",
+          "x": -2.0,
+          "y": 0.0,
+          "width": 1.0,
+          "height": 2.0,
+          "shape": "rectangular",
+          "layer": "top",
+          "hole_size": 0.0
+        },
+        {
+          "name": "3",
+          "x": -2.0,
+          "y": 1.5,
+          "width": 1.0,
+          "height": 2.0,
+          "shape": "rectangular",
+          "layer": "top",
+          "hole_size": 0.0
+        },
+        {
+          "name": "4",
+          "x": -2.0,
+          "y": 3.0,
+          "width": 1.0,
+          "height": 2.0,
+          "shape": "rectangular",
+          "layer": "top",
+          "hole_size": 0.0
+        }
+      ],
+      "silkscreen": {
+        "width": 6.0,
+        "height": 8.0
       },
       "component_count": 1
     },
@@ -608,46 +1291,46 @@
           "name": "1",
           "x": -1.5,
           "y": -1.5,
-          "width": 0.6,
-          "height": 1.0,
-          "shape": "rectangular",
-          "layer": "top",
-          "hole_size": 0.0
-        },
-        {
-          "name": "2",
-          "x": 0.0,
-          "y": -1.5,
-          "width": 0.6,
-          "height": 1.0,
+          "width": 1.0,
+          "height": 1.5,
           "shape": "rectangular",
           "layer": "top",
           "hole_size": 0.0
         },
         {
           "name": "3",
-          "x": 1.5,
-          "y": -1.5,
-          "width": 0.6,
-          "height": 1.0,
+          "x": -1.5,
+          "y": 1.5,
+          "width": 1.0,
+          "height": 1.5,
           "shape": "rectangular",
           "layer": "top",
           "hole_size": 0.0
         },
         {
-          "name": "Tab",
-          "x": 0.0,
-          "y": 1.0,
-          "width": 1.5,
-          "height": 2.5,
+          "name": "2",
+          "x": 1.5,
+          "y": -1.5,
+          "width": 1.0,
+          "height": 1.5,
+          "shape": "rectangular",
+          "layer": "top",
+          "hole_size": 0.0
+        },
+        {
+          "name": "4",
+          "x": 1.5,
+          "y": 1.5,
+          "width": 1.0,
+          "height": 1.5,
           "shape": "rectangular",
           "layer": "top",
           "hole_size": 0.0
         }
       ],
       "silkscreen": {
-        "width": 4.5,
-        "height": 4.0
+        "width": 5.0,
+        "height": 5.0
       },
       "component_count": 1
     }
@@ -660,34 +1343,36 @@
       "pads": [
         {
           "name": "1",
-          "x": -3.05,
+          "x": -3.02,
           "y": 0.0,
-          "width": 2.45,
-          "height": 3.05,
+          "width": 1.11,
+          "height": 3.43,
           "shape": "rectangular",
           "layer": "top",
           "hole_size": 0.0
         },
         {
           "name": "2",
-          "x": 3.05,
+          "x": 3.02,
           "y": 0.0,
-          "width": 2.45,
-          "height": 3.05,
+          "width": 1.11,
+          "height": 3.43,
           "shape": "rectangular",
           "layer": "top",
           "hole_size": 0.0
         }
       ],
       "silkscreen": {
-        "width": 7.0,
-        "height": 3.5
+        "width": 7.550000000000001,
+        "height": 3.83
       },
       "courtyard": {
-        "width": 8.0,
-        "height": 4.5
+        "width": 8.15,
+        "height": 4.43
       },
-      "notes": "IPC-7351 standard footprint",
+      "verification_status": "guessed",
+      "footprint_class": "unknown",
+      "notes": "Generated from database (needs verification)",
       "component_designators": [
         "C153",
         "C152",
@@ -715,40 +1400,42 @@
       "component_count": 22
     },
     "R0402": {
-      "footprint_name": "0603",
+      "footprint_name": "R0402",
       "component_type": "resistor",
       "package_type": "smd",
       "pads": [
         {
           "name": "1",
-          "x": -0.875,
+          "x": -0.425,
           "y": 0.0,
-          "width": 0.95,
-          "height": 1.0,
+          "width": 0.7,
+          "height": 0.73,
           "shape": "rectangular",
           "layer": "top",
           "hole_size": 0.0
         },
         {
           "name": "2",
-          "x": 0.875,
+          "x": 0.425,
           "y": 0.0,
-          "width": 0.95,
-          "height": 1.0,
+          "width": 0.7,
+          "height": 0.73,
           "shape": "rectangular",
           "layer": "top",
           "hole_size": 0.0
         }
       ],
       "silkscreen": {
-        "width": 2.3,
-        "height": 1.5
+        "width": 1.9499999999999997,
+        "height": 1.13
       },
       "courtyard": {
-        "width": 2.8,
-        "height": 2.0
+        "width": 2.55,
+        "height": 1.73
       },
-      "notes": "IPC-7351 standard footprint",
+      "verification_status": "auto_verified",
+      "footprint_class": "passive_chip",
+      "notes": "IPC-7351 standard from database (passive chip)",
       "component_designators": [
         "R106",
         "R103",
@@ -779,34 +1466,36 @@
       "pads": [
         {
           "name": "1",
-          "x": -1.9,
+          "x": -1.525,
           "y": 0.0,
-          "width": 2.3,
-          "height": 2.7,
+          "width": 1.25,
+          "height": 2.3,
           "shape": "rectangular",
           "layer": "top",
           "hole_size": 0.0
         },
         {
           "name": "2",
-          "x": 1.9,
+          "x": 1.525,
           "y": 0.0,
-          "width": 2.3,
-          "height": 2.7,
+          "width": 1.25,
+          "height": 2.3,
           "shape": "rectangular",
           "layer": "top",
           "hole_size": 0.0
         }
       ],
       "silkscreen": {
-        "width": 5.3,
-        "height": 3.9
+        "width": 4.7,
+        "height": 2.6999999999999997
       },
       "courtyard": {
-        "width": 6.3,
-        "height": 4.9
+        "width": 5.3,
+        "height": 3.3
       },
-      "notes": "IPC-7351 standard footprint",
+      "verification_status": "auto_verified",
+      "footprint_class": "standard_package",
+      "notes": "Standard package template from database",
       "component_designators": [
         "D11"
       ],
@@ -819,34 +1508,36 @@
       "pads": [
         {
           "name": "1",
-          "x": -3.05,
+          "x": -2.825,
           "y": 0.0,
-          "width": 2.6,
-          "height": 3.7,
+          "width": 1.25,
+          "height": 3.3,
           "shape": "rectangular",
           "layer": "top",
           "hole_size": 0.0
         },
         {
           "name": "2",
-          "x": 3.05,
+          "x": 2.825,
           "y": 0.0,
-          "width": 2.6,
-          "height": 3.7,
+          "width": 1.25,
+          "height": 3.3,
           "shape": "rectangular",
           "layer": "top",
           "hole_size": 0.0
         }
       ],
       "silkscreen": {
-        "width": 7.5,
-        "height": 4.5
+        "width": 7.300000000000001,
+        "height": 3.6999999999999997
       },
       "courtyard": {
-        "width": 8.0,
-        "height": 5.0
+        "width": 7.9,
+        "height": 4.3
       },
-      "notes": "IPC-7351 standard footprint",
+      "verification_status": "auto_verified",
+      "footprint_class": "standard_package",
+      "notes": "Standard package template from database",
       "component_designators": [
         "D12",
         "D6"
@@ -863,7 +1554,7 @@
           "x": -6.75,
           "y": 0.0,
           "width": 3.0,
-          "height": 13.5,
+          "height": 3.0,
           "shape": "rectangular",
           "layer": "top",
           "hole_size": 0.0
@@ -873,21 +1564,23 @@
           "x": 6.75,
           "y": 0.0,
           "width": 3.0,
-          "height": 13.5,
+          "height": 3.0,
           "shape": "rectangular",
           "layer": "top",
           "hole_size": 0.0
         }
       ],
       "silkscreen": {
-        "width": 14.0,
-        "height": 14.0
+        "width": 13.5,
+        "height": 13.5
       },
       "courtyard": {
-        "width": 15.0,
-        "height": 15.0
+        "width": 15.5,
+        "height": 15.5
       },
-      "notes": "IPC-7351 standard footprint",
+      "notes": "Dimensions based on standard SMD capacitor package size for CAE-13.5X13.5X13.5mm",
+      "footprint_class": "custom",
+      "verification_status": "needs_manual_verification",
       "component_designators": [
         "C176",
         "C175",
@@ -904,34 +1597,36 @@
       "pads": [
         {
           "name": "1",
-          "x": -2.5,
+          "x": -2.1,
           "y": 0.0,
-          "width": 2.5,
-          "height": 3.2,
+          "width": 1.5,
+          "height": 3.0,
           "shape": "rectangular",
           "layer": "top",
           "hole_size": 0.0
         },
         {
           "name": "2",
-          "x": 2.5,
+          "x": 2.1,
           "y": 0.0,
-          "width": 2.5,
-          "height": 3.2,
+          "width": 1.5,
+          "height": 3.0,
           "shape": "rectangular",
           "layer": "top",
           "hole_size": 0.0
         }
       ],
       "silkscreen": {
-        "width": 6.0,
-        "height": 3.5
+        "width": 6.1000000000000005,
+        "height": 3.4
       },
       "courtyard": {
-        "width": 7.0,
-        "height": 4.5
+        "width": 6.7,
+        "height": 4.0
       },
-      "notes": "IPC-7351 standard footprint",
+      "verification_status": "guessed",
+      "footprint_class": "unknown",
+      "notes": "Generated from database (needs verification)",
       "component_designators": [
         "C172",
         "C165",
@@ -962,40 +1657,42 @@
       "component_count": 25
     },
     "R2010": {
-      "footprint_name": "0603",
+      "footprint_name": "R2010",
       "component_type": "resistor",
       "package_type": "smd",
       "pads": [
         {
           "name": "1",
-          "x": -0.475,
+          "x": -1.75,
           "y": 0.0,
-          "width": 0.95,
-          "height": 1.0,
+          "width": 2.5,
+          "height": 2.5,
           "shape": "rectangular",
           "layer": "top",
           "hole_size": 0.0
         },
         {
           "name": "2",
-          "x": 0.475,
+          "x": 1.75,
           "y": 0.0,
-          "width": 0.95,
-          "height": 1.0,
+          "width": 2.5,
+          "height": 2.5,
           "shape": "rectangular",
           "layer": "top",
           "hole_size": 0.0
         }
       ],
       "silkscreen": {
-        "width": 2.3,
-        "height": 1.3
+        "width": 6.4,
+        "height": 2.9
       },
       "courtyard": {
-        "width": 2.8,
-        "height": 1.8
+        "width": 7.0,
+        "height": 3.5
       },
-      "notes": "IPC-7351 standard footprint",
+      "verification_status": "guessed",
+      "footprint_class": "unknown",
+      "notes": "Generated from database (needs verification)",
       "component_designators": [
         "R110",
         "R111",
@@ -1014,41 +1711,83 @@
       ],
       "component_count": 14
     },
-    "0603": {
-      "footprint_name": "0603",
+    "C0603": {
+      "footprint_name": "C0603",
       "component_type": "resistor",
       "package_type": "smd",
       "pads": [
         {
           "name": "1",
-          "x": -0.75,
+          "x": -0.68,
           "y": 0.0,
-          "width": 0.7,
-          "height": 0.9,
+          "width": 1.01,
+          "height": 0.98,
           "shape": "rectangular",
           "layer": "top",
           "hole_size": 0.0
         },
         {
           "name": "2",
-          "x": 0.75,
+          "x": 0.68,
           "y": 0.0,
-          "width": 0.7,
-          "height": 0.9,
+          "width": 1.01,
+          "height": 0.98,
           "shape": "rectangular",
           "layer": "top",
           "hole_size": 0.0
         }
       ],
       "silkscreen": {
-        "width": 1.6,
-        "height": 0.8
+        "width": 2.77,
+        "height": 1.38
       },
       "courtyard": {
-        "width": 2.0,
-        "height": 1.2
+        "width": 3.37,
+        "height": 1.98
       },
-      "notes": "IPC-7351 standard footprint",
+      "verification_status": "guessed",
+      "footprint_class": "unknown",
+      "notes": "Generated from database (needs verification)",
+      "component_designators": [],
+      "component_count": 0
+    },
+    "R0603": {
+      "footprint_name": "R0603",
+      "component_type": "resistor",
+      "package_type": "smd",
+      "pads": [
+        {
+          "name": "1",
+          "x": -0.68,
+          "y": 0.0,
+          "width": 1.01,
+          "height": 0.98,
+          "shape": "rectangular",
+          "layer": "top",
+          "hole_size": 0.0
+        },
+        {
+          "name": "2",
+          "x": 0.68,
+          "y": 0.0,
+          "width": 1.01,
+          "height": 0.98,
+          "shape": "rectangular",
+          "layer": "top",
+          "hole_size": 0.0
+        }
+      ],
+      "silkscreen": {
+        "width": 2.77,
+        "height": 1.38
+      },
+      "courtyard": {
+        "width": 3.37,
+        "height": 1.98
+      },
+      "verification_status": "guessed",
+      "footprint_class": "unknown",
+      "notes": "Generated from database (needs verification)",
       "component_designators": [
         "R125",
         "R124",
@@ -1058,51 +1797,225 @@
       ],
       "component_count": 5
     },
-    "SOT-23": {
-      "footprint_name": "SOT-23",
-      "component_type": "transistor",
+    "L0603": {
+      "footprint_name": "L0603",
+      "component_type": "resistor",
       "package_type": "smd",
       "pads": [
         {
           "name": "1",
-          "x": -1.05,
-          "y": -0.95,
-          "width": 0.6,
-          "height": 0.7,
+          "x": -0.68,
+          "y": 0.0,
+          "width": 1.01,
+          "height": 0.98,
           "shape": "rectangular",
           "layer": "top",
           "hole_size": 0.0
         },
         {
           "name": "2",
-          "x": 1.05,
-          "y": -0.95,
-          "width": 0.6,
-          "height": 0.7,
-          "shape": "rectangular",
-          "layer": "top",
-          "hole_size": 0.0
-        },
-        {
-          "name": "3",
-          "x": 0.0,
-          "y": 1.05,
-          "width": 0.6,
-          "height": 0.7,
+          "x": 0.68,
+          "y": 0.0,
+          "width": 1.01,
+          "height": 0.98,
           "shape": "rectangular",
           "layer": "top",
           "hole_size": 0.0
         }
       ],
       "silkscreen": {
-        "width": 3.0,
-        "height": 2.5
+        "width": 2.77,
+        "height": 1.38
       },
       "courtyard": {
-        "width": 3.5,
-        "height": 3.0
+        "width": 3.37,
+        "height": 1.98
       },
-      "notes": "IPC-7351 standard footprint",
+      "verification_status": "guessed",
+      "footprint_class": "unknown",
+      "notes": "Generated from database (needs verification)",
+      "component_designators": [],
+      "component_count": 0
+    },
+    "D0603": {
+      "footprint_name": "D0603",
+      "component_type": "resistor",
+      "package_type": "smd",
+      "pads": [
+        {
+          "name": "1",
+          "x": -0.68,
+          "y": 0.0,
+          "width": 1.01,
+          "height": 0.98,
+          "shape": "rectangular",
+          "layer": "top",
+          "hole_size": 0.0
+        },
+        {
+          "name": "2",
+          "x": 0.68,
+          "y": 0.0,
+          "width": 1.01,
+          "height": 0.98,
+          "shape": "rectangular",
+          "layer": "top",
+          "hole_size": 0.0
+        }
+      ],
+      "silkscreen": {
+        "width": 2.77,
+        "height": 1.38
+      },
+      "courtyard": {
+        "width": 3.37,
+        "height": 1.98
+      },
+      "verification_status": "guessed",
+      "footprint_class": "unknown",
+      "notes": "Generated from database (needs verification)",
+      "component_designators": [],
+      "component_count": 0
+    },
+    "LMF500-23B30UH": {
+      "footprint_name": "LMF500-23B30UH",
+      "component_type": "diode",
+      "package_type": "smd",
+      "pads": [
+        {
+          "name": "1",
+          "x": -3.75,
+          "y": -2.0,
+          "width": 0.9,
+          "height": 1.5,
+          "shape": "rectangular",
+          "layer": "top",
+          "hole_size": 0.0
+        },
+        {
+          "name": "2",
+          "x": -2.25,
+          "y": -2.0,
+          "width": 0.9,
+          "height": 1.5,
+          "shape": "rectangular",
+          "layer": "top",
+          "hole_size": 0.0
+        },
+        {
+          "name": "3",
+          "x": -0.75,
+          "y": -2.0,
+          "width": 0.9,
+          "height": 1.5,
+          "shape": "rectangular",
+          "layer": "top",
+          "hole_size": 0.0
+        },
+        {
+          "name": "4",
+          "x": 0.75,
+          "y": -2.0,
+          "width": 0.9,
+          "height": 1.5,
+          "shape": "rectangular",
+          "layer": "top",
+          "hole_size": 0.0
+        },
+        {
+          "name": "5",
+          "x": 2.25,
+          "y": -2.0,
+          "width": 0.9,
+          "height": 1.5,
+          "shape": "rectangular",
+          "layer": "top",
+          "hole_size": 0.0
+        },
+        {
+          "name": "6",
+          "x": 3.75,
+          "y": -2.0,
+          "width": 0.9,
+          "height": 1.5,
+          "shape": "rectangular",
+          "layer": "top",
+          "hole_size": 0.0
+        },
+        {
+          "name": "Tab",
+          "x": 0.0,
+          "y": 2.0,
+          "width": 10.0,
+          "height": 7.5,
+          "shape": "rectangular",
+          "layer": "top",
+          "hole_size": 0.0
+        }
+      ],
+      "silkscreen": {
+        "width": 12.0,
+        "height": 10.0
+      },
+      "courtyard": {
+        "width": 14.0,
+        "height": 12.0
+      },
+      "notes": "IPC-7351 standard or manufacturer specification",
+      "footprint_class": "custom",
+      "verification_status": "needs_manual_verification",
+      "component_designators": [
+        "DY1"
+      ],
+      "component_count": 1
+    },
+    "SOT-23": {
+      "footprint_name": "SOT-23",
+      "component_type": "ic",
+      "package_type": "smd",
+      "pads": [
+        {
+          "name": "1",
+          "x": -1.45,
+          "y": -0.475,
+          "width": 0.8,
+          "height": 0.9,
+          "shape": "rectangular",
+          "layer": "top",
+          "hole_size": 0.0
+        },
+        {
+          "name": "2",
+          "x": -1.45,
+          "y": 0.475,
+          "width": 0.8,
+          "height": 0.9,
+          "shape": "rectangular",
+          "layer": "top",
+          "hole_size": 0.0
+        },
+        {
+          "name": "3",
+          "x": 1.45,
+          "y": 0.0,
+          "width": 0.8,
+          "height": 0.9,
+          "shape": "rectangular",
+          "layer": "top",
+          "hole_size": 0.0
+        }
+      ],
+      "silkscreen": {
+        "width": 4.1000000000000005,
+        "height": 2.25
+      },
+      "courtyard": {
+        "width": 4.7,
+        "height": 2.85
+      },
+      "verification_status": "auto_verified",
+      "footprint_class": "standard_package",
+      "notes": "Standard package template from database",
       "component_designators": [
         "T6",
         "T5",
@@ -1117,8 +2030,370 @@
       "pads": [
         {
           "name": "1",
-          "x": -2.54,
-          "y": -4.5,
+          "x": -2.25,
+          "y": 0.0,
+          "width": 1.5,
+          "height": 3.0,
+          "shape": "rectangular",
+          "layer": "top",
+          "hole_size": 0.0
+        },
+        {
+          "name": "2",
+          "x": 2.25,
+          "y": 0.0,
+          "width": 1.5,
+          "height": 3.0,
+          "shape": "rectangular",
+          "layer": "top",
+          "hole_size": 0.0
+        }
+      ],
+      "silkscreen": {
+        "width": 6.4,
+        "height": 3.4
+      },
+      "courtyard": {
+        "width": 7.0,
+        "height": 4.0
+      },
+      "verification_status": "needs_manual_verification",
+      "footprint_class": "standard_package",
+      "notes": "Standard package template - missing required Tab pad (needs manual verification)",
+      "component_designators": [
+        "T4",
+        "T3"
+      ],
+      "component_count": 2
+    },
+    "SOD-523": {
+      "footprint_name": "SOD-523",
+      "component_type": "diode",
+      "package_type": "smd",
+      "pads": [
+        {
+          "name": "1",
+          "x": -0.48,
+          "y": 0.0,
+          "width": 0.6,
+          "height": 0.8,
+          "shape": "rectangular",
+          "layer": "top",
+          "hole_size": 0.0
+        },
+        {
+          "name": "2",
+          "x": 0.48,
+          "y": 0.0,
+          "width": 0.6,
+          "height": 0.8,
+          "shape": "rectangular",
+          "layer": "top",
+          "hole_size": 0.0
+        }
+      ],
+      "silkscreen": {
+        "width": 1.96,
+        "height": 1.2000000000000002
+      },
+      "courtyard": {
+        "width": 2.56,
+        "height": 1.8
+      },
+      "verification_status": "auto_verified",
+      "footprint_class": "standard_package",
+      "notes": "Standard package template from database",
+      "component_designators": [
+        "D15",
+        "D9",
+        "D10",
+        "D14",
+        "D8",
+        "D13"
+      ],
+      "component_count": 6
+    },
+    "L7.8X7.0X5.0": {
+      "footprint_name": "L7.8x7.0x5.0",
+      "component_type": "inductor",
+      "package_type": "smd",
+      "pads": [
+        {
+          "name": "1",
+          "x": -3.12,
+          "y": 0.0,
+          "width": 2.0,
+          "height": 3.0,
+          "shape": "rectangular",
+          "layer": "top",
+          "hole_size": 0.0
+        },
+        {
+          "name": "2",
+          "x": 3.12,
+          "y": 0.0,
+          "width": 2.0,
+          "height": 3.0,
+          "shape": "rectangular",
+          "layer": "top",
+          "hole_size": 0.0
+        }
+      ],
+      "silkscreen": {
+        "width": 8.64,
+        "height": 3.4
+      },
+      "courtyard": {
+        "width": 9.24,
+        "height": 4.0
+      },
+      "verification_status": "guessed",
+      "footprint_class": "unknown",
+      "notes": "Generated from database (needs verification)",
+      "component_designators": [
+        "L21",
+        "L18",
+        "L19",
+        "L20"
+      ],
+      "component_count": 4
+    },
+    "ESOP8L": {
+      "footprint_name": "ESOP8L",
+      "component_type": "ic",
+      "package_type": "smd",
+      "pads": [
+        {
+          "name": "1",
+          "x": -2.2,
+          "y": -0.9750000000000001,
+          "width": 0.5,
+          "height": 1.5,
+          "shape": "rectangular",
+          "layer": "top",
+          "hole_size": 0.0
+        },
+        {
+          "name": "2",
+          "x": -2.2,
+          "y": -0.32500000000000007,
+          "width": 0.5,
+          "height": 1.5,
+          "shape": "rectangular",
+          "layer": "top",
+          "hole_size": 0.0
+        },
+        {
+          "name": "3",
+          "x": -2.2,
+          "y": 0.32499999999999996,
+          "width": 0.5,
+          "height": 1.5,
+          "shape": "rectangular",
+          "layer": "top",
+          "hole_size": 0.0
+        },
+        {
+          "name": "4",
+          "x": -2.2,
+          "y": 0.9750000000000001,
+          "width": 0.5,
+          "height": 1.5,
+          "shape": "rectangular",
+          "layer": "top",
+          "hole_size": 0.0
+        },
+        {
+          "name": "5",
+          "x": 2.2,
+          "y": -0.9750000000000001,
+          "width": 0.5,
+          "height": 1.5,
+          "shape": "rectangular",
+          "layer": "top",
+          "hole_size": 0.0
+        },
+        {
+          "name": "6",
+          "x": 2.2,
+          "y": -0.32500000000000007,
+          "width": 0.5,
+          "height": 1.5,
+          "shape": "rectangular",
+          "layer": "top",
+          "hole_size": 0.0
+        },
+        {
+          "name": "7",
+          "x": 2.2,
+          "y": 0.32499999999999996,
+          "width": 0.5,
+          "height": 1.5,
+          "shape": "rectangular",
+          "layer": "top",
+          "hole_size": 0.0
+        },
+        {
+          "name": "8",
+          "x": 2.2,
+          "y": 0.9750000000000001,
+          "width": 0.5,
+          "height": 1.5,
+          "shape": "rectangular",
+          "layer": "top",
+          "hole_size": 0.0
+        },
+        {
+          "name": "Tab",
+          "x": 0.0,
+          "y": 0.0,
+          "width": 2.5,
+          "height": 2.5,
+          "shape": "rectangular",
+          "layer": "top",
+          "hole_size": 0.0
+        }
+      ],
+      "silkscreen": {
+        "width": 5.300000000000001,
+        "height": 3.85
+      },
+      "courtyard": {
+        "width": 5.9,
+        "height": 4.45
+      },
+      "verification_status": "guessed",
+      "footprint_class": "unknown",
+      "notes": "Generated from database (needs verification)",
+      "component_designators": [
+        "U8"
+      ],
+      "component_count": 1
+    },
+    "TO-252(1)": {
+      "footprint_name": "TO-252(1)",
+      "component_type": "transistor",
+      "package_type": "smd",
+      "pads": [
+        {
+          "name": "1",
+          "x": -3.8,
+          "y": -2.54,
+          "width": 1.5,
+          "height": 2.5,
+          "shape": "rectangular",
+          "layer": "top",
+          "hole_size": 0.0
+        },
+        {
+          "name": "3",
+          "x": -3.8,
+          "y": 2.54,
+          "width": 1.5,
+          "height": 2.5,
+          "shape": "rectangular",
+          "layer": "top",
+          "hole_size": 0.0
+        },
+        {
+          "name": "Tab",
+          "x": 0.0,
+          "y": 0.0,
+          "width": 8.0,
+          "height": 6.5,
+          "shape": "rectangular",
+          "layer": "top",
+          "hole_size": 0.0
+        }
+      ],
+      "silkscreen": {
+        "width": 8.950000000000001,
+        "height": 7.98
+      },
+      "courtyard": {
+        "width": 9.55,
+        "height": 8.58
+      },
+      "verification_status": "auto_verified",
+      "footprint_class": "standard_package",
+      "notes": "Standard package template from database",
+      "component_designators": [
+        "U7",
+        "U9"
+      ],
+      "component_count": 2
+    },
+    "SOT-89": {
+      "footprint_name": "SOT-89",
+      "component_type": "integrated_circuit",
+      "package_type": "smd",
+      "pads": [
+        {
+          "name": "1",
+          "x": -1.5,
+          "y": 0.95,
+          "width": 1.5,
+          "height": 1.5,
+          "shape": "rectangular",
+          "layer": "top",
+          "hole_size": 0.0
+        },
+        {
+          "name": "2",
+          "x": 0.0,
+          "y": 0.95,
+          "width": 1.5,
+          "height": 1.5,
+          "shape": "rectangular",
+          "layer": "top",
+          "hole_size": 0.0
+        },
+        {
+          "name": "3",
+          "x": 1.5,
+          "y": 0.95,
+          "width": 1.5,
+          "height": 1.5,
+          "shape": "rectangular",
+          "layer": "top",
+          "hole_size": 0.0
+        },
+        {
+          "name": "Tab",
+          "x": 0.0,
+          "y": -1.5,
+          "width": 4.5,
+          "height": 2.5,
+          "shape": "rectangular",
+          "layer": "top",
+          "hole_size": 0.0
+        }
+      ],
+      "silkscreen": {
+        "width": 4.5,
+        "height": 4.5
+      },
+      "courtyard": {
+        "width": 6.5,
+        "height": 6.5
+      },
+      "notes": "IPC-7351 standard or manufacturer specification",
+      "footprint_class": "standard_package",
+      "verification_status": "guessed",
+      "component_designators": [
+        "U6"
+      ],
+      "component_count": 1
+    },
+    "DW-PXXX-20XP1": {
+      "footprint_name": "DW-PXXX-20XP1",
+      "component_type": "integrated_circuit",
+      "package_type": "smd",
+      "pads": [
+        {
+          "name": "1",
+          "x": -3.8,
+          "y": -2.85,
           "width": 0.9,
           "height": 2.0,
           "shape": "rectangular",
@@ -1127,8 +2402,8 @@
         },
         {
           "name": "2",
-          "x": 0.0,
-          "y": -4.5,
+          "x": -3.8,
+          "y": -1.9,
           "width": 0.9,
           "height": 2.0,
           "shape": "rectangular",
@@ -1137,8 +2412,48 @@
         },
         {
           "name": "3",
-          "x": 2.54,
-          "y": -4.5,
+          "x": -3.8,
+          "y": -0.95,
+          "width": 0.9,
+          "height": 2.0,
+          "shape": "rectangular",
+          "layer": "top",
+          "hole_size": 0.0
+        },
+        {
+          "name": "4",
+          "x": -3.8,
+          "y": 0.0,
+          "width": 0.9,
+          "height": 2.0,
+          "shape": "rectangular",
+          "layer": "top",
+          "hole_size": 0.0
+        },
+        {
+          "name": "5",
+          "x": -3.8,
+          "y": 0.95,
+          "width": 0.9,
+          "height": 2.0,
+          "shape": "rectangular",
+          "layer": "top",
+          "hole_size": 0.0
+        },
+        {
+          "name": "6",
+          "x": -3.8,
+          "y": 1.9,
+          "width": 0.9,
+          "height": 2.0,
+          "shape": "rectangular",
+          "layer": "top",
+          "hole_size": 0.0
+        },
+        {
+          "name": "7",
+          "x": -3.8,
+          "y": 2.85,
           "width": 0.9,
           "height": 2.0,
           "shape": "rectangular",
@@ -1161,82 +2476,314 @@
         "height": 10.0
       },
       "courtyard": {
-        "width": 13.0,
-        "height": 11.0
+        "width": 14.0,
+        "height": 12.0
       },
-      "notes": "IPC-7351 standard footprint",
+      "notes": "IPC-7351 standard or manufacturer specification",
+      "footprint_class": "custom",
+      "verification_status": "needs_manual_verification",
       "component_designators": [
-        "T4",
-        "T3"
+        "U11"
       ],
-      "component_count": 2
+      "component_count": 1
     },
-    "SOD-523": {
-      "footprint_name": "SOD-523",
-      "component_type": "diode",
+    "TO-263-7": {
+      "footprint_name": "TO-263-7",
+      "component_type": "transistor",
       "package_type": "smd",
       "pads": [
         {
           "name": "1",
-          "x": -0.65,
-          "y": 0.0,
-          "width": 0.6,
-          "height": 0.8,
+          "x": -3.8,
+          "y": -2.85,
+          "width": 0.9,
+          "height": 2.0,
           "shape": "rectangular",
           "layer": "top",
           "hole_size": 0.0
         },
         {
           "name": "2",
-          "x": 0.65,
-          "y": 0.0,
-          "width": 0.6,
-          "height": 0.8,
+          "x": -3.8,
+          "y": -1.9000000000000001,
+          "width": 0.9,
+          "height": 2.0,
+          "shape": "rectangular",
+          "layer": "top",
+          "hole_size": 0.0
+        },
+        {
+          "name": "3",
+          "x": -3.8,
+          "y": -0.9500000000000002,
+          "width": 0.9,
+          "height": 2.0,
+          "shape": "rectangular",
+          "layer": "top",
+          "hole_size": 0.0
+        },
+        {
+          "name": "4",
+          "x": -3.8,
+          "y": -4.440892098500626e-16,
+          "width": 0.9,
+          "height": 2.0,
+          "shape": "rectangular",
+          "layer": "top",
+          "hole_size": 0.0
+        },
+        {
+          "name": "5",
+          "x": -3.8,
+          "y": 0.9499999999999997,
+          "width": 0.9,
+          "height": 2.0,
+          "shape": "rectangular",
+          "layer": "top",
+          "hole_size": 0.0
+        },
+        {
+          "name": "6",
+          "x": -3.8,
+          "y": 1.9,
+          "width": 0.9,
+          "height": 2.0,
+          "shape": "rectangular",
+          "layer": "top",
+          "hole_size": 0.0
+        },
+        {
+          "name": "7",
+          "x": -3.8,
+          "y": 2.849999999999999,
+          "width": 0.9,
+          "height": 2.0,
+          "shape": "rectangular",
+          "layer": "top",
+          "hole_size": 0.0
+        },
+        {
+          "name": "Tab",
+          "x": 0.0,
+          "y": 2.0,
+          "width": 10.0,
+          "height": 7.5,
           "shape": "rectangular",
           "layer": "top",
           "hole_size": 0.0
         }
       ],
       "silkscreen": {
-        "width": 1.8,
-        "height": 1.35
+        "width": 10.4,
+        "height": 10.0
       },
       "courtyard": {
-        "width": 2.3,
-        "height": 1.85
+        "width": 11.0,
+        "height": 10.6
       },
-      "notes": "IPC-7351 standard footprint",
+      "verification_status": "auto_verified",
+      "footprint_class": "standard_package",
+      "notes": "Standard package template from database (TO-263/D2PAK with Tab)",
       "component_designators": [
-        "D15",
-        "D9",
-        "D10",
-        "D14",
-        "D8",
-        "D13"
+        "U10"
       ],
-      "component_count": 6
+      "component_count": 1
     },
-    "L7.8X7.0X5.0": {
-      "footprint_name": "L7.8x7.0x5.0",
+    "T22*14*8": {
+      "footprint_name": "T22*14*8",
       "component_type": "inductor",
       "package_type": "smd",
       "pads": [
         {
           "name": "1",
-          "x": -3.9,
-          "y": 0.0,
+          "x": -5.0,
+          "y": -7.0,
           "width": 2.0,
-          "height": 3.0,
+          "height": 2.0,
+          "shape": "rectangular",
+          "layer": "top",
+          "hole_size": 0.0
+        },
+        {
+          "name": "3",
+          "x": -5.0,
+          "y": 7.0,
+          "width": 2.0,
+          "height": 2.0,
           "shape": "rectangular",
           "layer": "top",
           "hole_size": 0.0
         },
         {
           "name": "2",
-          "x": 3.9,
-          "y": 0.0,
+          "x": 5.0,
+          "y": -7.0,
           "width": 2.0,
-          "height": 3.0,
+          "height": 2.0,
+          "shape": "rectangular",
+          "layer": "top",
+          "hole_size": 0.0
+        },
+        {
+          "name": "4",
+          "x": 5.0,
+          "y": 7.0,
+          "width": 2.0,
+          "height": 2.0,
+          "shape": "rectangular",
+          "layer": "top",
+          "hole_size": 0.0
+        }
+      ],
+      "silkscreen": {
+        "width": 22.0,
+        "height": 14.0
+      },
+      "courtyard": {
+        "width": 24.0,
+        "height": 16.0
+      },
+      "notes": "Dimensions based on typical T22*14*8 inductor package. Verify with manufacturer datasheet.",
+      "footprint_class": "custom",
+      "verification_status": "needs_manual_verification",
+      "component_designators": [
+        "L22"
+      ],
+      "component_count": 1
+    },
+    "SOT-23-5": {
+      "footprint_name": "SOT-23-5",
+      "component_type": "ic",
+      "package_type": "smd",
+      "pads": [
+        {
+          "name": "1",
+          "x": -1.3,
+          "y": -0.95,
+          "width": 0.7,
+          "height": 1.0,
+          "shape": "rectangular",
+          "layer": "top",
+          "hole_size": 0.0
+        },
+        {
+          "name": "2",
+          "x": -1.3,
+          "y": 0.0,
+          "width": 0.7,
+          "height": 1.0,
+          "shape": "rectangular",
+          "layer": "top",
+          "hole_size": 0.0
+        },
+        {
+          "name": "3",
+          "x": -1.3,
+          "y": 0.95,
+          "width": 0.7,
+          "height": 1.0,
+          "shape": "rectangular",
+          "layer": "top",
+          "hole_size": 0.0
+        },
+        {
+          "name": "4",
+          "x": 1.3,
+          "y": -0.475,
+          "width": 0.7,
+          "height": 1.0,
+          "shape": "rectangular",
+          "layer": "top",
+          "hole_size": 0.0
+        },
+        {
+          "name": "5",
+          "x": 1.3,
+          "y": 0.475,
+          "width": 0.7,
+          "height": 1.0,
+          "shape": "rectangular",
+          "layer": "top",
+          "hole_size": 0.0
+        }
+      ],
+      "silkscreen": {
+        "width": 3.6999999999999997,
+        "height": 3.3
+      },
+      "courtyard": {
+        "width": 4.3,
+        "height": 3.9
+      },
+      "verification_status": "auto_verified",
+      "footprint_class": "standard_package",
+      "notes": "Standard package template from database",
+      "component_designators": [
+        "U12"
+      ],
+      "component_count": 1
+    },
+    "??????6?(2*3PIN??2?4.3)": {
+      "footprint_name": "??????6?(2*3PIN??2?4.3)",
+      "component_type": "connector",
+      "package_type": "smd",
+      "pads": [
+        {
+          "name": "1",
+          "x": -2.15,
+          "y": -2.15,
+          "width": 1.0,
+          "height": 1.5,
+          "shape": "rectangular",
+          "layer": "top",
+          "hole_size": 0.0
+        },
+        {
+          "name": "2",
+          "x": -2.15,
+          "y": 0.0,
+          "width": 1.0,
+          "height": 1.5,
+          "shape": "rectangular",
+          "layer": "top",
+          "hole_size": 0.0
+        },
+        {
+          "name": "3",
+          "x": -2.15,
+          "y": 2.15,
+          "width": 1.0,
+          "height": 1.5,
+          "shape": "rectangular",
+          "layer": "top",
+          "hole_size": 0.0
+        },
+        {
+          "name": "4",
+          "x": 2.15,
+          "y": -2.15,
+          "width": 1.0,
+          "height": 1.5,
+          "shape": "rectangular",
+          "layer": "top",
+          "hole_size": 0.0
+        },
+        {
+          "name": "5",
+          "x": 2.15,
+          "y": 0.0,
+          "width": 1.0,
+          "height": 1.5,
+          "shape": "rectangular",
+          "layer": "top",
+          "hole_size": 0.0
+        },
+        {
+          "name": "6",
+          "x": 2.15,
+          "y": 2.15,
+          "width": 1.0,
+          "height": 1.5,
           "shape": "rectangular",
           "layer": "top",
           "hole_size": 0.0
@@ -1244,139 +2791,17 @@
       ],
       "silkscreen": {
         "width": 8.3,
-        "height": 7.5
+        "height": 8.3
       },
       "courtyard": {
-        "width": 9.3,
-        "height": 8.5
+        "width": 10.3,
+        "height": 10.3
       },
-      "notes": "IPC-7351 standard footprint",
+      "notes": "IPC-7351 standard or manufacturer specification",
+      "footprint_class": "custom",
+      "verification_status": "needs_manual_verification",
       "component_designators": [
-        "L21",
-        "L18",
-        "L19",
-        "L20"
-      ],
-      "component_count": 4
-    },
-    "TO-252(1)": {
-      "footprint_name": "TO-252",
-      "component_type": "ic",
-      "package_type": "smd",
-      "pads": [
-        {
-          "name": "1",
-          "x": -1.27,
-          "y": -3.4,
-          "width": 0.9,
-          "height": 1.5,
-          "shape": "rectangular",
-          "layer": "top",
-          "hole_size": 0.0
-        },
-        {
-          "name": "2",
-          "x": 0.0,
-          "y": -3.4,
-          "width": 0.9,
-          "height": 1.5,
-          "shape": "rectangular",
-          "layer": "top",
-          "hole_size": 0.0
-        },
-        {
-          "name": "3",
-          "x": 1.27,
-          "y": -3.4,
-          "width": 0.9,
-          "height": 1.5,
-          "shape": "rectangular",
-          "layer": "top",
-          "hole_size": 0.0
-        },
-        {
-          "name": "Tab",
-          "x": 0.0,
-          "y": 1.5,
-          "width": 6.0,
-          "height": 5.6,
-          "shape": "rectangular",
-          "layer": "top",
-          "hole_size": 0.0
-        }
-      ],
-      "silkscreen": {
-        "width": 7.0,
-        "height": 6.0
-      },
-      "courtyard": {
-        "width": 7.5,
-        "height": 6.5
-      },
-      "notes": "IPC-7351 standard footprint",
-      "component_designators": [
-        "U7",
-        "U9"
-      ],
-      "component_count": 2
-    },
-    "SOT-89": {
-      "footprint_name": "SOT-89",
-      "component_type": "ic",
-      "package_type": "smd",
-      "pads": [
-        {
-          "name": "1",
-          "x": -1.5,
-          "y": -1.5,
-          "width": 0.6,
-          "height": 1.0,
-          "shape": "rectangular",
-          "layer": "top",
-          "hole_size": 0.0
-        },
-        {
-          "name": "2",
-          "x": 0.0,
-          "y": -1.5,
-          "width": 0.6,
-          "height": 1.0,
-          "shape": "rectangular",
-          "layer": "top",
-          "hole_size": 0.0
-        },
-        {
-          "name": "3",
-          "x": 1.5,
-          "y": -1.5,
-          "width": 0.6,
-          "height": 1.0,
-          "shape": "rectangular",
-          "layer": "top",
-          "hole_size": 0.0
-        },
-        {
-          "name": "Tab",
-          "x": 0.0,
-          "y": 1.0,
-          "width": 1.5,
-          "height": 2.5,
-          "shape": "rectangular",
-          "layer": "top",
-          "hole_size": 0.0
-        }
-      ],
-      "silkscreen": {
-        "width": 4.5,
-        "height": 4.0
-      },
-      "courtyard": {
-        "width": 5.0,
-        "height": 4.5
-      },
-      "notes": "IPC-7351 standard footprint",
-      "component_designators": [
-        "U6"
+        "J29"
       ],
       "component_count": 1
     },
@@ -1387,34 +2812,36 @@
       "pads": [
         {
           "name": "1",
-          "x": -1.05,
+          "x": -1.18,
           "y": 0.0,
-          "width": 1.4,
-          "height": 1.0,
+          "width": 0.91,
+          "height": 1.22,
           "shape": "rectangular",
           "layer": "top",
           "hole_size": 0.0
         },
         {
           "name": "2",
-          "x": 1.05,
+          "x": 1.18,
           "y": 0.0,
-          "width": 1.4,
-          "height": 1.0,
+          "width": 0.91,
+          "height": 1.22,
           "shape": "rectangular",
           "layer": "top",
           "hole_size": 0.0
         }
       ],
       "silkscreen": {
-        "width": 3.7,
-        "height": 1.8
+        "width": 3.67,
+        "height": 1.62
       },
       "courtyard": {
-        "width": 4.2,
-        "height": 2.3
+        "width": 4.27,
+        "height": 2.2199999999999998
       },
-      "notes": "IPC-7351 standard footprint",
+      "verification_status": "auto_verified",
+      "footprint_class": "standard_package",
+      "notes": "Standard package template from database",
       "component_designators": [
         "D45",
         "D44"
@@ -1422,42 +2849,106 @@
       "component_count": 2
     },
     "L0805": {
-      "footprint_name": "0805",
+      "footprint_name": "L0805",
       "component_type": "inductor",
       "package_type": "smd",
       "pads": [
         {
           "name": "1",
-          "x": -0.95,
+          "x": -0.8,
           "y": 0.0,
           "width": 1.2,
-          "height": 1.4,
+          "height": 1.2,
           "shape": "rectangular",
           "layer": "top",
           "hole_size": 0.0
         },
         {
           "name": "2",
-          "x": 0.95,
+          "x": 0.8,
           "y": 0.0,
           "width": 1.2,
-          "height": 1.4,
+          "height": 1.2,
           "shape": "rectangular",
           "layer": "top",
           "hole_size": 0.0
         }
       ],
       "silkscreen": {
-        "width": 2.3,
-        "height": 1.7
+        "width": 3.1999999999999997,
+        "height": 1.6
       },
       "courtyard": {
-        "width": 2.8,
+        "width": 3.8,
         "height": 2.2
       },
-      "notes": "IPC-7351 standard footprint",
+      "verification_status": "guessed",
+      "footprint_class": "unknown",
+      "notes": "Generated from database (needs verification)",
       "component_designators": [
         "L17"
+      ],
+      "component_count": 1
+    },
+    "Y50DX-1404ZJ10S": {
+      "footprint_name": "Y50DX-1404ZJ10S",
+      "component_type": "connector",
+      "package_type": "smd",
+      "pads": [
+        {
+          "name": "1",
+          "x": -2.0,
+          "y": -1.5,
+          "width": 1.0,
+          "height": 2.0,
+          "shape": "rectangular",
+          "layer": "top",
+          "hole_size": 0.0
+        },
+        {
+          "name": "2",
+          "x": -2.0,
+          "y": 0.0,
+          "width": 1.0,
+          "height": 2.0,
+          "shape": "rectangular",
+          "layer": "top",
+          "hole_size": 0.0
+        },
+        {
+          "name": "3",
+          "x": -2.0,
+          "y": 1.5,
+          "width": 1.0,
+          "height": 2.0,
+          "shape": "rectangular",
+          "layer": "top",
+          "hole_size": 0.0
+        },
+        {
+          "name": "4",
+          "x": -2.0,
+          "y": 3.0,
+          "width": 1.0,
+          "height": 2.0,
+          "shape": "rectangular",
+          "layer": "top",
+          "hole_size": 0.0
+        }
+      ],
+      "silkscreen": {
+        "width": 6.0,
+        "height": 8.0
+      },
+      "courtyard": {
+        "width": 8.0,
+        "height": 10.0
+      },
+      "notes": "Dimensions based on typical connector standards; exact dimensions should be verified with manufacturer datasheet.",
+      "footprint_class": "custom",
+      "verification_status": "needs_manual_verification",
+      "component_designators": [
+        "J28"
       ],
       "component_count": 1
     },
@@ -1470,52 +2961,54 @@
           "name": "1",
           "x": -1.5,
           "y": -1.5,
-          "width": 0.6,
-          "height": 1.0,
-          "shape": "rectangular",
-          "layer": "top",
-          "hole_size": 0.0
-        },
-        {
-          "name": "2",
-          "x": 0.0,
-          "y": -1.5,
-          "width": 0.6,
-          "height": 1.0,
+          "width": 1.0,
+          "height": 1.5,
           "shape": "rectangular",
           "layer": "top",
           "hole_size": 0.0
         },
         {
           "name": "3",
-          "x": 1.5,
-          "y": -1.5,
-          "width": 0.6,
-          "height": 1.0,
+          "x": -1.5,
+          "y": 1.5,
+          "width": 1.0,
+          "height": 1.5,
           "shape": "rectangular",
           "layer": "top",
           "hole_size": 0.0
         },
         {
-          "name": "Tab",
-          "x": 0.0,
-          "y": 1.0,
-          "width": 1.5,
-          "height": 2.5,
+          "name": "2",
+          "x": 1.5,
+          "y": -1.5,
+          "width": 1.0,
+          "height": 1.5,
+          "shape": "rectangular",
+          "layer": "top",
+          "hole_size": 0.0
+        },
+        {
+          "name": "4",
+          "x": 1.5,
+          "y": 1.5,
+          "width": 1.0,
+          "height": 1.5,
           "shape": "rectangular",
           "layer": "top",
           "hole_size": 0.0
         }
       ],
       "silkscreen": {
-        "width": 4.5,
-        "height": 4.0
+        "width": 5.0,
+        "height": 5.0
       },
       "courtyard": {
-        "width": 5.0,
-        "height": 4.5
+        "width": 7.0,
+        "height": 7.0
       },
-      "notes": "IPC-7351 standard footprint",
+      "notes": "IPC-7351 standard or manufacturer specification",
+      "footprint_class": "custom",
+      "verification_status": "needs_manual_verification",
       "component_designators": [
         "DS1"
       ],
@@ -1526,40 +3019,42 @@
     "categories": {
       "resistors": [
         {
-          "footprint_name": "0603",
+          "footprint_name": "R0402",
           "component_type": "resistor",
           "package_type": "smd",
           "pads": [
             {
               "name": "1",
-              "x": -0.875,
+              "x": -0.425,
               "y": 0.0,
-              "width": 0.95,
-              "height": 1.0,
+              "width": 0.7,
+              "height": 0.73,
               "shape": "rectangular",
               "layer": "top",
               "hole_size": 0.0
             },
             {
               "name": "2",
-              "x": 0.875,
+              "x": 0.425,
               "y": 0.0,
-              "width": 0.95,
-              "height": 1.0,
+              "width": 0.7,
+              "height": 0.73,
               "shape": "rectangular",
               "layer": "top",
               "hole_size": 0.0
             }
           ],
           "silkscreen": {
-            "width": 2.3,
-            "height": 1.5
+            "width": 1.9499999999999997,
+            "height": 1.13
           },
           "courtyard": {
-            "width": 2.8,
-            "height": 2.0
+            "width": 2.55,
+            "height": 1.73
           },
-          "notes": "IPC-7351 standard footprint",
+          "verification_status": "auto_verified",
+          "footprint_class": "passive_chip",
+          "notes": "IPC-7351 standard from database (passive chip)",
           "component_designators": [
             "R106",
             "R103",
@@ -1584,40 +3079,42 @@
           "component_count": 19
         },
         {
-          "footprint_name": "0603",
+          "footprint_name": "R2010",
           "component_type": "resistor",
           "package_type": "smd",
           "pads": [
             {
               "name": "1",
-              "x": -0.475,
+              "x": -1.75,
               "y": 0.0,
-              "width": 0.95,
-              "height": 1.0,
+              "width": 2.5,
+              "height": 2.5,
               "shape": "rectangular",
               "layer": "top",
               "hole_size": 0.0
             },
             {
               "name": "2",
-              "x": 0.475,
+              "x": 1.75,
               "y": 0.0,
-              "width": 0.95,
-              "height": 1.0,
+              "width": 2.5,
+              "height": 2.5,
               "shape": "rectangular",
               "layer": "top",
               "hole_size": 0.0
             }
           ],
           "silkscreen": {
-            "width": 2.3,
-            "height": 1.3
+            "width": 6.4,
+            "height": 2.9
           },
           "courtyard": {
-            "width": 2.8,
-            "height": 1.8
+            "width": 7.0,
+            "height": 3.5
           },
-          "notes": "IPC-7351 standard footprint",
+          "verification_status": "guessed",
+          "footprint_class": "unknown",
+          "notes": "Generated from database (needs verification)",
           "component_designators": [
             "R110",
             "R111",
@@ -1637,40 +3134,82 @@
           "component_count": 14
         },
         {
-          "footprint_name": "0603",
+          "footprint_name": "C0603",
           "component_type": "resistor",
           "package_type": "smd",
           "pads": [
             {
               "name": "1",
-              "x": -0.75,
+              "x": -0.68,
               "y": 0.0,
-              "width": 0.7,
-              "height": 0.9,
+              "width": 1.01,
+              "height": 0.98,
               "shape": "rectangular",
               "layer": "top",
               "hole_size": 0.0
             },
             {
               "name": "2",
-              "x": 0.75,
+              "x": 0.68,
               "y": 0.0,
-              "width": 0.7,
-              "height": 0.9,
+              "width": 1.01,
+              "height": 0.98,
               "shape": "rectangular",
               "layer": "top",
               "hole_size": 0.0
             }
           ],
           "silkscreen": {
-            "width": 1.6,
-            "height": 0.8
+            "width": 2.77,
+            "height": 1.38
           },
           "courtyard": {
-            "width": 2.0,
-            "height": 1.2
+            "width": 3.37,
+            "height": 1.98
           },
-          "notes": "IPC-7351 standard footprint",
+          "verification_status": "guessed",
+          "footprint_class": "unknown",
+          "notes": "Generated from database (needs verification)",
+          "component_designators": [],
+          "component_count": 0
+        },
+        {
+          "footprint_name": "R0603",
+          "component_type": "resistor",
+          "package_type": "smd",
+          "pads": [
+            {
+              "name": "1",
+              "x": -0.68,
+              "y": 0.0,
+              "width": 1.01,
+              "height": 0.98,
+              "shape": "rectangular",
+              "layer": "top",
+              "hole_size": 0.0
+            },
+            {
+              "name": "2",
+              "x": 0.68,
+              "y": 0.0,
+              "width": 1.01,
+              "height": 0.98,
+              "shape": "rectangular",
+              "layer": "top",
+              "hole_size": 0.0
+            }
+          ],
+          "silkscreen": {
+            "width": 2.77,
+            "height": 1.38
+          },
+          "courtyard": {
+            "width": 3.37,
+            "height": 1.98
+          },
+          "verification_status": "guessed",
+          "footprint_class": "unknown",
+          "notes": "Generated from database (needs verification)",
           "component_designators": [
             "R125",
             "R124",
@@ -1679,6 +3218,86 @@
             "R222"
           ],
           "component_count": 5
+        },
+        {
+          "footprint_name": "L0603",
+          "component_type": "resistor",
+          "package_type": "smd",
+          "pads": [
+            {
+              "name": "1",
+              "x": -0.68,
+              "y": 0.0,
+              "width": 1.01,
+              "height": 0.98,
+              "shape": "rectangular",
+              "layer": "top",
+              "hole_size": 0.0
+            },
+            {
+              "name": "2",
+              "x": 0.68,
+              "y": 0.0,
+              "width": 1.01,
+              "height": 0.98,
+              "shape": "rectangular",
+              "layer": "top",
+              "hole_size": 0.0
+            }
+          ],
+          "silkscreen": {
+            "width": 2.77,
+            "height": 1.38
+          },
+          "courtyard": {
+            "width": 3.37,
+            "height": 1.98
+          },
+          "verification_status": "guessed",
+          "footprint_class": "unknown",
+          "notes": "Generated from database (needs verification)",
+          "component_designators": [],
+          "component_count": 0
+        },
+        {
+          "footprint_name": "D0603",
+          "component_type": "resistor",
+          "package_type": "smd",
+          "pads": [
+            {
+              "name": "1",
+              "x": -0.68,
+              "y": 0.0,
+              "width": 1.01,
+              "height": 0.98,
+              "shape": "rectangular",
+              "layer": "top",
+              "hole_size": 0.0
+            },
+            {
+              "name": "2",
+              "x": 0.68,
+              "y": 0.0,
+              "width": 1.01,
+              "height": 0.98,
+              "shape": "rectangular",
+              "layer": "top",
+              "hole_size": 0.0
+            }
+          ],
+          "silkscreen": {
+            "width": 2.77,
+            "height": 1.38
+          },
+          "courtyard": {
+            "width": 3.37,
+            "height": 1.98
+          },
+          "verification_status": "guessed",
+          "footprint_class": "unknown",
+          "notes": "Generated from database (needs verification)",
+          "component_designators": [],
+          "component_count": 0
         }
       ],
       "capacitors": [
@@ -1689,34 +3308,36 @@
           "pads": [
             {
               "name": "1",
-              "x": -3.05,
+              "x": -3.02,
               "y": 0.0,
-              "width": 2.45,
-              "height": 3.05,
+              "width": 1.11,
+              "height": 3.43,
               "shape": "rectangular",
               "layer": "top",
               "hole_size": 0.0
             },
             {
               "name": "2",
-              "x": 3.05,
+              "x": 3.02,
               "y": 0.0,
-              "width": 2.45,
-              "height": 3.05,
+              "width": 1.11,
+              "height": 3.43,
               "shape": "rectangular",
               "layer": "top",
               "hole_size": 0.0
             }
           ],
           "silkscreen": {
-            "width": 7.0,
-            "height": 3.5
+            "width": 7.550000000000001,
+            "height": 3.83
           },
           "courtyard": {
-            "width": 8.0,
-            "height": 4.5
+            "width": 8.15,
+            "height": 4.43
           },
-          "notes": "IPC-7351 standard footprint",
+          "verification_status": "guessed",
+          "footprint_class": "unknown",
+          "notes": "Generated from database (needs verification)",
           "component_designators": [
             "C153",
             "C152",
@@ -1753,7 +3374,7 @@
               "x": -6.75,
               "y": 0.0,
               "width": 3.0,
-              "height": 13.5,
+              "height": 3.0,
               "shape": "rectangular",
               "layer": "top",
               "hole_size": 0.0
@@ -1763,21 +3384,23 @@
               "x": 6.75,
               "y": 0.0,
               "width": 3.0,
-              "height": 13.5,
+              "height": 3.0,
               "shape": "rectangular",
               "layer": "top",
               "hole_size": 0.0
             }
           ],
           "silkscreen": {
-            "width": 14.0,
-            "height": 14.0
+            "width": 13.5,
+            "height": 13.5
           },
           "courtyard": {
-            "width": 15.0,
-            "height": 15.0
+            "width": 15.5,
+            "height": 15.5
           },
-          "notes": "IPC-7351 standard footprint",
+          "notes": "Dimensions based on standard SMD capacitor package size for CAE-13.5X13.5X13.5mm",
+          "footprint_class": "custom",
+          "verification_status": "needs_manual_verification",
           "component_designators": [
             "C176",
             "C175",
@@ -1794,34 +3417,36 @@
           "pads": [
             {
               "name": "1",
-              "x": -2.5,
+              "x": -2.1,
               "y": 0.0,
-              "width": 2.5,
-              "height": 3.2,
+              "width": 1.5,
+              "height": 3.0,
               "shape": "rectangular",
               "layer": "top",
               "hole_size": 0.0
             },
             {
               "name": "2",
-              "x": 2.5,
+              "x": 2.1,
               "y": 0.0,
-              "width": 2.5,
-              "height": 3.2,
+              "width": 1.5,
+              "height": 3.0,
               "shape": "rectangular",
               "layer": "top",
               "hole_size": 0.0
             }
           ],
           "silkscreen": {
-            "width": 6.0,
-            "height": 3.5
+            "width": 6.1000000000000005,
+            "height": 3.4
           },
           "courtyard": {
-            "width": 7.0,
-            "height": 4.5
+            "width": 6.7,
+            "height": 4.0
           },
-          "notes": "IPC-7351 standard footprint",
+          "verification_status": "guessed",
+          "footprint_class": "unknown",
+          "notes": "Generated from database (needs verification)",
           "component_designators": [
             "C172",
             "C165",
@@ -1860,34 +3485,36 @@
           "pads": [
             {
               "name": "1",
-              "x": -1.9,
+              "x": -1.525,
               "y": 0.0,
-              "width": 2.3,
-              "height": 2.7,
+              "width": 1.25,
+              "height": 2.3,
               "shape": "rectangular",
               "layer": "top",
               "hole_size": 0.0
             },
             {
               "name": "2",
-              "x": 1.9,
+              "x": 1.525,
               "y": 0.0,
-              "width": 2.3,
-              "height": 2.7,
+              "width": 1.25,
+              "height": 2.3,
               "shape": "rectangular",
               "layer": "top",
               "hole_size": 0.0
             }
           ],
           "silkscreen": {
-            "width": 5.3,
-            "height": 3.9
+            "width": 4.7,
+            "height": 2.6999999999999997
           },
           "courtyard": {
-            "width": 6.3,
-            "height": 4.9
+            "width": 5.3,
+            "height": 3.3
           },
-          "notes": "IPC-7351 standard footprint",
+          "verification_status": "auto_verified",
+          "footprint_class": "standard_package",
+          "notes": "Standard package template from database",
           "component_designators": [
             "D11"
           ],
@@ -1900,39 +3527,133 @@
           "pads": [
             {
               "name": "1",
-              "x": -3.05,
+              "x": -2.825,
               "y": 0.0,
-              "width": 2.6,
-              "height": 3.7,
+              "width": 1.25,
+              "height": 3.3,
               "shape": "rectangular",
               "layer": "top",
               "hole_size": 0.0
             },
             {
               "name": "2",
-              "x": 3.05,
+              "x": 2.825,
               "y": 0.0,
-              "width": 2.6,
-              "height": 3.7,
+              "width": 1.25,
+              "height": 3.3,
               "shape": "rectangular",
               "layer": "top",
               "hole_size": 0.0
             }
           ],
           "silkscreen": {
-            "width": 7.5,
-            "height": 4.5
+            "width": 7.300000000000001,
+            "height": 3.6999999999999997
           },
           "courtyard": {
-            "width": 8.0,
-            "height": 5.0
+            "width": 7.9,
+            "height": 4.3
           },
-          "notes": "IPC-7351 standard footprint",
+          "verification_status": "auto_verified",
+          "footprint_class": "standard_package",
+          "notes": "Standard package template from database",
           "component_designators": [
             "D12",
             "D6"
           ],
           "component_count": 2
+        },
+        {
+          "footprint_name": "LMF500-23B30UH",
+          "component_type": "diode",
+          "package_type": "smd",
+          "pads": [
+            {
+              "name": "1",
+              "x": -3.75,
+              "y": -2.0,
+              "width": 0.9,
+              "height": 1.5,
+              "shape": "rectangular",
+              "layer": "top",
+              "hole_size": 0.0
+            },
+            {
+              "name": "2",
+              "x": -2.25,
+              "y": -2.0,
+              "width": 0.9,
+              "height": 1.5,
+              "shape": "rectangular",
+              "layer": "top",
+              "hole_size": 0.0
+            },
+            {
+              "name": "3",
+              "x": -0.75,
+              "y": -2.0,
+              "width": 0.9,
+              "height": 1.5,
+              "shape": "rectangular",
+              "layer": "top",
+              "hole_size": 0.0
+            },
+            {
+              "name": "4",
+              "x": 0.75,
+              "y": -2.0,
+              "width": 0.9,
+              "height": 1.5,
+              "shape": "rectangular",
+              "layer": "top",
+              "hole_size": 0.0
+            },
+            {
+              "name": "5",
+              "x": 2.25,
+              "y": -2.0,
+              "width": 0.9,
+              "height": 1.5,
+              "shape": "rectangular",
+              "layer": "top",
+              "hole_size": 0.0
+            },
+            {
+              "name": "6",
+              "x": 3.75,
+              "y": -2.0,
+              "width": 0.9,
+              "height": 1.5,
+              "shape": "rectangular",
+              "layer": "top",
+              "hole_size": 0.0
+            },
+            {
+              "name": "Tab",
+              "x": 0.0,
+              "y": 2.0,
+              "width": 10.0,
+              "height": 7.5,
+              "shape": "rectangular",
+              "layer": "top",
+              "hole_size": 0.0
+            }
+          ],
+          "silkscreen": {
+            "width": 12.0,
+            "height": 10.0
+          },
+          "courtyard": {
+            "width": 14.0,
+            "height": 12.0
+          },
+          "notes": "IPC-7351 standard or manufacturer specification",
+          "footprint_class": "custom",
+          "verification_status": "needs_manual_verification",
+          "component_designators": [
+            "DY1"
+          ],
+          "component_count": 1
         },
         {
           "footprint_name": "SOD-523",
@@ -1941,7 +3662,7 @@
           "pads": [
             {
               "name": "1",
-              "x": -0.65,
+              "x": -0.48,
               "y": 0.0,
               "width": 0.6,
               "height": 0.8,
@@ -1951,7 +3672,7 @@
             },
             {
               "name": "2",
-              "x": 0.65,
+              "x": 0.48,
               "y": 0.0,
               "width": 0.6,
               "height": 0.8,
@@ -1961,14 +3682,16 @@
             }
           ],
           "silkscreen": {
-            "width": 1.8,
-            "height": 1.35
+            "width": 1.96,
+            "height": 1.2000000000000002
           },
           "courtyard": {
-            "width": 2.3,
-            "height": 1.85
+            "width": 2.56,
+            "height": 1.8
           },
-          "notes": "IPC-7351 standard footprint",
+          "verification_status": "auto_verified",
+          "footprint_class": "standard_package",
+          "notes": "Standard package template from database",
           "component_designators": [
             "D15",
             "D9",
@@ -1986,34 +3709,36 @@
           "pads": [
             {
               "name": "1",
-              "x": -1.05,
+              "x": -1.18,
               "y": 0.0,
-              "width": 1.4,
-              "height": 1.0,
+              "width": 0.91,
+              "height": 1.22,
               "shape": "rectangular",
               "layer": "top",
               "hole_size": 0.0
             },
             {
               "name": "2",
-              "x": 1.05,
+              "x": 1.18,
               "y": 0.0,
-              "width": 1.4,
-              "height": 1.0,
+              "width": 0.91,
+              "height": 1.22,
               "shape": "rectangular",
               "layer": "top",
               "hole_size": 0.0
             }
           ],
           "silkscreen": {
-            "width": 3.7,
-            "height": 1.8
+            "width": 3.67,
+            "height": 1.62
           },
           "courtyard": {
-            "width": 4.2,
-            "height": 2.3
+            "width": 4.27,
+            "height": 2.2199999999999998
           },
-          "notes": "IPC-7351 standard footprint",
+          "verification_status": "auto_verified",
+          "footprint_class": "standard_package",
+          "notes": "Standard package template from database",
           "component_designators": [
             "D45",
             "D44"
@@ -2029,52 +3754,54 @@
               "name": "1",
               "x": -1.5,
               "y": -1.5,
-              "width": 0.6,
-              "height": 1.0,
-              "shape": "rectangular",
-              "layer": "top",
-              "hole_size": 0.0
-            },
-            {
-              "name": "2",
-              "x": 0.0,
-              "y": -1.5,
-              "width": 0.6,
-              "height": 1.0,
+              "width": 1.0,
+              "height": 1.5,
               "shape": "rectangular",
               "layer": "top",
               "hole_size": 0.0
             },
             {
               "name": "3",
-              "x": 1.5,
-              "y": -1.5,
-              "width": 0.6,
-              "height": 1.0,
+              "x": -1.5,
+              "y": 1.5,
+              "width": 1.0,
+              "height": 1.5,
               "shape": "rectangular",
               "layer": "top",
               "hole_size": 0.0
             },
             {
-              "name": "Tab",
-              "x": 0.0,
-              "y": 1.0,
-              "width": 1.5,
-              "height": 2.5,
+              "name": "2",
+              "x": 1.5,
+              "y": -1.5,
+              "width": 1.0,
+              "height": 1.5,
+              "shape": "rectangular",
+              "layer": "top",
+              "hole_size": 0.0
+            },
+            {
+              "name": "4",
+              "x": 1.5,
+              "y": 1.5,
+              "width": 1.0,
+              "height": 1.5,
               "shape": "rectangular",
               "layer": "top",
               "hole_size": 0.0
             }
           ],
           "silkscreen": {
-            "width": 4.5,
-            "height": 4.0
+            "width": 5.0,
+            "height": 5.0
           },
           "courtyard": {
-            "width": 5.0,
-            "height": 4.5
+            "width": 7.0,
+            "height": 7.0
           },
-          "notes": "IPC-7351 standard footprint",
+          "notes": "IPC-7351 standard or manufacturer specification",
+          "footprint_class": "custom",
+          "verification_status": "needs_manual_verification",
           "component_designators": [
             "DS1"
           ],
@@ -2083,50 +3810,252 @@
       ],
       "transistors": [
         {
-          "footprint_name": "SOT-23",
+          "footprint_name": "TO-263-2",
           "component_type": "transistor",
           "package_type": "smd",
           "pads": [
             {
               "name": "1",
-              "x": -1.05,
-              "y": -0.95,
-              "width": 0.6,
-              "height": 0.7,
+              "x": -2.25,
+              "y": 0.0,
+              "width": 1.5,
+              "height": 3.0,
               "shape": "rectangular",
               "layer": "top",
               "hole_size": 0.0
             },
             {
               "name": "2",
-              "x": 1.05,
-              "y": -0.95,
-              "width": 0.6,
-              "height": 0.7,
-              "shape": "rectangular",
-              "layer": "top",
-              "hole_size": 0.0
-            },
-            {
-              "name": "3",
-              "x": 0.0,
-              "y": 1.05,
-              "width": 0.6,
-              "height": 0.7,
+              "x": 2.25,
+              "y": 0.0,
+              "width": 1.5,
+              "height": 3.0,
               "shape": "rectangular",
               "layer": "top",
               "hole_size": 0.0
             }
           ],
           "silkscreen": {
-            "width": 3.0,
-            "height": 2.5
+            "width": 6.4,
+            "height": 3.4
           },
           "courtyard": {
-            "width": 3.5,
-            "height": 3.0
+            "width": 7.0,
+            "height": 4.0
           },
-          "notes": "IPC-7351 standard footprint",
+          "verification_status": "needs_manual_verification",
+          "footprint_class": "standard_package",
+          "notes": "Standard package template - missing required Tab pad (needs manual verification)",
+          "component_designators": [
+            "T4",
+            "T3"
+          ],
+          "component_count": 2
+        },
+        {
+          "footprint_name": "TO-252(1)",
+          "component_type": "transistor",
+          "package_type": "smd",
+          "pads": [
+            {
+              "name": "1",
+              "x": -3.8,
+              "y": -2.54,
+              "width": 1.5,
+              "height": 2.5,
+              "shape": "rectangular",
+              "layer": "top",
+              "hole_size": 0.0
+            },
+            {
+              "name": "3",
+              "x": -3.8,
+              "y": 2.54,
+              "width": 1.5,
+              "height": 2.5,
+              "shape": "rectangular",
+              "layer": "top",
+              "hole_size": 0.0
+            },
+            {
+              "name": "Tab",
+              "x": 0.0,
+              "y": 0.0,
+              "width": 8.0,
+              "height": 6.5,
+              "shape": "rectangular",
+              "layer": "top",
+              "hole_size": 0.0
+            }
+          ],
+          "silkscreen": {
+            "width": 8.950000000000001,
+            "height": 7.98
+          },
+          "courtyard": {
+            "width": 9.55,
+            "height": 8.58
+          },
+          "verification_status": "auto_verified",
+          "footprint_class": "standard_package",
+          "notes": "Standard package template from database",
+          "component_designators": [
+            "U7",
+            "U9"
+          ],
+          "component_count": 2
+        },
+        {
+          "footprint_name": "TO-263-7",
+          "component_type": "transistor",
+          "package_type": "smd",
+          "pads": [
+            {
+              "name": "1",
+              "x": -3.8,
+              "y": -2.85,
+              "width": 0.9,
+              "height": 2.0,
+              "shape": "rectangular",
+              "layer": "top",
+              "hole_size": 0.0
+            },
+            {
+              "name": "2",
+              "x": -3.8,
+              "y": -1.9000000000000001,
+              "width": 0.9,
+              "height": 2.0,
+              "shape": "rectangular",
+              "layer": "top",
+              "hole_size": 0.0
+            },
+            {
+              "name": "3",
+              "x": -3.8,
+              "y": -0.9500000000000002,
+              "width": 0.9,
+              "height": 2.0,
+              "shape": "rectangular",
+              "layer": "top",
+              "hole_size": 0.0
+            },
+            {
+              "name": "4",
+              "x": -3.8,
+              "y": -4.440892098500626e-16,
+              "width": 0.9,
+              "height": 2.0,
+              "shape": "rectangular",
+              "layer": "top",
+              "hole_size": 0.0
+            },
+            {
+              "name": "5",
+              "x": -3.8,
+              "y": 0.9499999999999997,
+              "width": 0.9,
+              "height": 2.0,
+              "shape": "rectangular",
+              "layer": "top",
+              "hole_size": 0.0
+            },
+            {
+              "name": "6",
+              "x": -3.8,
+              "y": 1.9,
+              "width": 0.9,
+              "height": 2.0,
+              "shape": "rectangular",
+              "layer": "top",
+              "hole_size": 0.0
+            },
+            {
+              "name": "7",
+              "x": -3.8,
+              "y": 2.849999999999999,
+              "width": 0.9,
+              "height": 2.0,
+              "shape": "rectangular",
+              "layer": "top",
+              "hole_size": 0.0
+            },
+            {
+              "name": "Tab",
+              "x": 0.0,
+              "y": 2.0,
+              "width": 10.0,
+              "height": 7.5,
+              "shape": "rectangular",
+              "layer": "top",
+              "hole_size": 0.0
+            }
+          ],
+          "silkscreen": {
+            "width": 10.4,
+            "height": 10.0
+          },
+          "courtyard": {
+            "width": 11.0,
+            "height": 10.6
+          },
+          "verification_status": "auto_verified",
+          "footprint_class": "standard_package",
+          "notes": "Standard package template from database (TO-263/D2PAK with Tab)",
+          "component_designators": [
+            "U10"
+          ],
+          "component_count": 1
+        }
+      ],
+      "ics": [
+        {
+          "footprint_name": "SOT-23",
+          "component_type": "ic",
+          "package_type": "smd",
+          "pads": [
+            {
+              "name": "1",
+              "x": -1.45,
+              "y": -0.475,
+              "width": 0.8,
+              "height": 0.9,
+              "shape": "rectangular",
+              "layer": "top",
+              "hole_size": 0.0
+            },
+            {
+              "name": "2",
+              "x": -1.45,
+              "y": 0.475,
+              "width": 0.8,
+              "height": 0.9,
+              "shape": "rectangular",
+              "layer": "top",
+              "hole_size": 0.0
+            },
+            {
+              "name": "3",
+              "x": 1.45,
+              "y": 0.0,
+              "width": 0.8,
+              "height": 0.9,
+              "shape": "rectangular",
+              "layer": "top",
+              "hole_size": 0.0
+            }
+          ],
+          "silkscreen": {
+            "width": 4.1000000000000005,
+            "height": 2.25
+          },
+          "courtyard": {
+            "width": 4.7,
+            "height": 2.85
+          },
+          "verification_status": "auto_verified",
+          "footprint_class": "standard_package",
+          "notes": "Standard package template from database",
           "component_designators": [
             "T6",
             "T5",
@@ -2135,14 +4064,188 @@
           "component_count": 3
         },
         {
-          "footprint_name": "TO-263-2",
-          "component_type": "transistor",
+          "footprint_name": "ESOP8L",
+          "component_type": "ic",
           "package_type": "smd",
           "pads": [
             {
               "name": "1",
-              "x": -2.54,
-              "y": -4.5,
+              "x": -2.2,
+              "y": -0.9750000000000001,
+              "width": 0.5,
+              "height": 1.5,
+              "shape": "rectangular",
+              "layer": "top",
+              "hole_size": 0.0
+            },
+            {
+              "name": "2",
+              "x": -2.2,
+              "y": -0.32500000000000007,
+              "width": 0.5,
+              "height": 1.5,
+              "shape": "rectangular",
+              "layer": "top",
+              "hole_size": 0.0
+            },
+            {
+              "name": "3",
+              "x": -2.2,
+              "y": 0.32499999999999996,
+              "width": 0.5,
+              "height": 1.5,
+              "shape": "rectangular",
+              "layer": "top",
+              "hole_size": 0.0
+            },
+            {
+              "name": "4",
+              "x": -2.2,
+              "y": 0.9750000000000001,
+              "width": 0.5,
+              "height": 1.5,
+              "shape": "rectangular",
+              "layer": "top",
+              "hole_size": 0.0
+            },
+            {
+              "name": "5",
+              "x": 2.2,
+              "y": -0.9750000000000001,
+              "width": 0.5,
+              "height": 1.5,
+              "shape": "rectangular",
+              "layer": "top",
+              "hole_size": 0.0
+            },
+            {
+              "name": "6",
+              "x": 2.2,
+              "y": -0.32500000000000007,
+              "width": 0.5,
+              "height": 1.5,
+              "shape": "rectangular",
+              "layer": "top",
+              "hole_size": 0.0
+            },
+            {
+              "name": "7",
+              "x": 2.2,
+              "y": 0.32499999999999996,
+              "width": 0.5,
+              "height": 1.5,
+              "shape": "rectangular",
+              "layer": "top",
+              "hole_size": 0.0
+            },
+            {
+              "name": "8",
+              "x": 2.2,
+              "y": 0.9750000000000001,
+              "width": 0.5,
+              "height": 1.5,
+              "shape": "rectangular",
+              "layer": "top",
+              "hole_size": 0.0
+            },
+            {
+              "name": "Tab",
+              "x": 0.0,
+              "y": 0.0,
+              "width": 2.5,
+              "height": 2.5,
+              "shape": "rectangular",
+              "layer": "top",
+              "hole_size": 0.0
+            }
+          ],
+          "silkscreen": {
+            "width": 5.300000000000001,
+            "height": 3.85
+          },
+          "courtyard": {
+            "width": 5.9,
+            "height": 4.45
+          },
+          "verification_status": "guessed",
+          "footprint_class": "unknown",
+          "notes": "Generated from database (needs verification)",
+          "component_designators": [
+            "U8"
+          ],
+          "component_count": 1
+        },
+        {
+          "footprint_name": "SOT-89",
+          "component_type": "integrated_circuit",
+          "package_type": "smd",
+          "pads": [
+            {
+              "name": "1",
+              "x": -1.5,
+              "y": 0.95,
+              "width": 1.5,
+              "height": 1.5,
+              "shape": "rectangular",
+              "layer": "top",
+              "hole_size": 0.0
+            },
+            {
+              "name": "2",
+              "x": 0.0,
+              "y": 0.95,
+              "width": 1.5,
+              "height": 1.5,
+              "shape": "rectangular",
+              "layer": "top",
+              "hole_size": 0.0
+            },
+            {
+              "name": "3",
+              "x": 1.5,
+              "y": 0.95,
+              "width": 1.5,
+              "height": 1.5,
+              "shape": "rectangular",
+              "layer": "top",
+              "hole_size": 0.0
+            },
+            {
+              "name": "Tab",
+              "x": 0.0,
+              "y": -1.5,
+              "width": 4.5,
+              "height": 2.5,
+              "shape": "rectangular",
+              "layer": "top",
+              "hole_size": 0.0
+            }
+          ],
+          "silkscreen": {
+            "width": 4.5,
+            "height": 4.5
+          },
+          "courtyard": {
+            "width": 6.5,
+            "height": 6.5
+          },
+          "notes": "IPC-7351 standard or manufacturer specification",
+          "footprint_class": "standard_package",
+          "verification_status": "guessed",
+          "component_designators": [
+            "U6"
+          ],
+          "component_count": 1
+        },
+        {
+          "footprint_name": "DW-PXXX-20XP1",
+          "component_type": "integrated_circuit",
+          "package_type": "smd",
+          "pads": [
+            {
+              "name": "1",
+              "x": -3.8,
+              "y": -2.85,
               "width": 0.9,
               "height": 2.0,
               "shape": "rectangular",
@@ -2151,8 +4254,8 @@
             },
             {
               "name": "2",
-              "x": 0.0,
-              "y": -4.5,
+              "x": -3.8,
+              "y": -1.9,
               "width": 0.9,
               "height": 2.0,
               "shape": "rectangular",
@@ -2161,8 +4264,48 @@
             },
             {
               "name": "3",
-              "x": 2.54,
-              "y": -4.5,
+              "x": -3.8,
+              "y": -0.95,
+              "width": 0.9,
+              "height": 2.0,
+              "shape": "rectangular",
+              "layer": "top",
+              "hole_size": 0.0
+            },
+            {
+              "name": "4",
+              "x": -3.8,
+              "y": 0.0,
+              "width": 0.9,
+              "height": 2.0,
+              "shape": "rectangular",
+              "layer": "top",
+              "hole_size": 0.0
+            },
+            {
+              "name": "5",
+              "x": -3.8,
+              "y": 0.95,
+              "width": 0.9,
+              "height": 2.0,
+              "shape": "rectangular",
+              "layer": "top",
+              "hole_size": 0.0
+            },
+            {
+              "name": "6",
+              "x": -3.8,
+              "y": 1.9,
+              "width": 0.9,
+              "height": 2.0,
+              "shape": "rectangular",
+              "layer": "top",
+              "hole_size": 0.0
+            },
+            {
+              "name": "7",
+              "x": -3.8,
+              "y": 2.85,
               "width": 0.9,
               "height": 2.0,
               "shape": "rectangular",
@@ -2185,89 +4328,27 @@
             "height": 10.0
           },
           "courtyard": {
-            "width": 13.0,
-            "height": 11.0
+            "width": 14.0,
+            "height": 12.0
           },
-          "notes": "IPC-7351 standard footprint",
+          "notes": "IPC-7351 standard or manufacturer specification",
+          "footprint_class": "custom",
+          "verification_status": "needs_manual_verification",
           "component_designators": [
-            "T4",
-            "T3"
+            "U11"
           ],
-          "component_count": 2
-        }
-      ],
-      "ics": [
-        {
-          "footprint_name": "TO-252",
-          "component_type": "ic",
-          "package_type": "smd",
-          "pads": [
-            {
-              "name": "1",
-              "x": -1.27,
-              "y": -3.4,
-              "width": 0.9,
-              "height": 1.5,
-              "shape": "rectangular",
-              "layer": "top",
-              "hole_size": 0.0
-            },
-            {
-              "name": "2",
-              "x": 0.0,
-              "y": -3.4,
-              "width": 0.9,
-              "height": 1.5,
-              "shape": "rectangular",
-              "layer": "top",
-              "hole_size": 0.0
-            },
-            {
-              "name": "3",
-              "x": 1.27,
-              "y": -3.4,
-              "width": 0.9,
-              "height": 1.5,
-              "shape": "rectangular",
-              "layer": "top",
-              "hole_size": 0.0
-            },
-            {
-              "name": "Tab",
-              "x": 0.0,
-              "y": 1.5,
-              "width": 6.0,
-              "height": 5.6,
-              "shape": "rectangular",
-              "layer": "top",
-              "hole_size": 0.0
-            }
-          ],
-          "silkscreen": {
-            "width": 7.0,
-            "height": 6.0
-          },
-          "courtyard": {
-            "width": 7.5,
-            "height": 6.5
-          },
-          "notes": "IPC-7351 standard footprint",
-          "component_designators": [
-            "U7",
-            "U9"
-          ],
-          "component_count": 2
+          "component_count": 1
         },
         {
-          "footprint_name": "SOT-89",
+          "footprint_name": "SOT-23-5",
           "component_type": "ic",
           "package_type": "smd",
           "pads": [
             {
               "name": "1",
-              "x": -1.5,
-              "y": -1.5,
-              "width": 0.6,
+              "x": -1.3,
+              "y": -0.95,
+              "width": 0.7,
               "height": 1.0,
               "shape": "rectangular",
               "layer": "top",
@@ -2275,9 +4356,9 @@
             },
             {
               "name": "2",
-              "x": 0.0,
-              "y": -1.5,
-              "width": 0.6,
+              "x": -1.3,
+              "y": 0.0,
+              "width": 0.7,
               "height": 1.0,
               "shape": "rectangular",
               "layer": "top",
@@ -2285,36 +4366,194 @@
             },
             {
               "name": "3",
-              "x": 1.5,
-              "y": -1.5,
-              "width": 0.6,
+              "x": -1.3,
+              "y": 0.95,
+              "width": 0.7,
               "height": 1.0,
               "shape": "rectangular",
               "layer": "top",
               "hole_size": 0.0
             },
             {
-              "name": "Tab",
-              "x": 0.0,
-              "y": 1.0,
-              "width": 1.5,
-              "height": 2.5,
+              "name": "4",
+              "x": 1.3,
+              "y": -0.475,
+              "width": 0.7,
+              "height": 1.0,
+              "shape": "rectangular",
+              "layer": "top",
+              "hole_size": 0.0
+            },
+            {
+              "name": "5",
+              "x": 1.3,
+              "y": 0.475,
+              "width": 0.7,
+              "height": 1.0,
               "shape": "rectangular",
               "layer": "top",
               "hole_size": 0.0
             }
           ],
           "silkscreen": {
-            "width": 4.5,
-            "height": 4.0
+            "width": 3.6999999999999997,
+            "height": 3.3
           },
           "courtyard": {
-            "width": 5.0,
-            "height": 4.5
+            "width": 4.3,
+            "height": 3.9
           },
-          "notes": "IPC-7351 standard footprint",
+          "verification_status": "auto_verified",
+          "footprint_class": "standard_package",
+          "notes": "Standard package template from database",
           "component_designators": [
-            "U6"
+            "U12"
+          ],
+          "component_count": 1
+        }
+      ],
+      "connectors": [
+        {
+          "footprint_name": "??????6?(2*3PIN??2?4.3)",
+          "component_type": "connector",
+          "package_type": "smd",
+          "pads": [
+            {
+              "name": "1",
+              "x": -2.15,
+              "y": -2.15,
+              "width": 1.0,
+              "height": 1.5,
+              "shape": "rectangular",
+              "layer": "top",
+              "hole_size": 0.0
+            },
+            {
+              "name": "2",
+              "x": -2.15,
+              "y": 0.0,
+              "width": 1.0,
+              "height": 1.5,
+              "shape": "rectangular",
+              "layer": "top",
+              "hole_size": 0.0
+            },
+            {
+              "name": "3",
+              "x": -2.15,
+              "y": 2.15,
+              "width": 1.0,
+              "height": 1.5,
+              "shape": "rectangular",
+              "layer": "top",
+              "hole_size": 0.0
+            },
+            {
+              "name": "4",
+              "x": 2.15,
+              "y": -2.15,
+              "width": 1.0,
+              "height": 1.5,
+              "shape": "rectangular",
+              "layer": "top",
+              "hole_size": 0.0
+            },
+            {
+              "name": "5",
+              "x": 2.15,
+              "y": 0.0,
+              "width": 1.0,
+              "height": 1.5,
+              "shape": "rectangular",
+              "layer": "top",
+              "hole_size": 0.0
+            },
+            {
+              "name": "6",
+              "x": 2.15,
+              "y": 2.15,
+              "width": 1.0,
+              "height": 1.5,
+              "shape": "rectangular",
+              "layer": "top",
+              "hole_size": 0.0
+            }
+          ],
+          "silkscreen": {
+            "width": 8.3,
+            "height": 8.3
+          },
+          "courtyard": {
+            "width": 10.3,
+            "height": 10.3
+          },
+          "notes": "IPC-7351 standard or manufacturer specification",
+          "footprint_class": "custom",
+          "verification_status": "needs_manual_verification",
+          "component_designators": [
+            "J29"
+          ],
+          "component_count": 1
+        },
+        {
+          "footprint_name": "Y50DX-1404ZJ10S",
+          "component_type": "connector",
+          "package_type": "smd",
+          "pads": [
+            {
+              "name": "1",
+              "x": -2.0,
+              "y": -1.5,
+              "width": 1.0,
+              "height": 2.0,
+              "shape": "rectangular",
+              "layer": "top",
+              "hole_size": 0.0
+            },
+            {
+              "name": "2",
+              "x": -2.0,
+              "y": 0.0,
+              "width": 1.0,
+              "height": 2.0,
+              "shape": "rectangular",
+              "layer": "top",
+              "hole_size": 0.0
+            },
+            {
+              "name": "3",
+              "x": -2.0,
+              "y": 1.5,
+              "width": 1.0,
+              "height": 2.0,
+              "shape": "rectangular",
+              "layer": "top",
+              "hole_size": 0.0
+            },
+            {
+              "name": "4",
+              "x": -2.0,
+              "y": 3.0,
+              "width": 1.0,
+              "height": 2.0,
+              "shape": "rectangular",
+              "layer": "top",
+              "hole_size": 0.0
+            }
+          ],
+          "silkscreen": {
+            "width": 6.0,
+            "height": 8.0
+          },
+          "courtyard": {
+            "width": 8.0,
+            "height": 10.0
+          },
+          "notes": "Dimensions based on typical connector standards; exact dimensions should be verified with manufacturer datasheet.",
+          "footprint_class": "custom",
+          "verification_status": "needs_manual_verification",
+          "component_designators": [
+            "J28"
           ],
           "component_count": 1
         }
@@ -2327,7 +4566,7 @@
           "pads": [
             {
               "name": "1",
-              "x": -3.9,
+              "x": -3.12,
               "y": 0.0,
               "width": 2.0,
               "height": 3.0,
@@ -2337,7 +4576,7 @@
             },
             {
               "name": "2",
-              "x": 3.9,
+              "x": 3.12,
               "y": 0.0,
               "width": 2.0,
               "height": 3.0,
@@ -2347,14 +4586,16 @@
             }
           ],
           "silkscreen": {
-            "width": 8.3,
-            "height": 7.5
+            "width": 8.64,
+            "height": 3.4
           },
           "courtyard": {
-            "width": 9.3,
-            "height": 8.5
+            "width": 9.24,
+            "height": 4.0
           },
-          "notes": "IPC-7351 standard footprint",
+          "verification_status": "guessed",
+          "footprint_class": "unknown",
+          "notes": "Generated from database (needs verification)",
           "component_designators": [
             "L21",
             "L18",
@@ -2364,40 +4605,104 @@
           "component_count": 4
         },
         {
-          "footprint_name": "0805",
+          "footprint_name": "T22*14*8",
           "component_type": "inductor",
           "package_type": "smd",
           "pads": [
             {
               "name": "1",
-              "x": -0.95,
-              "y": 0.0,
-              "width": 1.2,
-              "height": 1.4,
+              "x": -5.0,
+              "y": -7.0,
+              "width": 2.0,
+              "height": 2.0,
+              "shape": "rectangular",
+              "layer": "top",
+              "hole_size": 0.0
+            },
+            {
+              "name": "3",
+              "x": -5.0,
+              "y": 7.0,
+              "width": 2.0,
+              "height": 2.0,
               "shape": "rectangular",
               "layer": "top",
               "hole_size": 0.0
             },
             {
               "name": "2",
-              "x": 0.95,
-              "y": 0.0,
-              "width": 1.2,
-              "height": 1.4,
+              "x": 5.0,
+              "y": -7.0,
+              "width": 2.0,
+              "height": 2.0,
+              "shape": "rectangular",
+              "layer": "top",
+              "hole_size": 0.0
+            },
+            {
+              "name": "4",
+              "x": 5.0,
+              "y": 7.0,
+              "width": 2.0,
+              "height": 2.0,
               "shape": "rectangular",
               "layer": "top",
               "hole_size": 0.0
             }
           ],
           "silkscreen": {
-            "width": 2.3,
-            "height": 1.7
+            "width": 22.0,
+            "height": 14.0
           },
           "courtyard": {
-            "width": 2.8,
+            "width": 24.0,
+            "height": 16.0
+          },
+          "notes": "Dimensions based on typical T22*14*8 inductor package. Verify with manufacturer datasheet.",
+          "footprint_class": "custom",
+          "verification_status": "needs_manual_verification",
+          "component_designators": [
+            "L22"
+          ],
+          "component_count": 1
+        },
+        {
+          "footprint_name": "L0805",
+          "component_type": "inductor",
+          "package_type": "smd",
+          "pads": [
+            {
+              "name": "1",
+              "x": -0.8,
+              "y": 0.0,
+              "width": 1.2,
+              "height": 1.2,
+              "shape": "rectangular",
+              "layer": "top",
+              "hole_size": 0.0
+            },
+            {
+              "name": "2",
+              "x": 0.8,
+              "y": 0.0,
+              "width": 1.2,
+              "height": 1.2,
+              "shape": "rectangular",
+              "layer": "top",
+              "hole_size": 0.0
+            }
+          ],
+          "silkscreen": {
+            "width": 3.1999999999999997,
+            "height": 1.6
+          },
+          "courtyard": {
+            "width": 3.8,
             "height": 2.2
           },
-          "notes": "IPC-7351 standard footprint",
+          "verification_status": "guessed",
+          "footprint_class": "unknown",
+          "notes": "Generated from database (needs verification)",
           "component_designators": [
             "L17"
           ],
@@ -2406,15 +4711,16 @@
       ]
     },
     "statistics": {
-      "total_footprints": 17,
-      "total_components": 115,
+      "total_footprints": 28,
+      "total_components": 123,
       "category_counts": {
-        "resistors": 3,
+        "resistors": 6,
         "capacitors": 3,
-        "diodes": 5,
-        "transistors": 2,
-        "ics": 2,
-        "inductors": 2
+        "diodes": 6,
+        "transistors": 3,
+        "ics": 5,
+        "connectors": 2,
+        "inductors": 3
       }
     },
     "footprints": {
@@ -2425,34 +4731,36 @@
         "pads": [
           {
             "name": "1",
-            "x": -3.05,
+            "x": -3.02,
             "y": 0.0,
-            "width": 2.45,
-            "height": 3.05,
+            "width": 1.11,
+            "height": 3.43,
             "shape": "rectangular",
             "layer": "top",
             "hole_size": 0.0
           },
           {
             "name": "2",
-            "x": 3.05,
+            "x": 3.02,
             "y": 0.0,
-            "width": 2.45,
-            "height": 3.05,
+            "width": 1.11,
+            "height": 3.43,
             "shape": "rectangular",
             "layer": "top",
             "hole_size": 0.0
           }
         ],
         "silkscreen": {
-          "width": 7.0,
-          "height": 3.5
+          "width": 7.550000000000001,
+          "height": 3.83
         },
         "courtyard": {
-          "width": 8.0,
-          "height": 4.5
+          "width": 8.15,
+          "height": 4.43
         },
-        "notes": "IPC-7351 standard footprint",
+        "verification_status": "guessed",
+        "footprint_class": "unknown",
+        "notes": "Generated from database (needs verification)",
         "component_designators": [
           "C153",
           "C152",
@@ -2480,40 +4788,42 @@
         "component_count": 22
       },
       "R0402": {
-        "footprint_name": "0603",
+        "footprint_name": "R0402",
         "component_type": "resistor",
         "package_type": "smd",
         "pads": [
           {
             "name": "1",
-            "x": -0.875,
+            "x": -0.425,
             "y": 0.0,
-            "width": 0.95,
-            "height": 1.0,
+            "width": 0.7,
+            "height": 0.73,
             "shape": "rectangular",
             "layer": "top",
             "hole_size": 0.0
           },
           {
             "name": "2",
-            "x": 0.875,
+            "x": 0.425,
             "y": 0.0,
-            "width": 0.95,
-            "height": 1.0,
+            "width": 0.7,
+            "height": 0.73,
             "shape": "rectangular",
             "layer": "top",
             "hole_size": 0.0
           }
         ],
         "silkscreen": {
-          "width": 2.3,
-          "height": 1.5
+          "width": 1.9499999999999997,
+          "height": 1.13
         },
         "courtyard": {
-          "width": 2.8,
-          "height": 2.0
+          "width": 2.55,
+          "height": 1.73
         },
-        "notes": "IPC-7351 standard footprint",
+        "verification_status": "auto_verified",
+        "footprint_class": "passive_chip",
+        "notes": "IPC-7351 standard from database (passive chip)",
         "component_designators": [
           "R106",
           "R103",
@@ -2544,34 +4854,36 @@
         "pads": [
           {
             "name": "1",
-            "x": -1.9,
+            "x": -1.525,
             "y": 0.0,
-            "width": 2.3,
-            "height": 2.7,
+            "width": 1.25,
+            "height": 2.3,
             "shape": "rectangular",
             "layer": "top",
             "hole_size": 0.0
           },
           {
             "name": "2",
-            "x": 1.9,
+            "x": 1.525,
             "y": 0.0,
-            "width": 2.3,
-            "height": 2.7,
+            "width": 1.25,
+            "height": 2.3,
             "shape": "rectangular",
             "layer": "top",
             "hole_size": 0.0
           }
         ],
         "silkscreen": {
-          "width": 5.3,
-          "height": 3.9
+          "width": 4.7,
+          "height": 2.6999999999999997
         },
         "courtyard": {
-          "width": 6.3,
-          "height": 4.9
+          "width": 5.3,
+          "height": 3.3
         },
-        "notes": "IPC-7351 standard footprint",
+        "verification_status": "auto_verified",
+        "footprint_class": "standard_package",
+        "notes": "Standard package template from database",
         "component_designators": [
           "D11"
         ],
@@ -2584,34 +4896,36 @@
         "pads": [
           {
             "name": "1",
-            "x": -3.05,
+            "x": -2.825,
             "y": 0.0,
-            "width": 2.6,
-            "height": 3.7,
+            "width": 1.25,
+            "height": 3.3,
             "shape": "rectangular",
             "layer": "top",
             "hole_size": 0.0
           },
           {
             "name": "2",
-            "x": 3.05,
+            "x": 2.825,
             "y": 0.0,
-            "width": 2.6,
-            "height": 3.7,
+            "width": 1.25,
+            "height": 3.3,
             "shape": "rectangular",
             "layer": "top",
             "hole_size": 0.0
           }
         ],
         "silkscreen": {
-          "width": 7.5,
-          "height": 4.5
+          "width": 7.300000000000001,
+          "height": 3.6999999999999997
         },
         "courtyard": {
-          "width": 8.0,
-          "height": 5.0
+          "width": 7.9,
+          "height": 4.3
         },
-        "notes": "IPC-7351 standard footprint",
+        "verification_status": "auto_verified",
+        "footprint_class": "standard_package",
+        "notes": "Standard package template from database",
         "component_designators": [
           "D12",
           "D6"
@@ -2628,7 +4942,7 @@
             "x": -6.75,
             "y": 0.0,
             "width": 3.0,
-            "height": 13.5,
+            "height": 3.0,
             "shape": "rectangular",
             "layer": "top",
             "hole_size": 0.0
@@ -2638,21 +4952,23 @@
             "x": 6.75,
             "y": 0.0,
             "width": 3.0,
-            "height": 13.5,
+            "height": 3.0,
             "shape": "rectangular",
             "layer": "top",
             "hole_size": 0.0
           }
         ],
         "silkscreen": {
-          "width": 14.0,
-          "height": 14.0
+          "width": 13.5,
+          "height": 13.5
         },
         "courtyard": {
-          "width": 15.0,
-          "height": 15.0
+          "width": 15.5,
+          "height": 15.5
         },
-        "notes": "IPC-7351 standard footprint",
+        "notes": "Dimensions based on standard SMD capacitor package size for CAE-13.5X13.5X13.5mm",
+        "footprint_class": "custom",
+        "verification_status": "needs_manual_verification",
         "component_designators": [
           "C176",
           "C175",
@@ -2669,34 +4985,36 @@
         "pads": [
           {
             "name": "1",
-            "x": -2.5,
+            "x": -2.1,
             "y": 0.0,
-            "width": 2.5,
-            "height": 3.2,
+            "width": 1.5,
+            "height": 3.0,
             "shape": "rectangular",
             "layer": "top",
             "hole_size": 0.0
           },
           {
             "name": "2",
-            "x": 2.5,
+            "x": 2.1,
             "y": 0.0,
-            "width": 2.5,
-            "height": 3.2,
+            "width": 1.5,
+            "height": 3.0,
             "shape": "rectangular",
             "layer": "top",
             "hole_size": 0.0
           }
         ],
         "silkscreen": {
-          "width": 6.0,
-          "height": 3.5
+          "width": 6.1000000000000005,
+          "height": 3.4
         },
         "courtyard": {
-          "width": 7.0,
-          "height": 4.5
+          "width": 6.7,
+          "height": 4.0
         },
-        "notes": "IPC-7351 standard footprint",
+        "verification_status": "guessed",
+        "footprint_class": "unknown",
+        "notes": "Generated from database (needs verification)",
         "component_designators": [
           "C172",
           "C165",
@@ -2727,40 +5045,42 @@
         "component_count": 25
       },
       "R2010": {
-        "footprint_name": "0603",
+        "footprint_name": "R2010",
         "component_type": "resistor",
         "package_type": "smd",
         "pads": [
           {
             "name": "1",
-            "x": -0.475,
+            "x": -1.75,
             "y": 0.0,
-            "width": 0.95,
-            "height": 1.0,
+            "width": 2.5,
+            "height": 2.5,
             "shape": "rectangular",
             "layer": "top",
             "hole_size": 0.0
           },
           {
             "name": "2",
-            "x": 0.475,
+            "x": 1.75,
             "y": 0.0,
-            "width": 0.95,
-            "height": 1.0,
+            "width": 2.5,
+            "height": 2.5,
             "shape": "rectangular",
             "layer": "top",
             "hole_size": 0.0
           }
         ],
         "silkscreen": {
-          "width": 2.3,
-          "height": 1.3
+          "width": 6.4,
+          "height": 2.9
         },
         "courtyard": {
-          "width": 2.8,
-          "height": 1.8
+          "width": 7.0,
+          "height": 3.5
         },
-        "notes": "IPC-7351 standard footprint",
+        "verification_status": "guessed",
+        "footprint_class": "unknown",
+        "notes": "Generated from database (needs verification)",
         "component_designators": [
           "R110",
           "R111",
@@ -2779,41 +5099,83 @@
         ],
         "component_count": 14
       },
-      "0603": {
-        "footprint_name": "0603",
+      "C0603": {
+        "footprint_name": "C0603",
         "component_type": "resistor",
         "package_type": "smd",
         "pads": [
           {
             "name": "1",
-            "x": -0.75,
+            "x": -0.68,
             "y": 0.0,
-            "width": 0.7,
-            "height": 0.9,
+            "width": 1.01,
+            "height": 0.98,
             "shape": "rectangular",
             "layer": "top",
             "hole_size": 0.0
           },
           {
             "name": "2",
-            "x": 0.75,
+            "x": 0.68,
             "y": 0.0,
-            "width": 0.7,
-            "height": 0.9,
+            "width": 1.01,
+            "height": 0.98,
             "shape": "rectangular",
             "layer": "top",
             "hole_size": 0.0
           }
         ],
         "silkscreen": {
-          "width": 1.6,
-          "height": 0.8
+          "width": 2.77,
+          "height": 1.38
         },
         "courtyard": {
-          "width": 2.0,
-          "height": 1.2
+          "width": 3.37,
+          "height": 1.98
         },
-        "notes": "IPC-7351 standard footprint",
+        "verification_status": "guessed",
+        "footprint_class": "unknown",
+        "notes": "Generated from database (needs verification)",
+        "component_designators": [],
+        "component_count": 0
+      },
+      "R0603": {
+        "footprint_name": "R0603",
+        "component_type": "resistor",
+        "package_type": "smd",
+        "pads": [
+          {
+            "name": "1",
+            "x": -0.68,
+            "y": 0.0,
+            "width": 1.01,
+            "height": 0.98,
+            "shape": "rectangular",
+            "layer": "top",
+            "hole_size": 0.0
+          },
+          {
+            "name": "2",
+            "x": 0.68,
+            "y": 0.0,
+            "width": 1.01,
+            "height": 0.98,
+            "shape": "rectangular",
+            "layer": "top",
+            "hole_size": 0.0
+          }
+        ],
+        "silkscreen": {
+          "width": 2.77,
+          "height": 1.38
+        },
+        "courtyard": {
+          "width": 3.37,
+          "height": 1.98
+        },
+        "verification_status": "guessed",
+        "footprint_class": "unknown",
+        "notes": "Generated from database (needs verification)",
         "component_designators": [
           "R125",
           "R124",
@@ -2823,51 +5185,225 @@
         ],
         "component_count": 5
       },
-      "SOT-23": {
-        "footprint_name": "SOT-23",
-        "component_type": "transistor",
+      "L0603": {
+        "footprint_name": "L0603",
+        "component_type": "resistor",
         "package_type": "smd",
         "pads": [
           {
             "name": "1",
-            "x": -1.05,
-            "y": -0.95,
-            "width": 0.6,
-            "height": 0.7,
+            "x": -0.68,
+            "y": 0.0,
+            "width": 1.01,
+            "height": 0.98,
             "shape": "rectangular",
             "layer": "top",
             "hole_size": 0.0
           },
           {
             "name": "2",
-            "x": 1.05,
-            "y": -0.95,
-            "width": 0.6,
-            "height": 0.7,
-            "shape": "rectangular",
-            "layer": "top",
-            "hole_size": 0.0
-          },
-          {
-            "name": "3",
-            "x": 0.0,
-            "y": 1.05,
-            "width": 0.6,
-            "height": 0.7,
+            "x": 0.68,
+            "y": 0.0,
+            "width": 1.01,
+            "height": 0.98,
             "shape": "rectangular",
             "layer": "top",
             "hole_size": 0.0
           }
         ],
         "silkscreen": {
-          "width": 3.0,
-          "height": 2.5
+          "width": 2.77,
+          "height": 1.38
         },
         "courtyard": {
-          "width": 3.5,
-          "height": 3.0
+          "width": 3.37,
+          "height": 1.98
         },
-        "notes": "IPC-7351 standard footprint",
+        "verification_status": "guessed",
+        "footprint_class": "unknown",
+        "notes": "Generated from database (needs verification)",
+        "component_designators": [],
+        "component_count": 0
+      },
+      "D0603": {
+        "footprint_name": "D0603",
+        "component_type": "resistor",
+        "package_type": "smd",
+        "pads": [
+          {
+            "name": "1",
+            "x": -0.68,
+            "y": 0.0,
+            "width": 1.01,
+            "height": 0.98,
+            "shape": "rectangular",
+            "layer": "top",
+            "hole_size": 0.0
+          },
+          {
+            "name": "2",
+            "x": 0.68,
+            "y": 0.0,
+            "width": 1.01,
+            "height": 0.98,
+            "shape": "rectangular",
+            "layer": "top",
+            "hole_size": 0.0
+          }
+        ],
+        "silkscreen": {
+          "width": 2.77,
+          "height": 1.38
+        },
+        "courtyard": {
+          "width": 3.37,
+          "height": 1.98
+        },
+        "verification_status": "guessed",
+        "footprint_class": "unknown",
+        "notes": "Generated from database (needs verification)",
+        "component_designators": [],
+        "component_count": 0
+      },
+      "LMF500-23B30UH": {
+        "footprint_name": "LMF500-23B30UH",
+        "component_type": "diode",
+        "package_type": "smd",
+        "pads": [
+          {
+            "name": "1",
+            "x": -3.75,
+            "y": -2.0,
+            "width": 0.9,
+            "height": 1.5,
+            "shape": "rectangular",
+            "layer": "top",
+            "hole_size": 0.0
+          },
+          {
+            "name": "2",
+            "x": -2.25,
+            "y": -2.0,
+            "width": 0.9,
+            "height": 1.5,
+            "shape": "rectangular",
+            "layer": "top",
+            "hole_size": 0.0
+          },
+          {
+            "name": "3",
+            "x": -0.75,
+            "y": -2.0,
+            "width": 0.9,
+            "height": 1.5,
+            "shape": "rectangular",
+            "layer": "top",
+            "hole_size": 0.0
+          },
+          {
+            "name": "4",
+            "x": 0.75,
+            "y": -2.0,
+            "width": 0.9,
+            "height": 1.5,
+            "shape": "rectangular",
+            "layer": "top",
+            "hole_size": 0.0
+          },
+          {
+            "name": "5",
+            "x": 2.25,
+            "y": -2.0,
+            "width": 0.9,
+            "height": 1.5,
+            "shape": "rectangular",
+            "layer": "top",
+            "hole_size": 0.0
+          },
+          {
+            "name": "6",
+            "x": 3.75,
+            "y": -2.0,
+            "width": 0.9,
+            "height": 1.5,
+            "shape": "rectangular",
+            "layer": "top",
+            "hole_size": 0.0
+          },
+          {
+            "name": "Tab",
+            "x": 0.0,
+            "y": 2.0,
+            "width": 10.0,
+            "height": 7.5,
+            "shape": "rectangular",
+            "layer": "top",
+            "hole_size": 0.0
+          }
+        ],
+        "silkscreen": {
+          "width": 12.0,
+          "height": 10.0
+        },
+        "courtyard": {
+          "width": 14.0,
+          "height": 12.0
+        },
+        "notes": "IPC-7351 standard or manufacturer specification",
+        "footprint_class": "custom",
+        "verification_status": "needs_manual_verification",
+        "component_designators": [
+          "DY1"
+        ],
+        "component_count": 1
+      },
+      "SOT-23": {
+        "footprint_name": "SOT-23",
+        "component_type": "ic",
+        "package_type": "smd",
+        "pads": [
+          {
+            "name": "1",
+            "x": -1.45,
+            "y": -0.475,
+            "width": 0.8,
+            "height": 0.9,
+            "shape": "rectangular",
+            "layer": "top",
+            "hole_size": 0.0
+          },
+          {
+            "name": "2",
+            "x": -1.45,
+            "y": 0.475,
+            "width": 0.8,
+            "height": 0.9,
+            "shape": "rectangular",
+            "layer": "top",
+            "hole_size": 0.0
+          },
+          {
+            "name": "3",
+            "x": 1.45,
+            "y": 0.0,
+            "width": 0.8,
+            "height": 0.9,
+            "shape": "rectangular",
+            "layer": "top",
+            "hole_size": 0.0
+          }
+        ],
+        "silkscreen": {
+          "width": 4.1000000000000005,
+          "height": 2.25
+        },
+        "courtyard": {
+          "width": 4.7,
+          "height": 2.85
+        },
+        "verification_status": "auto_verified",
+        "footprint_class": "standard_package",
+        "notes": "Standard package template from database",
         "component_designators": [
           "T6",
           "T5",
@@ -2882,8 +5418,370 @@
         "pads": [
           {
             "name": "1",
-            "x": -2.54,
-            "y": -4.5,
+            "x": -2.25,
+            "y": 0.0,
+            "width": 1.5,
+            "height": 3.0,
+            "shape": "rectangular",
+            "layer": "top",
+            "hole_size": 0.0
+          },
+          {
+            "name": "2",
+            "x": 2.25,
+            "y": 0.0,
+            "width": 1.5,
+            "height": 3.0,
+            "shape": "rectangular",
+            "layer": "top",
+            "hole_size": 0.0
+          }
+        ],
+        "silkscreen": {
+          "width": 6.4,
+          "height": 3.4
+        },
+        "courtyard": {
+          "width": 7.0,
+          "height": 4.0
+        },
+        "verification_status": "needs_manual_verification",
+        "footprint_class": "standard_package",
+        "notes": "Standard package template - missing required Tab pad (needs manual verification)",
+        "component_designators": [
+          "T4",
+          "T3"
+        ],
+        "component_count": 2
+      },
+      "SOD-523": {
+        "footprint_name": "SOD-523",
+        "component_type": "diode",
+        "package_type": "smd",
+        "pads": [
+          {
+            "name": "1",
+            "x": -0.48,
+            "y": 0.0,
+            "width": 0.6,
+            "height": 0.8,
+            "shape": "rectangular",
+            "layer": "top",
+            "hole_size": 0.0
+          },
+          {
+            "name": "2",
+            "x": 0.48,
+            "y": 0.0,
+            "width": 0.6,
+            "height": 0.8,
+            "shape": "rectangular",
+            "layer": "top",
+            "hole_size": 0.0
+          }
+        ],
+        "silkscreen": {
+          "width": 1.96,
+          "height": 1.2000000000000002
+        },
+        "courtyard": {
+          "width": 2.56,
+          "height": 1.8
+        },
+        "verification_status": "auto_verified",
+        "footprint_class": "standard_package",
+        "notes": "Standard package template from database",
+        "component_designators": [
+          "D15",
+          "D9",
+          "D10",
+          "D14",
+          "D8",
+          "D13"
+        ],
+        "component_count": 6
+      },
+      "L7.8X7.0X5.0": {
+        "footprint_name": "L7.8x7.0x5.0",
+        "component_type": "inductor",
+        "package_type": "smd",
+        "pads": [
+          {
+            "name": "1",
+            "x": -3.12,
+            "y": 0.0,
+            "width": 2.0,
+            "height": 3.0,
+            "shape": "rectangular",
+            "layer": "top",
+            "hole_size": 0.0
+          },
+          {
+            "name": "2",
+            "x": 3.12,
+            "y": 0.0,
+            "width": 2.0,
+            "height": 3.0,
+            "shape": "rectangular",
+            "layer": "top",
+            "hole_size": 0.0
+          }
+        ],
+        "silkscreen": {
+          "width": 8.64,
+          "height": 3.4
+        },
+        "courtyard": {
+          "width": 9.24,
+          "height": 4.0
+        },
+        "verification_status": "guessed",
+        "footprint_class": "unknown",
+        "notes": "Generated from database (needs verification)",
+        "component_designators": [
+          "L21",
+          "L18",
+          "L19",
+          "L20"
+        ],
+        "component_count": 4
+      },
+      "ESOP8L": {
+        "footprint_name": "ESOP8L",
+        "component_type": "ic",
+        "package_type": "smd",
+        "pads": [
+          {
+            "name": "1",
+            "x": -2.2,
+            "y": -0.9750000000000001,
+            "width": 0.5,
+            "height": 1.5,
+            "shape": "rectangular",
+            "layer": "top",
+            "hole_size": 0.0
+          },
+          {
+            "name": "2",
+            "x": -2.2,
+            "y": -0.32500000000000007,
+            "width": 0.5,
+            "height": 1.5,
+            "shape": "rectangular",
+            "layer": "top",
+            "hole_size": 0.0
+          },
+          {
+            "name": "3",
+            "x": -2.2,
+            "y": 0.32499999999999996,
+            "width": 0.5,
+            "height": 1.5,
+            "shape": "rectangular",
+            "layer": "top",
+            "hole_size": 0.0
+          },
+          {
+            "name": "4",
+            "x": -2.2,
+            "y": 0.9750000000000001,
+            "width": 0.5,
+            "height": 1.5,
+            "shape": "rectangular",
+            "layer": "top",
+            "hole_size": 0.0
+          },
+          {
+            "name": "5",
+            "x": 2.2,
+            "y": -0.9750000000000001,
+            "width": 0.5,
+            "height": 1.5,
+            "shape": "rectangular",
+            "layer": "top",
+            "hole_size": 0.0
+          },
+          {
+            "name": "6",
+            "x": 2.2,
+            "y": -0.32500000000000007,
+            "width": 0.5,
+            "height": 1.5,
+            "shape": "rectangular",
+            "layer": "top",
+            "hole_size": 0.0
+          },
+          {
+            "name": "7",
+            "x": 2.2,
+            "y": 0.32499999999999996,
+            "width": 0.5,
+            "height": 1.5,
+            "shape": "rectangular",
+            "layer": "top",
+            "hole_size": 0.0
+          },
+          {
+            "name": "8",
+            "x": 2.2,
+            "y": 0.9750000000000001,
+            "width": 0.5,
+            "height": 1.5,
+            "shape": "rectangular",
+            "layer": "top",
+            "hole_size": 0.0
+          },
+          {
+            "name": "Tab",
+            "x": 0.0,
+            "y": 0.0,
+            "width": 2.5,
+            "height": 2.5,
+            "shape": "rectangular",
+            "layer": "top",
+            "hole_size": 0.0
+          }
+        ],
+        "silkscreen": {
+          "width": 5.300000000000001,
+          "height": 3.85
+        },
+        "courtyard": {
+          "width": 5.9,
+          "height": 4.45
+        },
+        "verification_status": "guessed",
+        "footprint_class": "unknown",
+        "notes": "Generated from database (needs verification)",
+        "component_designators": [
+          "U8"
+        ],
+        "component_count": 1
+      },
+      "TO-252(1)": {
+        "footprint_name": "TO-252(1)",
+        "component_type": "transistor",
+        "package_type": "smd",
+        "pads": [
+          {
+            "name": "1",
+            "x": -3.8,
+            "y": -2.54,
+            "width": 1.5,
+            "height": 2.5,
+            "shape": "rectangular",
+            "layer": "top",
+            "hole_size": 0.0
+          },
+          {
+            "name": "3",
+            "x": -3.8,
+            "y": 2.54,
+            "width": 1.5,
+            "height": 2.5,
+            "shape": "rectangular",
+            "layer": "top",
+            "hole_size": 0.0
+          },
+          {
+            "name": "Tab",
+            "x": 0.0,
+            "y": 0.0,
+            "width": 8.0,
+            "height": 6.5,
+            "shape": "rectangular",
+            "layer": "top",
+            "hole_size": 0.0
+          }
+        ],
+        "silkscreen": {
+          "width": 8.950000000000001,
+          "height": 7.98
+        },
+        "courtyard": {
+          "width": 9.55,
+          "height": 8.58
+        },
+        "verification_status": "auto_verified",
+        "footprint_class": "standard_package",
+        "notes": "Standard package template from database",
+        "component_designators": [
+          "U7",
+          "U9"
+        ],
+        "component_count": 2
+      },
+      "SOT-89": {
+        "footprint_name": "SOT-89",
+        "component_type": "integrated_circuit",
+        "package_type": "smd",
+        "pads": [
+          {
+            "name": "1",
+            "x": -1.5,
+            "y": 0.95,
+            "width": 1.5,
+            "height": 1.5,
+            "shape": "rectangular",
+            "layer": "top",
+            "hole_size": 0.0
+          },
+          {
+            "name": "2",
+            "x": 0.0,
+            "y": 0.95,
+            "width": 1.5,
+            "height": 1.5,
+            "shape": "rectangular",
+            "layer": "top",
+            "hole_size": 0.0
+          },
+          {
+            "name": "3",
+            "x": 1.5,
+            "y": 0.95,
+            "width": 1.5,
+            "height": 1.5,
+            "shape": "rectangular",
+            "layer": "top",
+            "hole_size": 0.0
+          },
+          {
+            "name": "Tab",
+            "x": 0.0,
+            "y": -1.5,
+            "width": 4.5,
+            "height": 2.5,
+            "shape": "rectangular",
+            "layer": "top",
+            "hole_size": 0.0
+          }
+        ],
+        "silkscreen": {
+          "width": 4.5,
+          "height": 4.5
+        },
+        "courtyard": {
+          "width": 6.5,
+          "height": 6.5
+        },
+        "notes": "IPC-7351 standard or manufacturer specification",
+        "footprint_class": "standard_package",
+        "verification_status": "guessed",
+        "component_designators": [
+          "U6"
+        ],
+        "component_count": 1
+      },
+      "DW-PXXX-20XP1": {
+        "footprint_name": "DW-PXXX-20XP1",
+        "component_type": "integrated_circuit",
+        "package_type": "smd",
+        "pads": [
+          {
+            "name": "1",
+            "x": -3.8,
+            "y": -2.85,
             "width": 0.9,
             "height": 2.0,
             "shape": "rectangular",
@@ -2892,8 +5790,8 @@
           },
           {
             "name": "2",
-            "x": 0.0,
-            "y": -4.5,
+            "x": -3.8,
+            "y": -1.9,
             "width": 0.9,
             "height": 2.0,
             "shape": "rectangular",
@@ -2902,8 +5800,48 @@
           },
           {
             "name": "3",
-            "x": 2.54,
-            "y": -4.5,
+            "x": -3.8,
+            "y": -0.95,
+            "width": 0.9,
+            "height": 2.0,
+            "shape": "rectangular",
+            "layer": "top",
+            "hole_size": 0.0
+          },
+          {
+            "name": "4",
+            "x": -3.8,
+            "y": 0.0,
+            "width": 0.9,
+            "height": 2.0,
+            "shape": "rectangular",
+            "layer": "top",
+            "hole_size": 0.0
+          },
+          {
+            "name": "5",
+            "x": -3.8,
+            "y": 0.95,
+            "width": 0.9,
+            "height": 2.0,
+            "shape": "rectangular",
+            "layer": "top",
+            "hole_size": 0.0
+          },
+          {
+            "name": "6",
+            "x": -3.8,
+            "y": 1.9,
+            "width": 0.9,
+            "height": 2.0,
+            "shape": "rectangular",
+            "layer": "top",
+            "hole_size": 0.0
+          },
+          {
+            "name": "7",
+            "x": -3.8,
+            "y": 2.85,
             "width": 0.9,
             "height": 2.0,
             "shape": "rectangular",
@@ -2926,82 +5864,314 @@
           "height": 10.0
         },
         "courtyard": {
-          "width": 13.0,
-          "height": 11.0
+          "width": 14.0,
+          "height": 12.0
         },
-        "notes": "IPC-7351 standard footprint",
+        "notes": "IPC-7351 standard or manufacturer specification",
+        "footprint_class": "custom",
+        "verification_status": "needs_manual_verification",
         "component_designators": [
-          "T4",
-          "T3"
+          "U11"
         ],
-        "component_count": 2
+        "component_count": 1
       },
-      "SOD-523": {
-        "footprint_name": "SOD-523",
-        "component_type": "diode",
+      "TO-263-7": {
+        "footprint_name": "TO-263-7",
+        "component_type": "transistor",
         "package_type": "smd",
         "pads": [
           {
             "name": "1",
-            "x": -0.65,
-            "y": 0.0,
-            "width": 0.6,
-            "height": 0.8,
+            "x": -3.8,
+            "y": -2.85,
+            "width": 0.9,
+            "height": 2.0,
             "shape": "rectangular",
             "layer": "top",
             "hole_size": 0.0
           },
           {
             "name": "2",
-            "x": 0.65,
-            "y": 0.0,
-            "width": 0.6,
-            "height": 0.8,
+            "x": -3.8,
+            "y": -1.9000000000000001,
+            "width": 0.9,
+            "height": 2.0,
+            "shape": "rectangular",
+            "layer": "top",
+            "hole_size": 0.0
+          },
+          {
+            "name": "3",
+            "x": -3.8,
+            "y": -0.9500000000000002,
+            "width": 0.9,
+            "height": 2.0,
+            "shape": "rectangular",
+            "layer": "top",
+            "hole_size": 0.0
+          },
+          {
+            "name": "4",
+            "x": -3.8,
+            "y": -4.440892098500626e-16,
+            "width": 0.9,
+            "height": 2.0,
+            "shape": "rectangular",
+            "layer": "top",
+            "hole_size": 0.0
+          },
+          {
+            "name": "5",
+            "x": -3.8,
+            "y": 0.9499999999999997,
+            "width": 0.9,
+            "height": 2.0,
+            "shape": "rectangular",
+            "layer": "top",
+            "hole_size": 0.0
+          },
+          {
+            "name": "6",
+            "x": -3.8,
+            "y": 1.9,
+            "width": 0.9,
+            "height": 2.0,
+            "shape": "rectangular",
+            "layer": "top",
+            "hole_size": 0.0
+          },
+          {
+            "name": "7",
+            "x": -3.8,
+            "y": 2.849999999999999,
+            "width": 0.9,
+            "height": 2.0,
+            "shape": "rectangular",
+            "layer": "top",
+            "hole_size": 0.0
+          },
+          {
+            "name": "Tab",
+            "x": 0.0,
+            "y": 2.0,
+            "width": 10.0,
+            "height": 7.5,
             "shape": "rectangular",
             "layer": "top",
             "hole_size": 0.0
           }
         ],
         "silkscreen": {
-          "width": 1.8,
-          "height": 1.35
+          "width": 10.4,
+          "height": 10.0
         },
         "courtyard": {
-          "width": 2.3,
-          "height": 1.85
+          "width": 11.0,
+          "height": 10.6
         },
-        "notes": "IPC-7351 standard footprint",
+        "verification_status": "auto_verified",
+        "footprint_class": "standard_package",
+        "notes": "Standard package template from database (TO-263/D2PAK with Tab)",
         "component_designators": [
-          "D15",
-          "D9",
-          "D10",
-          "D14",
-          "D8",
-          "D13"
+          "U10"
         ],
-        "component_count": 6
+        "component_count": 1
       },
-      "L7.8X7.0X5.0": {
-        "footprint_name": "L7.8x7.0x5.0",
+      "T22*14*8": {
+        "footprint_name": "T22*14*8",
         "component_type": "inductor",
         "package_type": "smd",
         "pads": [
           {
             "name": "1",
-            "x": -3.9,
-            "y": 0.0,
+            "x": -5.0,
+            "y": -7.0,
             "width": 2.0,
-            "height": 3.0,
+            "height": 2.0,
+            "shape": "rectangular",
+            "layer": "top",
+            "hole_size": 0.0
+          },
+          {
+            "name": "3",
+            "x": -5.0,
+            "y": 7.0,
+            "width": 2.0,
+            "height": 2.0,
             "shape": "rectangular",
             "layer": "top",
             "hole_size": 0.0
           },
           {
             "name": "2",
-            "x": 3.9,
-            "y": 0.0,
+            "x": 5.0,
+            "y": -7.0,
             "width": 2.0,
-            "height": 3.0,
+            "height": 2.0,
+            "shape": "rectangular",
+            "layer": "top",
+            "hole_size": 0.0
+          },
+          {
+            "name": "4",
+            "x": 5.0,
+            "y": 7.0,
+            "width": 2.0,
+            "height": 2.0,
+            "shape": "rectangular",
+            "layer": "top",
+            "hole_size": 0.0
+          }
+        ],
+        "silkscreen": {
+          "width": 22.0,
+          "height": 14.0
+        },
+        "courtyard": {
+          "width": 24.0,
+          "height": 16.0
+        },
+        "notes": "Dimensions based on typical T22*14*8 inductor package. Verify with manufacturer datasheet.",
+        "footprint_class": "custom",
+        "verification_status": "needs_manual_verification",
+        "component_designators": [
+          "L22"
+        ],
+        "component_count": 1
+      },
+      "SOT-23-5": {
+        "footprint_name": "SOT-23-5",
+        "component_type": "ic",
+        "package_type": "smd",
+        "pads": [
+          {
+            "name": "1",
+            "x": -1.3,
+            "y": -0.95,
+            "width": 0.7,
+            "height": 1.0,
+            "shape": "rectangular",
+            "layer": "top",
+            "hole_size": 0.0
+          },
+          {
+            "name": "2",
+            "x": -1.3,
+            "y": 0.0,
+            "width": 0.7,
+            "height": 1.0,
+            "shape": "rectangular",
+            "layer": "top",
+            "hole_size": 0.0
+          },
+          {
+            "name": "3",
+            "x": -1.3,
+            "y": 0.95,
+            "width": 0.7,
+            "height": 1.0,
+            "shape": "rectangular",
+            "layer": "top",
+            "hole_size": 0.0
+          },
+          {
+            "name": "4",
+            "x": 1.3,
+            "y": -0.475,
+            "width": 0.7,
+            "height": 1.0,
+            "shape": "rectangular",
+            "layer": "top",
+            "hole_size": 0.0
+          },
+          {
+            "name": "5",
+            "x": 1.3,
+            "y": 0.475,
+            "width": 0.7,
+            "height": 1.0,
+            "shape": "rectangular",
+            "layer": "top",
+            "hole_size": 0.0
+          }
+        ],
+        "silkscreen": {
+          "width": 3.6999999999999997,
+          "height": 3.3
+        },
+        "courtyard": {
+          "width": 4.3,
+          "height": 3.9
+        },
+        "verification_status": "auto_verified",
+        "footprint_class": "standard_package",
+        "notes": "Standard package template from database",
+        "component_designators": [
+          "U12"
+        ],
+        "component_count": 1
+      },
+      "??????6?(2*3PIN??2?4.3)": {
+        "footprint_name": "??????6?(2*3PIN??2?4.3)",
+        "component_type": "connector",
+        "package_type": "smd",
+        "pads": [
+          {
+            "name": "1",
+            "x": -2.15,
+            "y": -2.15,
+            "width": 1.0,
+            "height": 1.5,
+            "shape": "rectangular",
+            "layer": "top",
+            "hole_size": 0.0
+          },
+          {
+            "name": "2",
+            "x": -2.15,
+            "y": 0.0,
+            "width": 1.0,
+            "height": 1.5,
+            "shape": "rectangular",
+            "layer": "top",
+            "hole_size": 0.0
+          },
+          {
+            "name": "3",
+            "x": -2.15,
+            "y": 2.15,
+            "width": 1.0,
+            "height": 1.5,
+            "shape": "rectangular",
+            "layer": "top",
+            "hole_size": 0.0
+          },
+          {
+            "name": "4",
+            "x": 2.15,
+            "y": -2.15,
+            "width": 1.0,
+            "height": 1.5,
+            "shape": "rectangular",
+            "layer": "top",
+            "hole_size": 0.0
+          },
+          {
+            "name": "5",
+            "x": 2.15,
+            "y": 0.0,
+            "width": 1.0,
+            "height": 1.5,
+            "shape": "rectangular",
+            "layer": "top",
+            "hole_size": 0.0
+          },
+          {
+            "name": "6",
+            "x": 2.15,
+            "y": 2.15,
+            "width": 1.0,
+            "height": 1.5,
             "shape": "rectangular",
             "layer": "top",
             "hole_size": 0.0
@@ -3009,139 +6179,17 @@
         ],
         "silkscreen": {
           "width": 8.3,
-          "height": 7.5
+          "height": 8.3
         },
         "courtyard": {
-          "width": 9.3,
-          "height": 8.5
+          "width": 10.3,
+          "height": 10.3
         },
-        "notes": "IPC-7351 standard footprint",
+        "notes": "IPC-7351 standard or manufacturer specification",
+        "footprint_class": "custom",
+        "verification_status": "needs_manual_verification",
         "component_designators": [
-          "L21",
-          "L18",
-          "L19",
-          "L20"
-        ],
-        "component_count": 4
-      },
-      "TO-252(1)": {
-        "footprint_name": "TO-252",
-        "component_type": "ic",
-        "package_type": "smd",
-        "pads": [
-          {
-            "name": "1",
-            "x": -1.27,
-            "y": -3.4,
-            "width": 0.9,
-            "height": 1.5,
-            "shape": "rectangular",
-            "layer": "top",
-            "hole_size": 0.0
-          },
-          {
-            "name": "2",
-            "x": 0.0,
-            "y": -3.4,
-            "width": 0.9,
-            "height": 1.5,
-            "shape": "rectangular",
-            "layer": "top",
-            "hole_size": 0.0
-          },
-          {
-            "name": "3",
-            "x": 1.27,
-            "y": -3.4,
-            "width": 0.9,
-            "height": 1.5,
-            "shape": "rectangular",
-            "layer": "top",
-            "hole_size": 0.0
-          },
-          {
-            "name": "Tab",
-            "x": 0.0,
-            "y": 1.5,
-            "width": 6.0,
-            "height": 5.6,
-            "shape": "rectangular",
-            "layer": "top",
-            "hole_size": 0.0
-          }
-        ],
-        "silkscreen": {
-          "width": 7.0,
-          "height": 6.0
-        },
-        "courtyard": {
-          "width": 7.5,
-          "height": 6.5
-        },
-        "notes": "IPC-7351 standard footprint",
-        "component_designators": [
-          "U7",
-          "U9"
-        ],
-        "component_count": 2
-      },
-      "SOT-89": {
-        "footprint_name": "SOT-89",
-        "component_type": "ic",
-        "package_type": "smd",
-        "pads": [
-          {
-            "name": "1",
-            "x": -1.5,
-            "y": -1.5,
-            "width": 0.6,
-            "height": 1.0,
-            "shape": "rectangular",
-            "layer": "top",
-            "hole_size": 0.0
-          },
-          {
-            "name": "2",
-            "x": 0.0,
-            "y": -1.5,
-            "width": 0.6,
-            "height": 1.0,
-            "shape": "rectangular",
-            "layer": "top",
-            "hole_size": 0.0
-          },
-          {
-            "name": "3",
-            "x": 1.5,
-            "y": -1.5,
-            "width": 0.6,
-            "height": 1.0,
-            "shape": "rectangular",
-            "layer": "top",
-            "hole_size": 0.0
-          },
-          {
-            "name": "Tab",
-            "x": 0.0,
-            "y": 1.0,
-            "width": 1.5,
-            "height": 2.5,
-            "shape": "rectangular",
-            "layer": "top",
-            "hole_size": 0.0
-          }
-        ],
-        "silkscreen": {
-          "width": 4.5,
-          "height": 4.0
-        },
-        "courtyard": {
-          "width": 5.0,
-          "height": 4.5
-        },
-        "notes": "IPC-7351 standard footprint",
-        "component_designators": [
-          "U6"
+          "J29"
         ],
         "component_count": 1
       },
@@ -3152,34 +6200,36 @@
         "pads": [
           {
             "name": "1",
-            "x": -1.05,
+            "x": -1.18,
             "y": 0.0,
-            "width": 1.4,
-            "height": 1.0,
+            "width": 0.91,
+            "height": 1.22,
             "shape": "rectangular",
             "layer": "top",
             "hole_size": 0.0
           },
           {
             "name": "2",
-            "x": 1.05,
+            "x": 1.18,
             "y": 0.0,
-            "width": 1.4,
-            "height": 1.0,
+            "width": 0.91,
+            "height": 1.22,
             "shape": "rectangular",
             "layer": "top",
             "hole_size": 0.0
           }
         ],
         "silkscreen": {
-          "width": 3.7,
-          "height": 1.8
+          "width": 3.67,
+          "height": 1.62
         },
         "courtyard": {
-          "width": 4.2,
-          "height": 2.3
+          "width": 4.27,
+          "height": 2.2199999999999998
         },
-        "notes": "IPC-7351 standard footprint",
+        "verification_status": "auto_verified",
+        "footprint_class": "standard_package",
+        "notes": "Standard package template from database",
         "component_designators": [
           "D45",
           "D44"
@@ -3187,42 +6237,106 @@
         "component_count": 2
       },
       "L0805": {
-        "footprint_name": "0805",
+        "footprint_name": "L0805",
         "component_type": "inductor",
         "package_type": "smd",
         "pads": [
           {
             "name": "1",
-            "x": -0.95,
+            "x": -0.8,
             "y": 0.0,
             "width": 1.2,
-            "height": 1.4,
+            "height": 1.2,
             "shape": "rectangular",
             "layer": "top",
             "hole_size": 0.0
           },
           {
             "name": "2",
-            "x": 0.95,
+            "x": 0.8,
             "y": 0.0,
             "width": 1.2,
-            "height": 1.4,
+            "height": 1.2,
             "shape": "rectangular",
             "layer": "top",
             "hole_size": 0.0
           }
         ],
         "silkscreen": {
-          "width": 2.3,
-          "height": 1.7
+          "width": 3.1999999999999997,
+          "height": 1.6
         },
         "courtyard": {
-          "width": 2.8,
+          "width": 3.8,
           "height": 2.2
         },
-        "notes": "IPC-7351 standard footprint",
+        "verification_status": "guessed",
+        "footprint_class": "unknown",
+        "notes": "Generated from database (needs verification)",
         "component_designators": [
           "L17"
+        ],
+        "component_count": 1
+      },
+      "Y50DX-1404ZJ10S": {
+        "footprint_name": "Y50DX-1404ZJ10S",
+        "component_type": "connector",
+        "package_type": "smd",
+        "pads": [
+          {
+            "name": "1",
+            "x": -2.0,
+            "y": -1.5,
+            "width": 1.0,
+            "height": 2.0,
+            "shape": "rectangular",
+            "layer": "top",
+            "hole_size": 0.0
+          },
+          {
+            "name": "2",
+            "x": -2.0,
+            "y": 0.0,
+            "width": 1.0,
+            "height": 2.0,
+            "shape": "rectangular",
+            "layer": "top",
+            "hole_size": 0.0
+          },
+          {
+            "name": "3",
+            "x": -2.0,
+            "y": 1.5,
+            "width": 1.0,
+            "height": 2.0,
+            "shape": "rectangular",
+            "layer": "top",
+            "hole_size": 0.0
+          },
+          {
+            "name": "4",
+            "x": -2.0,
+            "y": 3.0,
+            "width": 1.0,
+            "height": 2.0,
+            "shape": "rectangular",
+            "layer": "top",
+            "hole_size": 0.0
+          }
+        ],
+        "silkscreen": {
+          "width": 6.0,
+          "height": 8.0
+        },
+        "courtyard": {
+          "width": 8.0,
+          "height": 10.0
+        },
+        "notes": "Dimensions based on typical connector standards; exact dimensions should be verified with manufacturer datasheet.",
+        "footprint_class": "custom",
+        "verification_status": "needs_manual_verification",
+        "component_designators": [
+          "J28"
         ],
         "component_count": 1
       },
@@ -3235,52 +6349,54 @@
             "name": "1",
             "x": -1.5,
             "y": -1.5,
-            "width": 0.6,
-            "height": 1.0,
-            "shape": "rectangular",
-            "layer": "top",
-            "hole_size": 0.0
-          },
-          {
-            "name": "2",
-            "x": 0.0,
-            "y": -1.5,
-            "width": 0.6,
-            "height": 1.0,
+            "width": 1.0,
+            "height": 1.5,
             "shape": "rectangular",
             "layer": "top",
             "hole_size": 0.0
           },
           {
             "name": "3",
-            "x": 1.5,
-            "y": -1.5,
-            "width": 0.6,
-            "height": 1.0,
+            "x": -1.5,
+            "y": 1.5,
+            "width": 1.0,
+            "height": 1.5,
             "shape": "rectangular",
             "layer": "top",
             "hole_size": 0.0
           },
           {
-            "name": "Tab",
-            "x": 0.0,
-            "y": 1.0,
-            "width": 1.5,
-            "height": 2.5,
+            "name": "2",
+            "x": 1.5,
+            "y": -1.5,
+            "width": 1.0,
+            "height": 1.5,
+            "shape": "rectangular",
+            "layer": "top",
+            "hole_size": 0.0
+          },
+          {
+            "name": "4",
+            "x": 1.5,
+            "y": 1.5,
+            "width": 1.0,
+            "height": 1.5,
             "shape": "rectangular",
             "layer": "top",
             "hole_size": 0.0
           }
         ],
         "silkscreen": {
-          "width": 4.5,
-          "height": 4.0
+          "width": 5.0,
+          "height": 5.0
         },
         "courtyard": {
-          "width": 5.0,
-          "height": 4.5
+          "width": 7.0,
+          "height": 7.0
         },
-        "notes": "IPC-7351 standard footprint",
+        "notes": "IPC-7351 standard or manufacturer specification",
+        "footprint_class": "custom",
+        "verification_status": "needs_manual_verification",
         "component_designators": [
           "DS1"
         ],
@@ -3289,15 +6405,16 @@
     }
   },
   "statistics": {
-    "unique_footprints": 17,
+    "unique_footprints": 28,
     "total_components": 123,
     "categories": {
-      "resistors": 3,
+      "resistors": 6,
       "capacitors": 3,
-      "diodes": 5,
-      "transistors": 2,
-      "ics": 2,
-      "inductors": 2
+      "diodes": 6,
+      "transistors": 3,
+      "ics": 5,
+      "connectors": 2,
+      "inductors": 3
     }
   }
 }

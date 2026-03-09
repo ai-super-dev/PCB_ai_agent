@@ -19,42 +19,89 @@ class LLMClient:
         if not OPENAI_API_KEY:
             raise ValueError("OPENAI_API_KEY not set in environment variables")
         
-        # Create custom HTTP client that bypasses system proxy
-        http_client = httpx.Client(
-            trust_env=False,  # Don't use system proxy settings
-            timeout=60.0,     # 60 second timeout
-        )
+        try:
+            # Create custom HTTP client that bypasses system proxy
+            http_client = httpx.Client(
+                trust_env=False,  # Don't use system proxy settings
+                timeout=60.0,     # 60 second timeout
+            )
+        except Exception as e:
+            logger.error(f"Failed to create HTTP client: {e}")
+            raise RuntimeError(f"Failed to create HTTP client: {e}") from e
         
-        self.client = OpenAI(
-            api_key=OPENAI_API_KEY,
-            http_client=http_client
-        )
+        try:
+            self.client = OpenAI(
+                api_key=OPENAI_API_KEY,
+                http_client=http_client
+            )
+        except Exception as e:
+            logger.error(f"Failed to create OpenAI client: {e}")
+            error_type = type(e).__name__
+            if "api" in str(e).lower() or "key" in str(e).lower():
+                raise ValueError(f"Invalid OpenAI API key: {e}") from e
+            else:
+                raise RuntimeError(f"Failed to initialize OpenAI client ({error_type}): {e}") from e
+        
         self.model = OPENAI_MODEL
         logger.info(f"LLM Client initialized with model: {self.model}")
     
-    def chat(self, messages: list, temperature: float = 0.7) -> Optional[str]:
+    def chat(self, messages: list, temperature: float = 0.7, tools: list = None, tool_choice: str = None) -> Optional[str]:
         """
         Send chat messages to OpenAI
         
         Args:
             messages: List of message dictionaries with 'role' and 'content'
             temperature: Sampling temperature (0-2)
+            tools: Optional list of tool definitions for function calling
+            tool_choice: Optional tool choice ("auto", "none", or specific tool)
         
         Returns:
             Response text or None if error
         """
         try:
             logger.info(f"Sending request to OpenAI ({len(messages)} messages)")
-            response = self.client.chat.completions.create(
-                model=self.model,
-                messages=messages,
-                temperature=temperature
-            )
+            
+            # Build request parameters
+            request_params = {
+                "model": self.model,
+                "messages": messages,
+                "temperature": temperature
+            }
+            
+            # Add tools if provided
+            if tools:
+                request_params["tools"] = tools
+                if tool_choice:
+                    request_params["tool_choice"] = tool_choice
+            
+            response = self.client.chat.completions.create(**request_params)
             logger.info("OpenAI response received successfully")
-            return response.choices[0].message.content
+            
+            # Handle tool calls if present
+            message = response.choices[0].message
+            if message.tool_calls:
+                # Return the tool calls for the caller to handle
+                return {"tool_calls": message.tool_calls, "content": message.content}
+            
+            return message.content
         except Exception as e:
-            logger.error(f"Error calling OpenAI API: {e}")
-            print(f"Error calling OpenAI API: {e}")
+            error_msg = str(e)
+            error_type = type(e).__name__
+            logger.error(f"Error calling OpenAI API: {error_type}: {error_msg}")
+            print(f"[LLM Client ERROR] {error_type}: {error_msg}")
+            
+            # Provide more specific error information
+            if "api_key" in error_msg.lower() or "authentication" in error_msg.lower():
+                print("[LLM Client ERROR] API key issue - check OPENAI_API_KEY environment variable")
+            elif "rate limit" in error_msg.lower() or "quota" in error_msg.lower():
+                print("[LLM Client ERROR] Rate limit or quota exceeded - check API usage")
+            elif "network" in error_msg.lower() or "connection" in error_msg.lower() or "timeout" in error_msg.lower():
+                print("[LLM Client ERROR] Network connectivity issue - check internet connection")
+            elif "model" in error_msg.lower():
+                print(f"[LLM Client ERROR] Model issue - check OPENAI_MODEL (currently: {self.model})")
+            
+            import traceback
+            logger.debug(traceback.format_exc())
             return None
     
     def chat_stream(self, messages: list, temperature: float = 0.7) -> Iterator[str]:

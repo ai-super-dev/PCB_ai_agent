@@ -42,6 +42,7 @@ try:
     FOOTPRINT_GENERATOR_AVAILABLE = True
 except ImportError:
     FOOTPRINT_GENERATOR_AVAILABLE = False
+    FOOTPRINT_GENERATOR_AVAILABLE = False
 
 
 class AltiumMCPServer:
@@ -54,6 +55,9 @@ class AltiumMCPServer:
         self.routing = RoutingModule(self.store, enable_drc_validation=True)
         self.drc = DRCModule(self.store)
         
+        # Store initialization errors for diagnostics
+        self._init_error = None
+        
         # Script client for applying changes to Altium (optional)
         self.script_client = None
         if SCRIPT_CLIENT_AVAILABLE:
@@ -63,10 +67,90 @@ class AltiumMCPServer:
         self.footprint_generator = None
         if FOOTPRINT_GENERATOR_AVAILABLE:
             try:
-                llm_client = LLMClient()
-                self.footprint_generator = FootprintGenerator(llm_client)
+                # Check API key before attempting initialization
+                from config import OPENAI_API_KEY
+                if not OPENAI_API_KEY or OPENAI_API_KEY.strip() == "":
+                    print("[MCP Server] ERROR: OPENAI_API_KEY is not set or is empty")
+                    print("[MCP Server] HINT: Set OPENAI_API_KEY in your .env file or environment variables")
+                    print("[MCP Server] HINT: Create a .env file in the project root with: OPENAI_API_KEY=your-key-here")
+                    self.footprint_generator = None
+                else:
+                    print("[MCP Server] ✓ OPENAI_API_KEY found (length: {})".format(len(OPENAI_API_KEY)))
+                    print("[MCP Server] Initializing LLM client...")
+                    try:
+                        llm_client = LLMClient()
+                        print("[MCP Server] ✓ LLM client initialized successfully")
+                        
+                        print("[MCP Server] Initializing footprint generator...")
+                        self.footprint_generator = FootprintGenerator(llm_client)
+                        print("[MCP Server] ✓ Footprint generator initialized successfully")
+                    except ValueError as ve:
+                        # API key validation error
+                        print(f"[MCP Server] ERROR: LLM client ValueError: {ve}")
+                        print("[MCP Server] This usually means the API key format is invalid")
+                        raise  # Re-raise to be caught by outer exception handler
+                    except Exception as init_error:
+                        # Any other initialization error
+                        import traceback
+                        print(f"[MCP Server] ERROR: LLM client initialization failed: {init_error}")
+                        print(f"[MCP Server] Error type: {type(init_error).__name__}")
+                        print(f"[MCP Server] Traceback:")
+                        print(traceback.format_exc())
+                        raise  # Re-raise to be caught by outer exception handler
+                    
+                    # Try to set web_search tool if available in the environment
+                    # This allows the footprint generator to use web search for real-world specifications
+                    try:
+                        # Check if web_search is available in globals (from Cursor's environment)
+                        import inspect
+                        frame = inspect.currentframe()
+                        # Check multiple frames up the call stack
+                        for i in range(10):
+                            if frame and frame.f_back:
+                                frame = frame.f_back
+                                caller_globals = frame.f_globals
+                                if 'web_search' in caller_globals and callable(caller_globals['web_search']):
+                                    self.footprint_generator.set_web_search_tool(caller_globals['web_search'])
+                                    print(f"[MCP Server] ✓ Web search tool found and set for footprint generator")
+                                    break
+                    except Exception as e:
+                        print(f"[MCP Server] Could not set web_search tool: {e}")
+                        # Continue without web search - LLM will use its knowledge
+            except ValueError as e:
+                # This is likely an API key issue
+                error_msg = str(e)
+                print(f"[MCP Server] ERROR: {error_msg}")
+                print("[MCP Server] HINT: OPENAI_API_KEY is not set or invalid")
+                print("[MCP Server] HINT: Create a .env file in the project root with: OPENAI_API_KEY=your-key-here")
+                print("[MCP Server] HINT: Or set it as an environment variable: set OPENAI_API_KEY=your-key-here")
+                self.footprint_generator = None
             except Exception as e:
-                print(f"Warning: Could not initialize footprint generator: {e}")
+                import traceback
+                error_msg = f"Could not initialize footprint generator: {e}"
+                error_type = type(e).__name__
+                full_traceback = traceback.format_exc()
+                
+                print(f"[MCP Server] ========== FOOTPRINT GENERATOR INITIALIZATION ERROR ==========")
+                print(f"[MCP Server] ERROR: {error_msg}")
+                print(f"[MCP Server] Error Type: {error_type}")
+                print(f"[MCP Server] Full Traceback:")
+                print(full_traceback)
+                print(f"[MCP Server] =============================================================")
+                
+                # Store the error for later retrieval
+                self._init_error = {
+                    "error": str(e),
+                    "error_type": error_type,
+                    "traceback": full_traceback
+                }
+                
+                # Check if it's an API key issue
+                if "api" in str(e).lower() or "key" in str(e).lower() or "openai" in str(e).lower():
+                    print("[MCP Server] HINT: This might be an OpenAI API key issue. Check OPENAI_API_KEY environment variable.")
+                self.footprint_generator = None
+        else:
+            print("[MCP Server] WARNING: Footprint generator module not available (import failed)")
+            print("[MCP Server] HINT: Check that tools.footprint_generator and llm_client modules are available")
         
         # Current loaded PCB
         self.current_pcb_path = None
@@ -2483,10 +2567,768 @@ class AltiumMCPServer:
             results["error"] = f"Could not verify if schematic_PCB.pas is running: {str(e)}"
             return results
         
+        # Step 0: Generate footprints if not already done
+        print("[Make PCB] Step 0: Generating footprints...")
+        try:
+            # Build required footprints dynamically from current schematic (no fixed package list)
+            schematic_components = []
+            if isinstance(self.current_schematic_data, dict):
+                schematic_components = self.current_schematic_data.get('components', []) or []
+
+            if hasattr(self, 'footprint_generator') and self.footprint_generator:
+                passive_prefixes = self.footprint_generator._passive_prefixes()
+            else:
+                passive_prefixes = ['C', 'R', 'L', 'D']
+
+            def _derive_required_footprints(components):
+                required = set()
+                numeric_bases = set()
+                for comp in components:
+                    if not isinstance(comp, dict):
+                        continue
+
+                    designator = (comp.get('designator') or '').strip()
+                    footprint_name = (comp.get('footprint') or '').strip()
+
+                    if not footprint_name and hasattr(self, 'footprint_generator') and self.footprint_generator:
+                        footprint_name = self.footprint_generator._extract_package_from_value(comp.get('value', '') or '')
+
+                    if not footprint_name:
+                        continue
+
+                    fp_upper = footprint_name.upper()
+                    required.add(fp_upper)
+
+                    # If schematic uses numeric footprint (e.g., 0805), add passive prefixed aliases.
+                    if len(footprint_name) >= 4 and footprint_name[0].isdigit():
+                        numeric_bases.add(footprint_name)
+                        if hasattr(self, 'footprint_generator') and self.footprint_generator and designator:
+                            comp_type = self.footprint_generator.get_component_type_from_designator(designator)
+                            prefix = self.footprint_generator._prefix_for_component_type(comp_type)
+                            if prefix:
+                                required.add((prefix + footprint_name).upper())
+
+                    # If schematic uses prefixed passive footprint (e.g., C0805), keep numeric base too.
+                    if len(footprint_name) > 1 and footprint_name[0].upper() in passive_prefixes and footprint_name[1:].isdigit():
+                        numeric_bases.add(footprint_name[1:])
+                        required.add(footprint_name[1:].upper())
+
+                # Ensure all passive aliases for numeric bases are available for robust lookup in Altium script.
+                for base in numeric_bases:
+                    for prefix in passive_prefixes:
+                        required.add((prefix + base).upper())
+
+                return required, numeric_bases
+
+            dynamic_required_footprints, dynamic_numeric_packages = _derive_required_footprints(schematic_components)
+            if dynamic_required_footprints:
+                print(f"[Make PCB] Dynamic required footprints from schematic: {len(dynamic_required_footprints)}")
+
+            # Check if footprint_libraries.json exists
+            # Note: Path is already imported at module level, don't import again
+            footprint_file = Path(__file__).parent.parent / "PCB_Project" / "footprint_libraries.json"
+            
+            # CRITICAL: Always ensure required footprints exist, even if file exists
+            # Load existing file if it exists, otherwise generate new
+            existing_footprints_data = None
+            if footprint_file.exists():
+                try:
+                    with open(footprint_file, 'r', encoding='utf-8') as f:
+                        existing_footprints_data = json.load(f)
+                    print("[Make PCB] Footprint libraries file exists, loading and verifying...")
+                except Exception as e:
+                    print(f"[Make PCB] Warning: Could not load existing footprint file: {e}")
+                    existing_footprints_data = None
+            
+            # Generate footprints if file doesn't exist or if we need to update
+            if not footprint_file.exists() or existing_footprints_data is None:
+                print("[Make PCB] Footprint libraries not found, generating footprints...")
+                footprint_result = self.generate_footprints()
+                if not footprint_result.get("success"):
+                    results["steps"].append({
+                        "step": "generate_footprints",
+                        "success": False,
+                        "message": footprint_result.get("error", "Failed to generate footprints")
+                    })
+                    results["error"] = f"Cannot generate footprints: {footprint_result.get('error', 'Unknown error')}"
+                    return results
+                
+                # Save footprint libraries to JSON file
+                footprint_libraries = footprint_result.get("footprint_libraries", {})
+                if footprint_libraries:
+                    output = {
+                        "footprints": [],
+                        "footprint_libraries": {}
+                    }
+                    # CRITICAL: First, add all footprints to the array
+                    # Then, also create prefixed versions for numeric footprints and add them to the array
+                    processed_footprints = set()  # Track which footprints we've already added to avoid duplicates
+                    
+                    for footprint_key, footprint_spec in footprint_libraries.items():
+                        footprint_name = footprint_spec.get('footprint_name', footprint_key)
+                        
+                        # Add original footprint to array if not already processed
+                        if footprint_key not in processed_footprints:
+                            output["footprints"].append(footprint_spec)
+                            processed_footprints.add(footprint_key)
+                        
+                        # CRITICAL: For numeric footprints (0603, 0805, etc.), create prefixed versions
+                        # Generate for ALL prefixes (C, R, L, D), not just the ones found in schematic
+                        if footprint_name and len(footprint_name) >= 4 and footprint_name[0].isdigit():
+                            # Get component types from the footprint spec
+                            component_designators = footprint_spec.get('component_designators', [])
+                            
+                            # CRITICAL: Generate for ALL prefixes, not just found ones
+                            all_prefixes = passive_prefixes
+                            for prefix in all_prefixes:
+                                prefixed_name = prefix + footprint_name
+                                prefixed_key = prefixed_name.upper().strip()
+                                
+                                # Only create if not already exists
+                                if prefixed_key not in processed_footprints:
+                                    # Create a copy of the footprint spec with the prefixed name
+                                    prefixed_spec = footprint_spec.copy()
+                                    prefixed_spec['footprint_name'] = prefixed_name
+                                    # Filter components that match this prefix
+                                    matching_designators = [d for d in component_designators 
+                                                           if d and len(d) > 0 and d[0].upper() == prefix]
+                                    prefixed_spec['component_designators'] = matching_designators
+                                    prefixed_spec['component_count'] = len(matching_designators)
+                                    
+                                    # Add to array
+                                    output["footprints"].append(prefixed_spec)
+                                    processed_footprints.add(prefixed_key)
+                                    
+                                    # Also add to dict for lookup
+                                    footprint_libraries[prefixed_key] = prefixed_spec
+                                    output["footprint_libraries"][prefixed_key] = prefixed_spec
+                                    output["footprint_libraries"][prefixed_name] = prefixed_spec
+                                    output["footprint_libraries"][prefixed_name.upper()] = prefixed_spec
+                        
+                        # CRITICAL: Handle "TO-252(1)" -> also create "TO-252"
+                        if footprint_name and 'TO-252' in footprint_name.upper():
+                            if 'TO-252(1)' in footprint_name.upper() or 'TO-252-1' in footprint_name.upper():
+                                # Create TO-252 version without suffix
+                                to252_name = 'TO-252'
+                                to252_key = to252_name.upper()
+                                if to252_key not in processed_footprints:
+                                    to252_spec = footprint_spec.copy()
+                                    to252_spec['footprint_name'] = to252_name
+                                    output["footprints"].append(to252_spec)
+                                    processed_footprints.add(to252_key)
+                                    output["footprint_libraries"][to252_key] = to252_spec
+                                    output["footprint_libraries"][to252_name] = to252_spec
+                                    print(f"[Make PCB] Created TO-252 from {footprint_name}")
+                        
+                        footprint_name = footprint_spec.get('footprint_name', footprint_key)
+                        
+                        # CRITICAL: Store footprint with MULTIPLE keys to ensure Altium can find it
+                        # Store with original name (case-insensitive variations)
+                        normalized_name = footprint_name.upper().replace('(', '').replace(')', '').replace(' ', '').replace('.', 'X').replace('*', 'X').replace('-', '')
+                        output["footprint_libraries"][normalized_name] = footprint_spec
+                        
+                        # Also store with original name (uppercase) for exact matches
+                        output["footprint_libraries"][footprint_name.upper()] = footprint_spec
+                        
+                        # Also store with dashes removed but keep original case
+                        no_dash = footprint_name.replace('-', '').replace('(', '').replace(')', '').replace(' ', '').replace('.', 'X').replace('*', 'X')
+                        output["footprint_libraries"][no_dash.upper()] = footprint_spec
+                        
+                        # Store original name as-is (for exact matches)
+                        output["footprint_libraries"][footprint_name] = footprint_spec
+                        
+                        # CRITICAL: For numeric footprints (0603, 0805, 1206, etc.), also store with common prefixes
+                        # This allows "C0603" or "R0603" to match "0603" in the JSON
+                        if footprint_name and len(footprint_name) >= 4:
+                            # Check if it's a numeric footprint (starts with digit)
+                            if footprint_name[0].isdigit():
+                                # Store with C, R, L, D prefixes
+                                for prefix in passive_prefixes:
+                                    prefixed_name = prefix + footprint_name
+                                    output["footprint_libraries"][prefixed_name.upper()] = footprint_spec
+                                    output["footprint_libraries"][prefixed_name] = footprint_spec
+                    
+                    # CRITICAL: Also generate common package sizes that might be requested by Altium
+                    # even if they don't appear in the schematic
+                    # ALWAYS generate these packages with ALL prefixes to ensure they exist
+                    common_packages = sorted(dynamic_numeric_packages)
+                    common_prefixes = passive_prefixes
+                    
+                    print(f"[Make PCB] Starting proactive generation for {len(common_packages)} common packages...")
+                    for package in common_packages:
+                        # CRITICAL: Check if we have ALL prefixed versions (C, R, L, D)
+                        # Don't skip just because numeric version exists - we need ALL prefixes
+                        required_footprints = [prefix + package for prefix in common_prefixes]
+                        missing_prefixes = []
+                        for prefixed_name in required_footprints:
+                            prefixed_key = prefixed_name.upper()
+                            found = False
+                            for fp in output['footprints']:
+                                if fp.get('footprint_name', '').upper() == prefixed_key:
+                                    found = True
+                                    break
+                            if not found:
+                                missing_prefixes.append(prefixed_name)
+                        
+                        # Only generate if we're missing any prefixed versions
+                        if missing_prefixes:
+                            print(f"[Make PCB] Package {package} missing prefixes: {missing_prefixes}")
+                            # Try to generate from standard database
+                            try:
+                                # Import FootprintGenerator to access STANDARD_DIMENSIONS
+                                from tools.footprint_generator import FootprintGenerator
+                                
+                                # Use the server's footprint generator if available, otherwise create a temporary one
+                                if hasattr(self, 'footprint_generator') and self.footprint_generator:
+                                    temp_gen = self.footprint_generator
+                                else:
+                                    # Create a temporary generator - we need LLM client for initialization
+                                    # But we'll only use _generate_from_standard_database which doesn't need LLM
+                                    from llm_client import LLMClient
+                                    try:
+                                        temp_llm = LLMClient()
+                                        temp_gen = FootprintGenerator(temp_llm)
+                                    except:
+                                        # If LLM init fails, skip proactive generation for this package
+                                        continue
+                                
+                                # Try to get standard dimensions for this package
+                                standard_dims = temp_gen._get_standard_dimensions(package)
+                                
+                                if standard_dims:
+                                    print(f"[Make PCB] Found standard dimensions for {package}, generating footprints...")
+                                    # Generate footprint from standard database
+                                    db_footprint = temp_gen._generate_from_standard_database(
+                                        package, f'DUMMY_{package}', 2
+                                    )
+                                    
+                                    if db_footprint:
+                                        print(f"[Make PCB] Generated base footprint for {package}, creating {len(missing_prefixes)} prefixed versions...")
+                                        # Generate ONLY the missing prefixed versions
+                                        generated_count = 0
+                                        for prefixed_name in missing_prefixes:
+                                            prefixed_key = prefixed_name.upper()
+                                            if prefixed_key not in processed_footprints:
+                                                prefixed_spec = db_footprint.copy()
+                                                prefixed_spec['footprint_name'] = prefixed_name
+                                                prefixed_spec['component_designators'] = []
+                                                prefixed_spec['component_count'] = 0
+                                                output['footprints'].append(prefixed_spec)
+                                                processed_footprints.add(prefixed_key)
+                                                # Also add to dict with multiple keys
+                                                output['footprint_libraries'][prefixed_key] = prefixed_spec
+                                                output['footprint_libraries'][prefixed_name] = prefixed_spec
+                                                output['footprint_libraries'][prefixed_name.upper()] = prefixed_spec
+                                                generated_count += 1
+                                                print(f"[Make PCB]   ✓ Added {prefixed_name} to footprints array")
+                                        if generated_count > 0:
+                                            print(f"[Make PCB] ✓ Generated {generated_count} missing prefixed versions for {package}: {missing_prefixes}")
+                                        else:
+                                            print(f"[Make PCB] Warning: No prefixed versions were added for {package} (all already existed?)")
+                                    else:
+                                        print(f"[Make PCB] Warning: Could not generate footprint from database for {package}")
+                                else:
+                                    print(f"[Make PCB] Warning: No standard dimensions found for {package}")
+                                    
+                                    # Also add the numeric version if it doesn't exist
+                                    numeric_key = package.upper()
+                                    if numeric_key not in processed_footprints:
+                                        numeric_spec = db_footprint.copy()
+                                        numeric_spec['footprint_name'] = package
+                                        numeric_spec['component_designators'] = []
+                                        numeric_spec['component_count'] = 0
+                                        output['footprints'].append(numeric_spec)
+                                        processed_footprints.add(numeric_key)
+                                        output['footprint_libraries'][numeric_key] = numeric_spec
+                                        output['footprint_libraries'][package] = numeric_spec
+                                        print(f"[Make PCB] Also added numeric version {package}")
+                            except Exception as e:
+                                print(f"[Make PCB] Warning: Could not generate common package {package}: {e}")
+                                import traceback
+                                print(f"[Make PCB] Traceback: {traceback.format_exc()}")
+                    
+                    # CRITICAL: Also ensure ESOP8L and TO-252 exist (they're in STANDARD_DIMENSIONS)
+                    special_footprints = ['ESOP8L', 'TO-252']
+                    for special_fp in special_footprints:
+                        found = False
+                        for fp in output['footprints']:
+                            fp_name = fp.get('footprint_name', '').upper()
+                            if special_fp.upper() == fp_name or special_fp.upper() in fp_name:
+                                found = True
+                                break
+                        
+                        if not found:
+                            try:
+                                if hasattr(self, 'footprint_generator') and self.footprint_generator:
+                                    temp_gen = self.footprint_generator
+                                else:
+                                    from llm_client import LLMClient
+                                    try:
+                                        temp_llm = LLMClient()
+                                        temp_gen = FootprintGenerator(temp_llm)
+                                    except:
+                                        temp_gen = None
+                                
+                                if temp_gen:
+                                    # For TO-252, try both "TO-252" and "TO-252-1" 
+                                    fp_name_to_try = special_fp
+                                    if special_fp == 'TO-252':
+                                        # Try TO-252 first, if not found try TO-252-1
+                                        standard_dims = temp_gen._get_standard_dimensions('TO-252')
+                                        if not standard_dims:
+                                            standard_dims = temp_gen._get_standard_dimensions('TO-252-1')
+                                            if standard_dims:
+                                                fp_name_to_try = 'TO-252-1'
+                                    
+                                    pin_count = 3 if 'TO-252' in special_fp else 8
+                                    special_footprint = temp_gen._generate_from_standard_database(fp_name_to_try, f'DUMMY_{special_fp}', pin_count)
+                                    if special_footprint:
+                                        special_footprint['footprint_name'] = special_fp  # Use the requested name
+                                        special_footprint['component_designators'] = []
+                                        special_footprint['component_count'] = 0
+                                        output['footprints'].append(special_footprint)
+                                        processed_footprints.add(special_fp.upper())
+                                        output['footprint_libraries'][special_fp.upper()] = special_footprint
+                                        output['footprint_libraries'][special_fp] = special_footprint
+                                        print(f"[Make PCB] Generated {special_fp} footprint")
+                            except Exception as e:
+                                print(f"[Make PCB] Warning: Could not generate {special_fp}: {e}")
+                                import traceback
+                                print(f"[Make PCB] Traceback: {traceback.format_exc()}")
+                    
+                    footprint_file.parent.mkdir(parents=True, exist_ok=True)
+                    with open(footprint_file, 'w', encoding='utf-8') as f:
+                        json.dump(output, f, indent=2, ensure_ascii=False)
+                    print(f"[Make PCB] ✓ Saved {len(output['footprints'])} footprints to {footprint_file}")
+                else:
+                    # Footprint file exists - but we should still ensure all required footprints are present
+                    print("[Make PCB] Footprint libraries file exists, verifying all required footprints are present...")
+                    try:
+                        # Load existing file
+                        with open(footprint_file, 'r', encoding='utf-8') as f:
+                            existing_data = json.load(f)
+                        
+                        existing_footprints = [f.get('footprint_name', '') for f in existing_data.get('footprints', [])]
+                        existing_footprint_names = {f.upper() for f in existing_footprints}
+                        
+                        # Check for missing footprints
+                        required_footprints = sorted(dynamic_required_footprints)
+                        missing_footprints = [rf for rf in required_footprints if rf.upper() not in existing_footprint_names]
+                        
+                        if missing_footprints:
+                            print(f"[Make PCB] Found {len(missing_footprints)} missing footprints: {missing_footprints}")
+                            print("[Make PCB] Regenerating footprints to include missing ones...")
+                            # Regenerate footprints to include missing ones
+                            footprint_result = self.generate_footprints()
+                            if footprint_result.get("success"):
+                                footprint_libraries = footprint_result.get("footprint_libraries", {})
+                                if footprint_libraries:
+                                    # Use the same logic as above to create output with all footprints
+                                    output = {
+                                        "footprints": [],
+                                        "footprint_libraries": {}
+                                    }
+                                    processed_footprints = set()
+                                    
+                                    for footprint_key, footprint_spec in footprint_libraries.items():
+                                        footprint_name = footprint_spec.get('footprint_name', footprint_key)
+                                        if footprint_key not in processed_footprints:
+                                            output["footprints"].append(footprint_spec)
+                                            processed_footprints.add(footprint_key)
+                                        
+                                        # Generate prefixed versions for numeric footprints
+                                        if footprint_name and len(footprint_name) >= 4 and footprint_name[0].isdigit():
+                                            all_prefixes = passive_prefixes
+                                            for prefix in all_prefixes:
+                                                prefixed_name = prefix + footprint_name
+                                                prefixed_key = prefixed_name.upper().strip()
+                                                if prefixed_key not in processed_footprints:
+                                                    prefixed_spec = footprint_spec.copy()
+                                                    prefixed_spec['footprint_name'] = prefixed_name
+                                                    prefixed_spec['component_designators'] = footprint_spec.get('component_designators', [])
+                                                    prefixed_spec['component_count'] = footprint_spec.get('component_count', 0)
+                                                    output["footprints"].append(prefixed_spec)
+                                                    processed_footprints.add(prefixed_key)
+                                                    output["footprint_libraries"][prefixed_key] = prefixed_spec
+                                    
+                                    # Run proactive generation (same code as above)
+                                    common_packages = sorted(dynamic_numeric_packages)
+                                    common_prefixes = passive_prefixes
+                                    
+                                    for package in common_packages:
+                                        required_footprints = [prefix + package for prefix in common_prefixes]
+                                        missing_prefixes = []
+                                        for prefixed_name in required_footprints:
+                                            prefixed_key = prefixed_name.upper()
+                                            found = False
+                                            for fp in output['footprints']:
+                                                if fp.get('footprint_name', '').upper() == prefixed_key:
+                                                    found = True
+                                                    break
+                                            if not found:
+                                                missing_prefixes.append(prefixed_name)
+                                        
+                                        if missing_prefixes:
+                                            try:
+                                                if hasattr(self, 'footprint_generator') and self.footprint_generator:
+                                                    temp_gen = self.footprint_generator
+                                                else:
+                                                    from llm_client import LLMClient
+                                                    try:
+                                                        temp_llm = LLMClient()
+                                                        temp_gen = FootprintGenerator(temp_llm)
+                                                    except:
+                                                        continue
+                                                
+                                                standard_dims = temp_gen._get_standard_dimensions(package)
+                                                if standard_dims:
+                                                    db_footprint = temp_gen._generate_from_standard_database(package, f'DUMMY_{package}', 2)
+                                                    if db_footprint:
+                                                        for prefixed_name in missing_prefixes:
+                                                            prefixed_key = prefixed_name.upper()
+                                                            if prefixed_key not in processed_footprints:
+                                                                prefixed_spec = db_footprint.copy()
+                                                                prefixed_spec['footprint_name'] = prefixed_name
+                                                                prefixed_spec['component_designators'] = []
+                                                                prefixed_spec['component_count'] = 0
+                                                                output['footprints'].append(prefixed_spec)
+                                                                processed_footprints.add(prefixed_key)
+                                                                output['footprint_libraries'][prefixed_key] = prefixed_spec
+                                            except:
+                                                pass
+                                    
+                                    # Ensure any dynamically required non-passive footprints are also present
+                                    non_passive_required = [fp for fp in required_footprints if not (len(fp) > 1 and fp[0] in passive_prefixes and fp[1:].isdigit())]
+                                    for special_fp in non_passive_required:
+                                        found = any('TO-252' in f.get('footprint_name', '').upper() if special_fp == 'TO-252' else 'ESOP8L' in f.get('footprint_name', '').upper() for f in output['footprints'])
+                                        if not found:
+                                            try:
+                                                if hasattr(self, 'footprint_generator') and self.footprint_generator:
+                                                    temp_gen = self.footprint_generator
+                                                else:
+                                                    from llm_client import LLMClient
+                                                    temp_llm = LLMClient()
+                                                    temp_gen = FootprintGenerator(temp_llm)
+                                                
+                                                fp_name_to_try = special_fp
+                                                if special_fp == 'TO-252':
+                                                    standard_dims = temp_gen._get_standard_dimensions('TO-252')
+                                                    if not standard_dims:
+                                                        standard_dims = temp_gen._get_standard_dimensions('TO-252-1')
+                                                        if standard_dims:
+                                                            fp_name_to_try = 'TO-252-1'
+                                                
+                                                pin_count = 3 if 'TO-252' in special_fp else 8
+                                                special_footprint = temp_gen._generate_from_standard_database(fp_name_to_try, f'DUMMY_{special_fp}', pin_count)
+                                                if special_footprint:
+                                                    special_footprint['footprint_name'] = special_fp
+                                                    special_footprint['component_designators'] = []
+                                                    special_footprint['component_count'] = 0
+                                                    output['footprints'].append(special_footprint)
+                                                    output['footprint_libraries'][special_fp.upper()] = special_footprint
+                                            except:
+                                                pass
+                                    
+                                    # Save updated file
+                                    with open(footprint_file, 'w', encoding='utf-8') as f:
+                                        json.dump(output, f, indent=2, ensure_ascii=False)
+                                    print(f"[Make PCB] ✓ Updated footprint file with {len(output['footprints'])} footprints (added missing ones)")
+                        else:
+                            print("[Make PCB] All required footprints are present in existing file")
+                    except Exception as e:
+                        print(f"[Make PCB] Warning: Could not verify/update footprint file: {e}")
+                        import traceback
+                        print(traceback.format_exc())
+                
+                results["steps"].append({
+                    "step": "generate_footprints",
+                    "success": True,
+                    "message": f"Generated {footprint_result.get('count', 0)} unique footprints"
+                })
+            
+            # CRITICAL: ALWAYS ensure required footprints exist (runs whether file was just created or already existed)
+            print("[Make PCB] Verifying all required footprints are present...")
+            try:
+                # Load current file
+                with open(footprint_file, 'r', encoding='utf-8') as f:
+                    current_data = json.load(f)
+                
+                # Check BOTH footprints array AND footprint_libraries dictionary
+                current_footprints = [f.get('footprint_name', '') for f in current_data.get('footprints', [])]
+                current_footprint_names = {f.upper() for f in current_footprints}
+                # Also check dictionary keys
+                dict_keys = set(current_data.get('footprint_libraries', {}).keys())
+                current_footprint_names.update({k.upper() for k in dict_keys})
+                
+                # Required footprints that MUST exist
+                required_footprints = set(dynamic_required_footprints)
+                
+                # Check what's missing (also check for TO-252(1) as alias for TO-252)
+                missing_required = []
+                for rf in required_footprints:
+                    rf_upper = rf.upper()
+                    if rf_upper not in current_footprint_names:
+                        # Generic alias check: treat X and X(1)/X-1 as equivalent for lookup
+                        if not any(rf_upper in k.upper() or k.upper() in rf_upper for k in current_footprint_names):
+                            missing_required.append(rf)
+                
+                if missing_required:
+                    print(f"[Make PCB] Found {len(missing_required)} missing required footprints: {missing_required}")
+                    print("[Make PCB] Generating missing footprints...")
+                    
+                    # Get footprint generator
+                    if hasattr(self, 'footprint_generator') and self.footprint_generator:
+                        temp_gen = self.footprint_generator
+                    else:
+                        from llm_client import LLMClient
+                        try:
+                            temp_llm = LLMClient()
+                            from tools.footprint_generator import FootprintGenerator
+                            temp_gen = FootprintGenerator(temp_llm)
+                        except Exception as e:
+                            print(f"[Make PCB] ERROR: Could not initialize footprint generator: {e}")
+                            temp_gen = None
+                    
+                    if temp_gen:
+                        # Generate missing footprints
+                        for missing_fp in missing_required:
+                            try:
+                                # Determine package type
+                                if missing_fp.startswith('C') or missing_fp.startswith('R') or missing_fp.startswith('L'):
+                                    # Extract numeric part (e.g., "C0805" -> "0805")
+                                    numeric_part = missing_fp[1:]
+                                    standard_dims = temp_gen._get_standard_dimensions(numeric_part)
+                                    if standard_dims:
+                                        db_footprint = temp_gen._generate_from_standard_database(numeric_part, f'DUMMY_{missing_fp}', 2)
+                                        if db_footprint:
+                                            db_footprint['footprint_name'] = missing_fp
+                                            db_footprint['component_designators'] = []
+                                            db_footprint['component_count'] = 0
+                                            current_data['footprints'].append(db_footprint)
+                                            current_data['footprint_libraries'][missing_fp.upper()] = db_footprint
+                                            current_data['footprint_libraries'][missing_fp] = db_footprint
+                                            print(f"[Make PCB] ✓ Generated and added {missing_fp}")
+                                elif missing_fp == 'TO-252':
+                                    # Try TO-252 first, then TO-252-1
+                                    standard_dims = temp_gen._get_standard_dimensions('TO-252')
+                                    fp_name_to_try = 'TO-252'
+                                    if not standard_dims:
+                                        standard_dims = temp_gen._get_standard_dimensions('TO-252-1')
+                                        if standard_dims:
+                                            fp_name_to_try = 'TO-252-1'
+                                    if standard_dims:
+                                        db_footprint = temp_gen._generate_from_standard_database(fp_name_to_try, 'DUMMY_TO-252', 3)
+                                        if db_footprint:
+                                            db_footprint['footprint_name'] = 'TO-252'
+                                            db_footprint['component_designators'] = []
+                                            db_footprint['component_count'] = 0
+                                            current_data['footprints'].append(db_footprint)
+                                            current_data['footprint_libraries']['TO-252'] = db_footprint
+                                            current_data['footprint_libraries']['TO-252'.upper()] = db_footprint
+                                            print(f"[Make PCB] ✓ Generated and added TO-252")
+                                elif missing_fp == 'ESOP8L':
+                                    standard_dims = temp_gen._get_standard_dimensions('ESOP8L')
+                                    if standard_dims:
+                                        db_footprint = temp_gen._generate_from_standard_database('ESOP8L', 'DUMMY_ESOP8L', 8)
+                                        if db_footprint:
+                                            db_footprint['footprint_name'] = 'ESOP8L'
+                                            db_footprint['component_designators'] = []
+                                            db_footprint['component_count'] = 0
+                                            current_data['footprints'].append(db_footprint)
+                                            current_data['footprint_libraries']['ESOP8L'] = db_footprint
+                                            current_data['footprint_libraries']['ESOP8L'.upper()] = db_footprint
+                                            print(f"[Make PCB] ✓ Generated and added ESOP8L")
+                            except Exception as e:
+                                print(f"[Make PCB] ERROR: Could not generate {missing_fp}: {e}")
+                                import traceback
+                                print(traceback.format_exc())
+                        
+                        # Save updated file
+                        with open(footprint_file, 'w', encoding='utf-8') as f:
+                            json.dump(current_data, f, indent=2, ensure_ascii=False)
+                        print(f"[Make PCB] ✓ Updated footprint file with {len(current_data['footprints'])} total footprints")
+                    else:
+                        print("[Make PCB] ERROR: Footprint generator not available - cannot generate missing footprints")
+                else:
+                    print("[Make PCB] ✓ All required footprints are present")
+            except Exception as e:
+                print(f"[Make PCB] ERROR: Could not verify/update footprints: {e}")
+                import traceback
+                print(traceback.format_exc())
+            else:
+                print("[Make PCB] Footprint libraries already exist, skipping generation")
+                results["steps"].append({
+                    "step": "generate_footprints",
+                    "success": True,
+                    "message": "Footprint libraries already exist"
+                })
+            
+            # CRITICAL: ALWAYS ensure required footprints exist (runs whether file was just created or already existed)
+            print("[Make PCB] Verifying all required footprints are present...")
+            try:
+                # Load current file
+                with open(footprint_file, 'r', encoding='utf-8') as f:
+                    current_data = json.load(f)
+                
+                # Check BOTH footprints array AND footprint_libraries dictionary
+                current_footprints = [f.get('footprint_name', '') for f in current_data.get('footprints', [])]
+                current_footprint_names = {f.upper() for f in current_footprints}
+                # Also check dictionary keys
+                dict_keys = set(current_data.get('footprint_libraries', {}).keys())
+                current_footprint_names.update({k.upper() for k in dict_keys})
+                
+                # Required footprints that MUST exist
+                required_footprints = set(dynamic_required_footprints)
+                
+                # Check what's missing (also check for TO-252(1) as alias for TO-252)
+                missing_required = []
+                for rf in required_footprints:
+                    rf_upper = rf.upper()
+                    if rf_upper not in current_footprint_names:
+                        # Generic alias check: treat X and X(1)/X-1 as equivalent for lookup
+                        if not any(rf_upper in k.upper() or k.upper() in rf_upper for k in current_footprint_names):
+                            missing_required.append(rf)
+                
+                if missing_required:
+                    print(f"[Make PCB] Found {len(missing_required)} missing required footprints: {missing_required}")
+                    print("[Make PCB] Generating missing footprints...")
+                    
+                    # Get footprint generator
+                    if hasattr(self, 'footprint_generator') and self.footprint_generator:
+                        temp_gen = self.footprint_generator
+                    else:
+                        from llm_client import LLMClient
+                        try:
+                            temp_llm = LLMClient()
+                            from tools.footprint_generator import FootprintGenerator
+                            temp_gen = FootprintGenerator(temp_llm)
+                        except Exception as e:
+                            print(f"[Make PCB] ERROR: Could not initialize footprint generator: {e}")
+                            temp_gen = None
+                    
+                    if temp_gen:
+                        # Generate missing footprints
+                        for missing_fp in missing_required:
+                            try:
+                                # Determine package type
+                                if missing_fp.startswith('C') or missing_fp.startswith('R') or missing_fp.startswith('L'):
+                                    # Extract numeric part (e.g., "C0805" -> "0805")
+                                    numeric_part = missing_fp[1:]
+                                    standard_dims = temp_gen._get_standard_dimensions(numeric_part)
+                                    if standard_dims:
+                                        db_footprint = temp_gen._generate_from_standard_database(numeric_part, f'DUMMY_{missing_fp}', 2)
+                                        if db_footprint:
+                                            db_footprint['footprint_name'] = missing_fp
+                                            db_footprint['component_designators'] = []
+                                            db_footprint['component_count'] = 0
+                                            current_data['footprints'].append(db_footprint)
+                                            current_data['footprint_libraries'][missing_fp.upper()] = db_footprint
+                                            current_data['footprint_libraries'][missing_fp] = db_footprint
+                                            print(f"[Make PCB] ✓ Generated and added {missing_fp}")
+                                elif missing_fp == 'TO-252':
+                                    # Try TO-252 first, then TO-252-1
+                                    standard_dims = temp_gen._get_standard_dimensions('TO-252')
+                                    fp_name_to_try = 'TO-252'
+                                    if not standard_dims:
+                                        standard_dims = temp_gen._get_standard_dimensions('TO-252-1')
+                                        if standard_dims:
+                                            fp_name_to_try = 'TO-252-1'
+                                    if standard_dims:
+                                        db_footprint = temp_gen._generate_from_standard_database(fp_name_to_try, 'DUMMY_TO-252', 3)
+                                        if db_footprint:
+                                            db_footprint['footprint_name'] = 'TO-252'
+                                            db_footprint['component_designators'] = []
+                                            db_footprint['component_count'] = 0
+                                            current_data['footprints'].append(db_footprint)
+                                            current_data['footprint_libraries']['TO-252'] = db_footprint
+                                            current_data['footprint_libraries']['TO-252'.upper()] = db_footprint
+                                            print(f"[Make PCB] ✓ Generated and added TO-252")
+                                elif missing_fp == 'ESOP8L':
+                                    standard_dims = temp_gen._get_standard_dimensions('ESOP8L')
+                                    if standard_dims:
+                                        db_footprint = temp_gen._generate_from_standard_database('ESOP8L', 'DUMMY_ESOP8L', 8)
+                                        if db_footprint:
+                                            db_footprint['footprint_name'] = 'ESOP8L'
+                                            db_footprint['component_designators'] = []
+                                            db_footprint['component_count'] = 0
+                                            current_data['footprints'].append(db_footprint)
+                                            current_data['footprint_libraries']['ESOP8L'] = db_footprint
+                                            current_data['footprint_libraries']['ESOP8L'.upper()] = db_footprint
+                                            print(f"[Make PCB] ✓ Generated and added ESOP8L")
+                            except Exception as e:
+                                print(f"[Make PCB] ERROR: Could not generate {missing_fp}: {e}")
+                                import traceback
+                                print(traceback.format_exc())
+                        
+                        # Save updated file
+                        with open(footprint_file, 'w', encoding='utf-8') as f:
+                            json.dump(current_data, f, indent=2, ensure_ascii=False)
+                        print(f"[Make PCB] ✓ Updated footprint file with {len(current_data['footprints'])} total footprints")
+                    else:
+                        print("[Make PCB] ERROR: Footprint generator not available - cannot generate missing footprints")
+                else:
+                    print("[Make PCB] ✓ All required footprints are present")
+            except Exception as e:
+                print(f"[Make PCB] ERROR: Could not verify/update footprints: {e}")
+                import traceback
+                print(traceback.format_exc())
+        except Exception as e:
+            results["steps"].append({"step": "generate_footprints", "success": False, "message": str(e)})
+            print(f"[Make PCB] Footprint generation failed: {str(e)}")
+            # Continue anyway - might have existing footprints
+        
+        time.sleep(2)
+        
+        # Step 0.5: Create PCB libraries if not already done
+        print("[Make PCB] Step 0.5: Creating PCB libraries...")
+        try:
+            lib_result = self.create_pcb_libraries()
+            if lib_result.get("success"):
+                results["steps"].append({
+                    "step": "create_libraries",
+                    "success": True,
+                    "message": lib_result.get("message", "PCB libraries created")
+                })
+                print(f"[Make PCB] {lib_result.get('message', 'Libraries created')}")
+            else:
+                # Libraries might already exist, continue anyway
+                results["steps"].append({
+                    "step": "create_libraries",
+                    "success": False,
+                    "message": lib_result.get("error", "Library creation failed, continuing anyway")
+                })
+                print(f"[Make PCB] Library creation warning: {lib_result.get('error', 'Unknown error')}")
+        except Exception as e:
+            results["steps"].append({"step": "create_libraries", "success": False, "message": str(e)})
+            print(f"[Make PCB] Library creation failed: {str(e)}, continuing anyway")
+        
+        time.sleep(2)
+        
         # Step 1: Export schematic info
         print("[Make PCB] Step 1: Exporting schematic info...")
         try:
+            def _reuse_existing_schematic_info_if_available(reason: str) -> bool:
+                schematic_file = Path(__file__).parent / "PCB_Project" / "schematic_info.json"
+                if not schematic_file.exists():
+                    return False
+                try:
+                    with open(schematic_file, "r", encoding="utf-8") as sf:
+                        schematic_data = json.load(sf)
+                    comp_count = len(schematic_data.get("components", []))
+                    if comp_count > 0:
+                        print(f"[Make PCB] {reason}; reusing existing schematic_info.json with {comp_count} components")
+                        results["steps"].append({
+                            "step": "export_schematic",
+                            "success": True,
+                            "message": "Export timed out; reused existing schematic_info.json"
+                        })
+                        return True
+                except Exception as fallback_err:
+                    print(f"[Make PCB] Could not use fallback schematic_info.json: {fallback_err}")
+                return False
+
             export_result = self.script_client.export_schematic_info()
+            export_ready = False
             export_action = export_result.get("action", "")
             print(f"[Make PCB] Export result - success: {export_result.get('success')}, action: {export_action}")
             
@@ -2501,27 +3343,35 @@ class AltiumMCPServer:
                         print(f"[Make PCB] Result file exists but export failed. Content: {timeout_content[:200]}")
                     except:
                         pass
-                
-                results["steps"].append({
-                    "step": "export_schematic",
-                    "success": False,
-                    "message": "Export timed out - schematic may be too large or script may not be responding"
-                })
-                results["error"] = "Export schematic info timed out. Make sure:\n1. schematic_PCB.pas is running in Altium\n2. A schematic file is open\n3. The schematic is part of a valid project"
-                return results
+
+                if not _reuse_existing_schematic_info_if_available("Export returned no result"):
+                    results["steps"].append({
+                        "step": "export_schematic",
+                        "success": False,
+                        "message": "Export timed out - schematic may be too large or script may not be responding"
+                    })
+                    results["error"] = "Export schematic info timed out. Make sure:\n1. schematic_PCB.pas is running in Altium\n2. A schematic file is open\n3. The schematic is part of a valid project"
+                    return results
+                export_ready = True
             
             # Check for explicit error
             if export_result.get("error"):
                 error_msg = export_result.get("error", "Unknown error")
-                results["steps"].append({
-                    "step": "export_schematic",
-                    "success": False,
-                    "message": error_msg
-                })
-                results["error"] = f"Cannot export schematic info: {error_msg}"
-                return results
+                error_lower = error_msg.lower()
+                is_timeout_error = ("timeout waiting for altium response" in error_lower) or ("export_schematic_info" in error_lower)
+                if is_timeout_error and _reuse_existing_schematic_info_if_available("Export timed out with explicit error"):
+                    export_ready = True
+                else:
+                    results["steps"].append({
+                        "step": "export_schematic",
+                        "success": False,
+                        "message": error_msg
+                    })
+                    results["error"] = f"Cannot export schematic info: {error_msg}"
+                    return results
             
             if export_result.get("success"):
+                export_ready = True
                 results["steps"].append({
                     "step": "export_schematic",
                     "success": True,
@@ -2586,7 +3436,7 @@ class AltiumMCPServer:
                 
                 # Additional safety wait
                 time.sleep(2)
-            else:
+            elif not export_ready:
                 results["steps"].append({
                     "step": "export_schematic",
                     "success": False,
@@ -2786,6 +3636,66 @@ class AltiumMCPServer:
         
         return results
     
+    def test_llm_connection(self) -> dict:
+        """Test if LLM client can be initialized and connected"""
+        result = {
+            "api_key_set": False,
+            "api_key_length": 0,
+            "module_imported": False,
+            "llm_client_initialized": False,
+            "error": None,
+            "error_type": None,
+            "traceback": None
+        }
+        
+        # Check if module is imported
+        result["module_imported"] = FOOTPRINT_GENERATOR_AVAILABLE
+        
+        if not FOOTPRINT_GENERATOR_AVAILABLE:
+            result["error"] = "Footprint generator module not imported"
+            return result
+        
+        # Check API key
+        try:
+            from config import OPENAI_API_KEY
+            result["api_key_set"] = bool(OPENAI_API_KEY and OPENAI_API_KEY.strip())
+            result["api_key_length"] = len(OPENAI_API_KEY) if OPENAI_API_KEY else 0
+            
+            if not result["api_key_set"]:
+                result["error"] = "OPENAI_API_KEY is not set or empty"
+                return result
+        except Exception as e:
+            result["error"] = f"Could not check API key: {e}"
+            return result
+        
+        # Try to initialize LLM client
+        try:
+            llm_client = LLMClient()
+            result["llm_client_initialized"] = True
+            
+            # Try a simple test call
+            try:
+                test_response = llm_client.chat([
+                    {"role": "system", "content": "You are a test assistant."},
+                    {"role": "user", "content": "Say 'OK' if you can read this."}
+                ], temperature=0.0)
+                if test_response:
+                    result["test_call_successful"] = True
+                else:
+                    result["test_call_successful"] = False
+                    result["error"] = "Test API call returned None"
+            except Exception as test_error:
+                result["test_call_successful"] = False
+                result["error"] = f"Test API call failed: {test_error}"
+                result["error_type"] = type(test_error).__name__
+        except Exception as e:
+            import traceback
+            result["error"] = str(e)
+            result["error_type"] = type(e).__name__
+            result["traceback"] = traceback.format_exc()
+        
+        return result
+    
     def generate_footprints(self, components: List[Dict[str, Any]] = None) -> dict:
         """
         Generate footprint specifications for components using LLM
@@ -2797,16 +3707,155 @@ class AltiumMCPServer:
             Dict mapping designator -> footprint specification
         """
         if not self.footprint_generator:
+            error_msg = "Footprint generator not available."
+            hint = ""
+            detailed_info = []
+            actual_error = None
+            
+            if not FOOTPRINT_GENERATOR_AVAILABLE:
+                error_msg += " Footprint generator module could not be imported."
+                hint = "Check that tools.footprint_generator and llm_client modules are available."
+                detailed_info.append("Module import failed - check Python imports")
+            else:
+                error_msg += " LLM client may not be initialized."
+                # Check API key status
+                try:
+                    from config import OPENAI_API_KEY
+                    if not OPENAI_API_KEY or OPENAI_API_KEY.strip() == "":
+                        hint = "OPENAI_API_KEY is not set. Create a .env file in the project root with: OPENAI_API_KEY=your-key-here"
+                        detailed_info.append("API key is missing or empty")
+                    else:
+                        hint = "LLM client initialization failed. Check server console for detailed error messages."
+                        detailed_info.append(f"API key is set (length: {len(OPENAI_API_KEY)}) but initialization failed")
+                        
+                        # Include actual initialization error if available
+                        if hasattr(self, '_init_error') and self._init_error:
+                            actual_error = self._init_error.get('error', 'Unknown error')
+                            error_type = self._init_error.get('error_type', 'Unknown')
+                            detailed_info.append(f"Actual error: {error_type}: {actual_error}")
+                            hint += f"\n\nActual error: {error_type}: {actual_error}"
+                except Exception as e:
+                    hint = f"Could not check API key status: {e}"
+                    detailed_info.append(f"Config check failed: {e}")
+            
+            # Combine error message with hint for better visibility
+            full_error = f"{error_msg}\n\n{hint}"
+            if detailed_info:
+                full_error += f"\n\nDetails: {'; '.join(detailed_info)}"
+            if actual_error:
+                full_error += f"\n\nActual initialization error: {actual_error}"
+            
             return {
-                "error": "Footprint generator not available. LLM client may not be initialized.",
-                "hint": "Make sure OPENAI_API_KEY is set in environment variables"
+                "success": False,
+                "error": full_error,  # Include hint in main error message
+                "hint": hint,
+                "details": detailed_info,
+                "actual_error": actual_error
             }
         
+        def _normalize_components(raw_components: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+            normalized = []
+            for idx, comp in enumerate(raw_components or []):
+                if not isinstance(comp, dict):
+                    continue
+
+                designator = (
+                    comp.get("designator")
+                    or comp.get("name")
+                    or comp.get("SOURCEDESIGNATOR")
+                    or comp.get("DESIGNATOR")
+                    or ""
+                )
+                designator = str(designator).strip()
+
+                footprint = (
+                    comp.get("footprint")
+                    or comp.get("FOOTPRINT")
+                    or comp.get("model")
+                    or comp.get("ModelName")
+                    or ""
+                )
+                footprint = str(footprint).strip()
+
+                value = str(comp.get("value", comp.get("VALUE", ""))).strip()
+                lib_reference = str(comp.get("lib_reference", comp.get("LIBREFERENCE", ""))).strip()
+                description = str(comp.get("description", comp.get("COMPONENTDESCRIPTION", ""))).strip()
+
+                pin_count_raw = comp.get("pin_count", comp.get("PINCOUNT", None))
+                try:
+                    pin_count = int(pin_count_raw) if pin_count_raw is not None else 0
+                except (TypeError, ValueError):
+                    pin_count = 0
+
+                if pin_count <= 0 and isinstance(comp.get("pins"), list):
+                    pin_count = len(comp.get("pins", []))
+
+                if not designator:
+                    designator = f"COMP_{idx}"
+
+                # Skip clearly unusable placeholders that trigger UNKNOWN_0PIN for all parts.
+                if (
+                    designator.upper().startswith("COMP_")
+                    and not footprint
+                    and pin_count <= 0
+                    and not value
+                    and not lib_reference
+                    and not description
+                ):
+                    continue
+
+                normalized.append({
+                    "designator": designator,
+                    "footprint": footprint,
+                    "value": value,
+                    "lib_reference": lib_reference,
+                    "description": description,
+                    "pin_count": max(pin_count, 0),
+                    "pins": comp.get("pins", []),
+                })
+            return normalized
+
+        def _component_quality_score(comp_list: List[Dict[str, Any]]) -> int:
+            score = 0
+            for comp in comp_list:
+                d = str(comp.get("designator", "")).strip()
+                fp = str(comp.get("footprint", "")).strip()
+                pc = int(comp.get("pin_count", 0) or 0)
+                if d and not d.upper().startswith("COMP_"):
+                    score += 2
+                if fp:
+                    score += 3
+                if pc > 0:
+                    score += 2
+                if str(comp.get("value", "")).strip():
+                    score += 1
+            return score
+
         # Use provided components or current schematic data
         if components is None:
             if not self.current_schematic_data:
                 return {"error": "No schematic loaded. Load schematic first or provide components."}
             components = self.current_schematic_data.get("components", [])
+        else:
+            provided_components = _normalize_components(components)
+            current_components = []
+            if isinstance(self.current_schematic_data, dict):
+                current_components = _normalize_components(self.current_schematic_data.get("components", []) or [])
+
+            provided_score = _component_quality_score(provided_components)
+            current_score = _component_quality_score(current_components)
+
+            if current_components and current_score > provided_score:
+                print(
+                    f"[Generate Footprints] Provided component payload looks degraded "
+                    f"(score={provided_score}). Falling back to loaded schematic components "
+                    f"(score={current_score})."
+                )
+                components = current_components
+            else:
+                components = provided_components
+
+        components = _normalize_components(components)
         
         if not components:
             return {"error": "No components provided or found in schematic."}
@@ -2818,15 +3867,79 @@ class AltiumMCPServer:
             # Generate footprints (now optimized to group by footprint)
             footprint_results = self.footprint_generator.generate_footprints_batch(components)
             
+            # Check for errors in the results
+            if '_error' in footprint_results:
+                error_msg = footprint_results.pop('_error', 'Unknown error')
+                failed_footprints = footprint_results.pop('_failed_footprints', [])
+                print(f"[Generate Footprints] ERROR: {error_msg}")
+                return {
+                    "success": False,
+                    "error": error_msg,
+                    "failed_footprints": failed_footprints,
+                    "footprints": footprint_results,
+                    "footprint_libraries": {},
+                    "statistics": {
+                        "unique_footprints": 0,
+                        "total_components": len(components),
+                        "categories": {}
+                    },
+                    "count": 0,
+                    "message": f"Footprint generation failed: {error_msg}"
+                }
+            
             # Extract library structure (unique footprints)
             footprint_libraries = footprint_results.pop('_footprint_libraries', {})
+            
+            # Check if any footprints were generated
+            if len(footprint_libraries) == 0:
+                # Get error details from results if available
+                error_details = footprint_results.pop('_error', None)
+                failed_footprints = footprint_results.pop('_failed_footprints', [])
+                first_error = footprint_results.pop('_first_error', None)
+                
+                if error_details:
+                    error_msg = error_details  # Use the detailed error message from footprint generator
+                else:
+                    error_msg = f"No footprints were generated. All {len(failed_footprints) if failed_footprints else 'footprint generation'} attempts failed."
+                
+                print(f"[Generate Footprints] ERROR: {error_msg}")
+                print(f"[Generate Footprints] Failed footprints: {len(failed_footprints)}")
+                if failed_footprints:
+                    print(f"[Generate Footprints] First few failed: {', '.join([f['footprint_name'] for f in failed_footprints[:5]])}")
+                if first_error:
+                    print(f"[Generate Footprints] First error example: {first_error.get('footprint_name', 'unknown')}")
+                print(f"[Generate Footprints] Check console/logs for detailed error messages from LLM API")
+                
+                # Create a user-friendly error message
+                user_error_msg = error_msg.split('\n')[0]  # Just the first line for UI
+                if first_error:
+                    user_error_msg += f"\n\nExample: Failed to generate '{first_error.get('footprint_name', 'unknown')}' footprint."
+                user_error_msg += "\n\nPlease check the console/terminal output for detailed LLM API error messages."
+                
+                return {
+                    "success": False,
+                    "error": user_error_msg,
+                    "detailed_error": error_msg,  # Full detailed error
+                    "failed_footprints": failed_footprints,
+                    "first_error": first_error,
+                    "footprints": footprint_results,
+                    "footprint_libraries": {},
+                    "statistics": {
+                        "unique_footprints": 0,
+                        "total_components": len(components),
+                        "categories": {}
+                    },
+                    "count": 0,
+                    "message": user_error_msg,
+                    "hint": "Check console output for LLM API errors. Common issues: API key not set, rate limits, network issues."
+                }
             
             # Prepare library structure for Altium PCB library creation
             library_structure = self.footprint_generator.prepare_library_structure(footprint_libraries)
             
             # Count unique footprints vs total components
             unique_footprints = len(footprint_libraries)
-            total_components = len(footprint_results)
+            total_components = len([r for r in footprint_results.values() if r and isinstance(r, dict)])
             
             print(f"[Generate Footprints] Generated {unique_footprints} unique footprints for {total_components} components")
             print(f"[Generate Footprints] Categories: {library_structure['statistics']['category_counts']}")
@@ -3018,7 +4131,34 @@ class AltiumMCPServer:
 
 
 # Global server instance
+# Initialize with detailed logging
+print("=" * 60)
+print("Initializing Altium MCP Server...")
+print("=" * 60)
 mcp_server = AltiumMCPServer()
+print("=" * 60)
+print("Server initialization complete!")
+if mcp_server.footprint_generator:
+    print("✓ Footprint generator: READY")
+else:
+    print("✗ Footprint generator: NOT AVAILABLE")
+    if FOOTPRINT_GENERATOR_AVAILABLE:
+        print("  → Module imported but initialization failed")
+        # Show the actual error if available
+        if hasattr(mcp_server, '_init_error') and mcp_server._init_error:
+            error_info = mcp_server._init_error
+            print(f"  → Error Type: {error_info.get('error_type', 'Unknown')}")
+            print(f"  → Error Message: {error_info.get('error', 'Unknown error')}")
+        else:
+            print("  → Check OPENAI_API_KEY in .env file or environment variables")
+            print("  → Check server console output above for detailed error messages")
+    else:
+        print("  → Module could not be imported")
+print("=" * 60)
+print("")
+print("IMPORTANT: If footprint generator is not available, check the error messages")
+print("above this summary. The actual exception and traceback are shown above.")
+print("=" * 60)
 
 
 class MCPRequestHandler(BaseHTTPRequestHandler):
@@ -3053,13 +4193,31 @@ class MCPRequestHandler(BaseHTTPRequestHandler):
             })
         
         elif path == "/status" or path == "/altium/status":
+            # Include footprint generator status
+            footprint_gen_status = {
+                "available": mcp_server.footprint_generator is not None,
+                "module_imported": FOOTPRINT_GENERATOR_AVAILABLE
+            }
+            if not footprint_gen_status["available"] and footprint_gen_status["module_imported"]:
+                # Check if API key is set
+                try:
+                    from config import OPENAI_API_KEY
+                    footprint_gen_status["api_key_set"] = bool(OPENAI_API_KEY and OPENAI_API_KEY.strip())
+                    if not footprint_gen_status["api_key_set"]:
+                        footprint_gen_status["error"] = "OPENAI_API_KEY not set"
+                        footprint_gen_status["hint"] = "Set OPENAI_API_KEY in .env file or environment variables"
+                except:
+                    footprint_gen_status["api_key_set"] = False
+                    footprint_gen_status["error"] = "Could not check API key status"
+            
             self._send_json({
                 "connected": True,
                 "method": "python_file_reader",
                 "message": "MCP Server ready. Use Python file reader - NO Altium scripts needed!",
                 "pcb_loaded": mcp_server.current_pcb_path is not None,
                 "current_file": Path(mcp_server.current_pcb_path).name if mcp_server.current_pcb_path else None,
-                "artifact_id": mcp_server.current_artifact_id
+                "artifact_id": mcp_server.current_artifact_id,
+                "footprint_generator": footprint_gen_status
             })
         
         elif path == "/pcb/info" or path == "/altium/pcb/info":
@@ -3223,6 +4381,11 @@ class MCPRequestHandler(BaseHTTPRequestHandler):
         
         elif path == "/schematic/continue-pcb":
             result = mcp_server.continue_pcb_setup()
+            self._send_json(result)
+        
+        elif path == "/schematic/test-llm":
+            # Test LLM connection and initialization
+            result = mcp_server.test_llm_connection()
             self._send_json(result)
         
         elif path == "/schematic/generate-footprints":

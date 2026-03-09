@@ -4144,9 +4144,27 @@ Schematic Statistics
                             'component_count': footprint_spec.get('component_count', 0)
                         })
                     
+                    # CRITICAL: Also store footprints with prefixed names in footprint_libraries dict
+                    # This allows "C0603" or "R0603" to match "0603" in the JSON
+                    enhanced_footprint_libraries = footprint_libraries.copy()
+                    for footprint_key, footprint_spec in footprint_libraries.items():
+                        if footprint_key == '_footprint_libraries':
+                            continue
+                        footprint_name = footprint_spec.get('footprint_name', footprint_key)
+                        
+                        # For numeric footprints (0603, 0805, 1206, etc.), also store with common prefixes
+                        if footprint_name and len(footprint_name) >= 4:
+                            # Check if it's a numeric footprint (starts with digit)
+                            if footprint_name[0].isdigit():
+                                # Store with C, R, L, D prefixes
+                                for prefix in ['C', 'R', 'L', 'D']:
+                                    prefixed_name = prefix + footprint_name
+                                    enhanced_footprint_libraries[prefixed_name.upper()] = footprint_spec
+                                    enhanced_footprint_libraries[prefixed_name] = footprint_spec
+                    
                     library_data = {
                         'footprints': footprints_array,  # Array for DelphiScript parsing
-                        'footprint_libraries': footprint_libraries,  # Keep original structure
+                        'footprint_libraries': enhanced_footprint_libraries,  # Enhanced with prefixed names
                         'library_structure': library_structure,
                         'statistics': stats
                     }
@@ -4461,9 +4479,19 @@ Schematic Statistics
                         self._safe_after(500, lambda: self._ask_proceed_to_pcb(files_saved=True))
                 else:
                     error = result.get("error", "Unknown error")
+                    hint = result.get("hint", "")
+                    details = result.get("details", [])
+                    
+                    # Build comprehensive error message
+                    error_message = f"❌ Footprint generation failed: {error}"
+                    if hint and hint not in error:
+                        error_message += f"\n\n💡 Hint: {hint}"
+                    if details:
+                        error_message += f"\n\n📋 Details: {'; '.join(details)}"
+                    error_message += "\n\nProceeding to PCB creation with existing footprint information..."
+                    
                     self._safe_after(0, lambda: self.add_message(
-                        f"❌ Footprint generation failed: {error}\n\n"
-                        f"Proceeding to PCB creation with existing footprint information...",
+                        error_message,
                         is_user=False
                     ))
                     self._safe_after(0, lambda: self.set_status("Generation Failed", "warning"))

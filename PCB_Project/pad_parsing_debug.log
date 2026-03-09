@@ -1,0 +1,24 @@
+Starting ParsePadsFromJSON
+Component: DS1
+PadsJSON length: 501
+PadsJSON content: [ { "name": "1", "x": -1.5, "y": -1.5, "width": 1.0, "height": 1.5, "shape": "rectangular", "layer": "top", "hole_size": 0.0 }, { "name": "3", "x": -1.5, "y": 1.5, "width": 1.0, "height": 1.5, "shape": "rectangular", "layer": "top", "hole_size": 0.0 }, { "name": "2", "x": 1.5, "y": -1.5, "width": 1.0, "height": 1.5, "shape": "rectangular", "layer": "top", "hole_size": 0.0 }, { "name": "4", "x": 1.5, "y": 1.5, "width": 1.0, "height": 1.5, "shape": "rectangular", "layer": "top", "hole_size": 0.0 }]
+
+Processing line: [ { "name": "1", "x": -1.5, "y": -1.5, "width": 1.0, "height": 1.5, "shape": "rectangular", "layer": "top", "hole_size": 0.0 }, { "name": "3", "x": -1.5, "y": 1.5, "width": 1.0, "height": 1.5, "shape": "rectangular", "layer": "top", "hole_size": 0.0 }, { "name": "2", "x": 1.5, "y": -1.5, "width": 1.0, "height": 1.5, "shape": "rectangular", "layer": "top", "hole_size": 0.0 }, { "name": "4", "x": 1.5, "y": 1.5, "width": 1.0, "height": 1.5, "shape": "rectangular", "layer": "top", "hole_size": 0.0 }]
+  Starting new pad object
+  Ending pad object - Name: 1, X: -1.5, Y: -1.5, W: 1.0, H: 1.5
+  Creating pad: 1 at (-1.5, -1.5) size 1x1.5
+  Pad created successfully. Total pads: 1
+  Starting new pad object
+  Ending pad object - Name: 3, X: -1.5, Y: 1.5, W: 1.0, H: 1.5
+  Creating pad: 3 at (-1.5, 1.5) size 1x1.5
+  Pad created successfully. Total pads: 2
+  Starting new pad object
+  Ending pad object - Name: 2, X: 1.5, Y: -1.5, W: 1.0, H: 1.5
+  Creating pad: 2 at (1.5, -1.5) size 1x1.5
+  Pad created successfully. Total pads: 3
+  Starting new pad object
+  Ending pad object - Name: 4, X: 1.5, Y: 1.5, W: 1.0, H: 1.5
+  Creating pad: 4 at (1.5, 1.5) size 1x1.5
+  Pad created successfully. Total pads: 4
+
+Finished ParsePadsFromJSON - Total pads created: 4

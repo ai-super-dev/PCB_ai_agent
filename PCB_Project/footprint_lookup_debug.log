@@ -1,0 +1,70 @@
+Footprint not found: 0603
+Component: R125
+Tried variations:
+  0: 0603
+    -> ReadFootprintFromJSON returned FALSE
+  1: 0603
+    -> ReadFootprintFromJSON returned FALSE
+  2: 0603
+    -> ReadFootprintFromJSON returned FALSE
+  3: 0603
+    -> ReadFootprintFromJSON returned FALSE
+  4: 0603
+    -> ReadFootprintFromJSON returned FALSE
+---
+Footprint not found: 0603
+Component: R124
+Tried variations:
+  0: 0603
+    -> ReadFootprintFromJSON returned FALSE
+  1: 0603
+    -> ReadFootprintFromJSON returned FALSE
+  2: 0603
+    -> ReadFootprintFromJSON returned FALSE
+  3: 0603
+    -> ReadFootprintFromJSON returned FALSE
+  4: 0603
+    -> ReadFootprintFromJSON returned FALSE
+---
+Footprint not found: 0603
+Component: R129
+Tried variations:
+  0: 0603
+    -> ReadFootprintFromJSON returned FALSE
+  1: 0603
+    -> ReadFootprintFromJSON returned FALSE
+  2: 0603
+    -> ReadFootprintFromJSON returned FALSE
+  3: 0603
+    -> ReadFootprintFromJSON returned FALSE
+  4: 0603
+    -> ReadFootprintFromJSON returned FALSE
+---
+Footprint not found: 0603
+Component: R127
+Tried variations:
+  0: 0603
+    -> ReadFootprintFromJSON returned FALSE
+  1: 0603
+    -> ReadFootprintFromJSON returned FALSE
+  2: 0603
+    -> ReadFootprintFromJSON returned FALSE
+  3: 0603
+    -> ReadFootprintFromJSON returned FALSE
+  4: 0603
+    -> ReadFootprintFromJSON returned FALSE
+---
+Footprint not found: 0603
+Component: R222
+Tried variations:
+  0: 0603
+    -> ReadFootprintFromJSON returned FALSE
+  1: 0603
+    -> ReadFootprintFromJSON returned FALSE
+  2: 0603
+    -> ReadFootprintFromJSON returned FALSE
+  3: 0603
+    -> ReadFootprintFromJSON returned FALSE
+  4: 0603
+    -> ReadFootprintFromJSON returned FALSE
+---
